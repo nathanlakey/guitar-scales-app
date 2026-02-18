@@ -10,7 +10,7 @@ function ScaleSelector({ rootNote, scaleName, onRootChange, onScaleChange }) {
       <div className="selector-section">
         <label className="selector-label">Root Note</label>
         <div className="note-buttons">
-          {NOTES.map(note => (
+          {[...NOTES].sort().map(note => (
             <button
               key={note}
               className={`note-btn ${note === rootNote ? 'active' : ''}`}
