@@ -39,10 +39,6 @@ function ScaleSelector({ rootNote, scaleName, onRootChange, onScaleChange }) {
           ))}
         </select>
       </div>
-
-      <div className="current-selection">
-        <span className="selection-badge">{rootNote} {scaleName}</span>
-      </div>
     </div>
   );
 }

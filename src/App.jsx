@@ -16,31 +16,28 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-title">
-          <span className="title-icon">🎸</span>
-          Fretboard Scholar
-        </h1>
-        <p className="app-subtitle">Master every scale on the guitar</p>
+        <h1 className="app-title">Fretboard Scholar</h1>
+        <p className="app-subtitle">Interactive guitar scale visualizer</p>
       </header>
 
       <main className="app-main">
-        <ScaleSelector
-          rootNote={rootNote}
-          scaleName={scaleName}
-          onRootChange={setRootNote}
-          onScaleChange={setScaleName}
-        />
+        {/* Control Panel - all controls grouped together */}
+        <div className="control-panel">
+          <ScaleSelector
+            rootNote={rootNote}
+            scaleName={scaleName}
+            onRootChange={setRootNote}
+            onScaleChange={setScaleName}
+          />
+          
+          <ScaleInfo rootNote={rootNote} scaleName={scaleName} />
+          
+          <AudioControls fretboardData={fretboardData} />
+        </div>
 
-        <ScaleInfo rootNote={rootNote} scaleName={scaleName} />
-
-        <AudioControls fretboardData={fretboardData} />
-
+        {/* Fretboard - the main focus */}
         <Fretboard rootNote={rootNote} scaleName={scaleName} />
       </main>
-
-      <footer className="app-footer">
-        <p>Click any note on the fretboard to hear it • Use playback controls to practice scales</p>
-      </footer>
     </div>
   )
 }

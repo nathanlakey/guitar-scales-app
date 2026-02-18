@@ -17,7 +17,6 @@ function ScaleInfo({ rootNote, scaleName }) {
 
   return (
     <div className="scale-info">
-      <h3 className="scale-info-title">Notes in {rootNote} {scaleName}</h3>
       <div className="scale-notes-display">
         {scaleNotes.map((note, index) => (
           <div key={index} className={`scale-note-chip ${index === 0 ? 'root' : ''}`}>
