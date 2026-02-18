@@ -2,17 +2,17 @@ import * as Tone from 'tone';
 
 /**
  * AudioEngine - Core audio system manager for the guitar fretboard
- * Handles Tone.js initialization, guitar synthesis, and note playback
+ * Handles Tone.js initialization, realistic guitar sample playback, and effects processing
  */
 class AudioEngine {
   constructor() {
     this.initialized = false;
-    this.synth = null;
+    this.sampler = null;
     this.isPlaying = false;
   }
 
   /**
-   * Initialize Tone.js audio context
+   * Initialize Tone.js audio context with realistic guitar samples
    * Must be called after user interaction (browser autoplay policy)
    */
   async initialize() {
@@ -23,81 +23,88 @@ class AudioEngine {
       console.log('Audio context started');
       console.log('Audio context state:', Tone.getContext().state);
 
-      // Create reverb first and wait for it to generate
+      // Create reverb for natural guitar ambience
       const reverb = new Tone.Reverb({
-        decay: 1.5,
-        wet: 0.15,
+        decay: 2.0,
+        wet: 0.25,
       }).toDestination();
       
-      // Wait for reverb to be ready
       await reverb.generate();
       console.log('Reverb generated');
 
-      // Create a reliable polyphonic synth with pluck-like characteristics
-      this.synth = new Tone.PolySynth(Tone.Synth, {
-        oscillator: {
-          type: 'triangle',
+      // Create guitar sampler with strategically mapped samples
+      // Using multiple sample points across the range for natural pitch shifting
+      this.sampler = new Tone.Sampler({
+        urls: {
+          'E2': 'E2.mp3',
+          'A2': 'A2.mp3',
+          'D3': 'D3.mp3',
+          'G3': 'G3.mp3',
+          'B3': 'B3.mp3',
+          'E4': 'E4.mp3',
+          'A4': 'A4.mp3',
         },
-        envelope: {
-          attack: 0.001,
-          decay: 0.2,
-          sustain: 0.15,
-          release: 1.5,
+        baseUrl: 'https://tonejs.github.io/audio/salamander/',
+        onload: () => {
+          console.log('Guitar samples loaded successfully');
         },
-        volume: -8,
-      }).toDestination();
+        onerror: (error) => {
+          console.error('Error loading samples:', error);
+          // Fallback to synthesis if samples fail to load
+          this.initializeFallbackSynth();
+        },
+        attack: 0,
+        release: 1.5,
+        curve: 'exponential',
+      }).connect(reverb);
 
-      console.log('Main synth created');
+      console.log('Sampler created');
 
-      // Layer with FMSynth for richness
-      this.fmSynth = new Tone.PolySynth(Tone.FMSynth, {
-        harmonicity: 3,
-        modulationIndex: 10,
-        oscillator: {
-          type: 'sine',
-        },
-        envelope: {
-          attack: 0.001,
-          decay: 0.3,
-          sustain: 0.1,
-          release: 1.2,
-        },
-        modulation: {
-          type: 'square',
-        },
-        modulationEnvelope: {
-          attack: 0.002,
-          decay: 0.2,
-          sustain: 0,
-          release: 0.2,
-        },
-        volume: -20,
-      }).toDestination();
-
-      console.log('FM synth created');
-
-      // Connect synths to reverb
-      this.synth.connect(reverb);
-      this.fmSynth.connect(reverb);
-
-      // Add gentle compression for consistent volume
+      // Add compression for consistent dynamics
       const compressor = new Tone.Compressor({
-        threshold: -20,
-        ratio: 3,
+        threshold: -24,
+        ratio: 4,
         attack: 0.003,
-        release: 0.1,
+        release: 0.25,
       }).toDestination();
 
-      this.synth.connect(compressor);
-      this.fmSynth.connect(compressor);
+      this.sampler.connect(compressor);
+
+      // Add subtle EQ to enhance guitar frequencies
+      const eq = new Tone.EQ3({
+        low: 1,
+        mid: 2,
+        high: -1,
+        lowFrequency: 250,
+        highFrequency: 4000,
+      }).toDestination();
+
+      this.sampler.connect(eq);
 
       this.initialized = true;
       console.log('Audio engine initialized successfully');
-      console.log('Synth status:', { synth: !!this.synth, fmSynth: !!this.fmSynth });
+      console.log('Sampler status:', { sampler: !!this.sampler });
     } catch (error) {
       console.error('Failed to initialize audio engine:', error);
       this.initialized = false;
     }
+  }
+
+  /**
+   * Fallback synthesis if samples fail to load
+   * Uses advanced synthesis to approximate guitar sound
+   */
+  initializeFallbackSynth() {
+    console.log('Initializing fallback synthesis...');
+    
+    // Create a more guitar-like synth using Karplus-Strong algorithm approximation
+    this.sampler = new Tone.PolySynth(Tone.PluckSynth, {
+      attackNoise: 1,
+      dampening: 4000,
+      resonance: 0.9,
+    }).toDestination();
+    
+    console.log('Fallback synth created');
   }
 
   /**
@@ -146,7 +153,7 @@ class AudioEngine {
   }
 
   /**
-   * Play a single note
+   * Play a single note with realistic guitar sample
    * @param {string} stringNote - Note name of the string (e.g., 'E', 'A', 'D')
    * @param {number} fret - Fret number (0-24)
    * @param {number} duration - Note duration in seconds
@@ -161,8 +168,8 @@ class AudioEngine {
       return;
     }
 
-    if (!this.synth || !this.fmSynth) {
-      console.error('Synths not available:', { synth: !!this.synth, fmSynth: !!this.fmSynth });
+    if (!this.sampler) {
+      console.error('Sampler not available');
       return;
     }
 
@@ -182,26 +189,37 @@ class AudioEngine {
         return;
       }
 
+      // Convert frequency to note name for Tone.js
+      const noteName = Tone.Frequency(frequency).toNote();
+      console.log('Note name:', noteName);
+
       // Adjust duration based on articulation
       let adjustedDuration = duration;
+      let velocity = 0.8;
       
       switch (articulation) {
         case 'legato':
           adjustedDuration = duration * 1.5;
+          velocity = 0.7;
           break;
         case 'staccato':
           adjustedDuration = Math.min(duration * 0.3, 0.15);
+          velocity = 0.9;
           break;
         default: // normal
           adjustedDuration = duration;
+          velocity = 0.8;
       }
 
-      console.log('Triggering synths with frequency:', frequency, 'duration:', adjustedDuration);
+      // Add slight random variation for natural feel
+      velocity = velocity + (Math.random() - 0.5) * 0.1;
+      velocity = Math.max(0.3, Math.min(1, velocity));
+
+      console.log('Triggering sampler with note:', noteName, 'duration:', adjustedDuration, 'velocity:', velocity);
       console.log('Audio context state:', Tone.getContext().state);
       
-      // Play with both synths for rich, layered guitar tone
-      this.synth.triggerAttackRelease(frequency, adjustedDuration);
-      this.fmSynth.triggerAttackRelease(frequency, adjustedDuration);
+      // Trigger the sampler with the calculated note
+      this.sampler.triggerAttackRelease(noteName, adjustedDuration, undefined, velocity);
       
       console.log('Note triggered successfully');
     } catch (error) {
@@ -213,11 +231,8 @@ class AudioEngine {
    * Stop all currently playing notes
    */
   stopAll() {
-    if (this.synth) {
-      this.synth.releaseAll();
-    }
-    if (this.fmSynth) {
-      this.fmSynth.releaseAll();
+    if (this.sampler) {
+      this.sampler.releaseAll();
     }
   }
 
@@ -225,11 +240,8 @@ class AudioEngine {
    * Clean up resources
    */
   dispose() {
-    if (this.synth) {
-      this.synth.dispose();
-    }
-    if (this.fmSynth) {
-      this.fmSynth.dispose();
+    if (this.sampler) {
+      this.sampler.dispose();
     }
     this.initialized = false;
   }
