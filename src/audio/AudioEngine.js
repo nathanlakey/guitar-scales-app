@@ -144,19 +144,22 @@ class AudioEngine {
    * @param {number} stringIndex - Optional: string index (0-5) for precise pitch
    */
   playNote(stringNote, fret, duration = 0.5, articulation = 'normal', stringIndex = null) {
+    console.log('playNote called:', { stringNote, fret, duration, articulation, stringIndex, initialized: this.initialized });
+    
     if (!this.initialized) {
       console.warn('AudioEngine not initialized. Call initialize() first.');
       return;
     }
 
     if (!this.synth || !this.fmSynth) {
-      console.error('Synths not available');
+      console.error('Synths not available:', { synth: !!this.synth, fmSynth: !!this.fmSynth });
       return;
     }
 
     try {
       // Calculate frequency using the existing getFrequency method
       const frequency = this.getFrequency(stringNote, fret, stringIndex);
+      console.log('Calculated frequency:', frequency, 'Hz');
       
       if (!frequency || frequency <= 0) {
         console.error('Invalid frequency calculated:', frequency);
@@ -177,9 +180,13 @@ class AudioEngine {
           adjustedDuration = duration;
       }
 
+      console.log('Triggering synths with frequency:', frequency, 'duration:', adjustedDuration);
+      
       // Play with both synths for rich, layered guitar tone
       this.synth.triggerAttackRelease(frequency, adjustedDuration);
       this.fmSynth.triggerAttackRelease(frequency, adjustedDuration * 1.2);
+      
+      console.log('Note triggered successfully');
     } catch (error) {
       console.error('Error playing note:', error);
     }
