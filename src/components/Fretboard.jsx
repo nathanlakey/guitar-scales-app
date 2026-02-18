@@ -169,12 +169,11 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
               preserveAspectRatio="none"
             >
               <defs>
-                {/* Glow filters for each CAGED shape */}
+                {/* Subtle glow filters for each CAGED shape */}
                 {Object.entries(CAGED_COLORS).map(([shape, colors]) => (
                   <filter key={`glow-${shape}`} id={`chord-glow-${shape}`}>
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                    <feGaussianBlur stdDeviation="4" result="coloredBlur" />
                     <feMerge>
-                      <feMergeNode in="coloredBlur" />
                       <feMergeNode in="coloredBlur" />
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
@@ -190,10 +189,10 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                 const toPos = calculateNotePosition(toDisplayIndex, connection.to.fret);
                 const colors = CAGED_COLORS[connection.cagedShape];
                 
-                // Create subtle curved path
+                // Create subtle curved path with minimal curvature
                 const midX = (fromPos.x + toPos.x) / 2;
                 const midY = (fromPos.y + toPos.y) / 2;
-                const curvature = 15 * connection.strength;
+                const curvature = 8 * connection.strength; // Reduced curvature
                 const path = `M ${fromPos.x} ${fromPos.y} Q ${midX} ${midY - curvature} ${toPos.x} ${toPos.y}`;
                 
                 return (
@@ -201,12 +200,12 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                     key={`glow-${index}`}
                     d={path}
                     stroke={colors.glow}
-                    strokeWidth={3 * connection.strength}
-                    fill="none"
-                    strokeLinecap="round"
+                    strokeWidth={2 * connection.strength} // Thinner lines
+                    fill=\"none\"
+                    strokeLinecap=\"round\"
                     filter={`url(#chord-glow-${connection.cagedShape})`}
-                    className="chord-glow-path"
-                    opacity={0.6}
+                    className=\"chord-glow-path\"
+                    opacity={0.4} // Lower base opacity
                   />
                 );
               })}

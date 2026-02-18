@@ -493,20 +493,31 @@ export function detectCAGEDChordShapes(chordRoot, chordNotes, fretboard) {
         maxFret
       });
 
-      // Generate glow connections within this shape
-      shapeNotes.forEach((note1, i) => {
-        shapeNotes.forEach((note2, j) => {
+      // Generate glow connections within this shape - only adjacent notes
+      // Sort notes by position for structured connections
+      const sortedNotes = [...shapeNotes].sort((a, b) => {
+        if (a.stringIndex !== b.stringIndex) return a.stringIndex - b.stringIndex;
+        return a.fret - b.fret;
+      });
+
+      sortedNotes.forEach((note1, i) => {
+        sortedNotes.forEach((note2, j) => {
           if (i < j) {
             const stringDist = Math.abs(note1.stringIndex - note2.stringIndex);
             const fretDist = Math.abs(note1.fret - note2.fret);
             
-            // Connect notes that are close enough to be in the same hand position
-            if (stringDist <= 2 && fretDist <= 4) {
+            // Only connect adjacent notes within realistic fingering proximity
+            // Adjacent strings (1 string apart) OR same string within 2 frets
+            const isAdjacentStrings = stringDist === 1 && fretDist <= 3;
+            const isSameStringNearby = stringDist === 0 && fretDist <= 2;
+            const isDiagonalNeighbor = stringDist === 1 && fretDist === 1;
+            
+            if (isAdjacentStrings || isSameStringNearby || isDiagonalNeighbor) {
               connections.push({
                 from: note1,
                 to: note2,
                 cagedShape,
-                strength: 1 / (stringDist + fretDist + 1) // Closer = stronger glow
+                strength: 0.5 / (stringDist + fretDist + 1) // Very subtle
               });
             }
           }

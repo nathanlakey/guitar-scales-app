@@ -87,10 +87,10 @@
 
 @keyframes chord-glow-pulse {
   0%, 100% {
-    opacity: 0.4;
+    opacity: 0.25;
   }
   50% {
-    opacity: 0.7;
+    opacity: 0.45;
   }
 }
 
@@ -171,43 +171,56 @@
 }
 
 /* Multi-shape membership - notes belonging to multiple CAGED shapes */
+/* Use layered glow effects for smooth color blending */
 .note-marker.caged-multi {
   position: relative;
-  background: conic-gradient(
-    from 0deg,
-    #60a5fa 0deg 72deg,
-    #a855f7 72deg 144deg,
-    #22c55e 144deg 216deg,
-    #ec4899 216deg 288deg,
-    #fb923c 288deg 360deg
-  );
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  /* Create blended multi-color glow using multiple layered shadows */
   box-shadow: 
-    0 2px 8px rgba(150, 150, 250, 0.4),
-    0 0 25px rgba(150, 150, 250, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  animation: multi-shape-pulse 3s ease-in-out infinite;
+    0 0 8px 2px rgba(96, 165, 250, 0.4),    /* Blue */
+    0 0 8px 2px rgba(168, 85, 247, 0.4),    /* Purple */
+    0 0 8px 2px rgba(34, 197, 94, 0.4),     /* Green */
+    0 0 8px 2px rgba(236, 72, 153, 0.4),    /* Pink */
+    0 0 8px 2px rgba(251, 146, 60, 0.4),    /* Orange */
+    0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  animation: multi-shape-glow 3s ease-in-out infinite;
+  border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
-@keyframes multi-shape-pulse {
+@keyframes multi-shape-glow {
   0%, 100% {
     box-shadow: 
-      0 2px 8px rgba(150, 150, 250, 0.4),
-      0 0 25px rgba(150, 150, 250, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      0 0 10px 3px rgba(96, 165, 250, 0.5),
+      0 0 10px 3px rgba(168, 85, 247, 0.5),
+      0 0 10px 3px rgba(34, 197, 94, 0.5),
+      0 0 10px 3px rgba(236, 72, 153, 0.5),
+      0 0 10px 3px rgba(251, 146, 60, 0.5),
+      0 2px 6px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
   50% {
     box-shadow: 
-      0 3px 12px rgba(150, 150, 250, 0.6),
-      0 0 35px rgba(150, 150, 250, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      0 0 16px 5px rgba(96, 165, 250, 0.7),
+      0 0 16px 5px rgba(168, 85, 247, 0.7),
+      0 0 16px 5px rgba(34, 197, 94, 0.7),
+      0 0 16px 5px rgba(236, 72, 153, 0.7),
+      0 0 16px 5px rgba(251, 146, 60, 0.7),
+      0 3px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
 }
 
 .note-marker.caged-multi:hover {
   transform: scale(1.15);
   box-shadow: 
-    0 4px 16px rgba(150, 150, 250, 0.7),
-    0 0 45px rgba(150, 150, 250, 0.6);
+    0 0 20px 6px rgba(96, 165, 250, 0.8),
+    0 0 20px 6px rgba(168, 85, 247, 0.8),
+    0 0 20px 6px rgba(34, 197, 94, 0.8),
+    0 0 20px 6px rgba(236, 72, 153, 0.8),
+    0 0 20px 6px rgba(251, 146, 60, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 /* Guitar string row */
