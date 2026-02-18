@@ -110,20 +110,21 @@ function getCAGEDPositions(rootNote, scaleName) {
   // CAGED shapes with very generous overlapping spans
   // Generated dynamically from full fretboard scale data
   // Wide boundaries ensure ALL scale notes within each shape region are included
+  // All 5 shapes MUST be included for complete CAGED system
   const cagedShapes = [
     { name: 'C Shape', offset: -4, span: 10 },  // Wide span ensures complete pattern coverage
     { name: 'A Shape', offset: -1, span: 10 },  // Overlaps with C shape for smooth transitions
     { name: 'G Shape', offset: 2, span: 10 },   // Wide span captures all notes in G shape region
     { name: 'E Shape', offset: 6, span: 10 },   // Generous span for complete E shape pattern
-    { name: 'D Shape', offset: 9, span: 10 },   // Wide span extends to upper fretboard limit
+    { name: 'D Shape', offset: 9, span: 7 },    // Reduced span to ensure it fits on fretboard
   ];
   
   cagedShapes.forEach((shape, index) => {
     const startFret = Math.max(0, firstRootFret + shape.offset);
     const endFret = Math.min(NUM_FRETS, startFret + shape.span);
     
-    // Only include position if it fits within the fretboard
-    if (startFret <= NUM_FRETS && endFret > startFret) {
+    // Always include all 5 shapes - only exclude if completely beyond fretboard
+    if (startFret < NUM_FRETS && endFret > startFret) {
       positions.push({
         number: index + 1,
         name: shape.name,
