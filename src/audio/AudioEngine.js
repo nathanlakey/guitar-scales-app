@@ -2,17 +2,17 @@ import * as Tone from 'tone';
 
 /**
  * AudioEngine - Core audio system manager for the guitar fretboard
- * Handles Tone.js initialization, realistic guitar sample playback, and effects processing
+ * Handles Tone.js initialization and realistic guitar synthesis
  */
 class AudioEngine {
   constructor() {
     this.initialized = false;
-    this.sampler = null;
+    this.synth = null;
     this.isPlaying = false;
   }
 
   /**
-   * Initialize Tone.js audio context with realistic guitar samples
+   * Initialize Tone.js audio context with realistic guitar synthesis
    * Must be called after user interaction (browser autoplay policy)
    */
   async initialize() {
@@ -25,86 +25,51 @@ class AudioEngine {
 
       // Create reverb for natural guitar ambience
       const reverb = new Tone.Reverb({
-        decay: 2.0,
-        wet: 0.25,
+        decay: 1.5,
+        wet: 0.2,
       }).toDestination();
       
       await reverb.generate();
       console.log('Reverb generated');
 
-      // Create guitar sampler with strategically mapped samples
-      // Using multiple sample points across the range for natural pitch shifting
-      this.sampler = new Tone.Sampler({
-        urls: {
-          'E2': 'E2.mp3',
-          'A2': 'A2.mp3',
-          'D3': 'D3.mp3',
-          'G3': 'G3.mp3',
-          'B3': 'B3.mp3',
-          'E4': 'E4.mp3',
-          'A4': 'A4.mp3',
-        },
-        baseUrl: 'https://tonejs.github.io/audio/salamander/',
-        onload: () => {
-          console.log('Guitar samples loaded successfully');
-        },
-        onerror: (error) => {
-          console.error('Error loading samples:', error);
-          // Fallback to synthesis if samples fail to load
-          this.initializeFallbackSynth();
-        },
-        attack: 0,
-        release: 1.5,
-        curve: 'exponential',
+      // Create realistic guitar synth using PluckSynth (Karplus-Strong algorithm)
+      // This produces a natural, guitar-like plucked string sound
+      this.synth = new Tone.PolySynth(Tone.PluckSynth, {
+        attackNoise: 1,
+        dampening: 4000,
+        resonance: 0.92,
       }).connect(reverb);
 
-      console.log('Sampler created');
+      console.log('Guitar synth created');
 
       // Add compression for consistent dynamics
       const compressor = new Tone.Compressor({
-        threshold: -24,
-        ratio: 4,
+        threshold: -20,
+        ratio: 3,
         attack: 0.003,
         release: 0.25,
       }).toDestination();
 
-      this.sampler.connect(compressor);
+      this.synth.connect(compressor);
 
       // Add subtle EQ to enhance guitar frequencies
       const eq = new Tone.EQ3({
-        low: 1,
-        mid: 2,
-        high: -1,
-        lowFrequency: 250,
+        low: 2,
+        mid: 1.5,
+        high: 0,
+        lowFrequency: 200,
         highFrequency: 4000,
       }).toDestination();
 
-      this.sampler.connect(eq);
+      this.synth.connect(eq);
 
       this.initialized = true;
       console.log('Audio engine initialized successfully');
-      console.log('Sampler status:', { sampler: !!this.sampler });
+      console.log('Synth status:', { synth: !!this.synth });
     } catch (error) {
       console.error('Failed to initialize audio engine:', error);
       this.initialized = false;
     }
-  }
-
-  /**
-   * Fallback synthesis if samples fail to load
-   * Uses advanced synthesis to approximate guitar sound
-   */
-  initializeFallbackSynth() {
-    console.log('Initializing fallback synthesis...');
-    
-    // Create a more guitar-like synth using Karplus-Strong algorithm approximation
-    this.sampler = new Tone.PolySynth(Tone.PluckSynth, {
-      attackNoise: 1,
-      dampening: 4000,
-      resonance: 0.9,
-    }).toDestination();
-    
-    console.log('Fallback synth created');
   }
 
   /**
@@ -153,7 +118,7 @@ class AudioEngine {
   }
 
   /**
-   * Play a single note with realistic guitar sample
+   * Play a single note with realistic guitar synthesis
    * @param {string} stringNote - Note name of the string (e.g., 'E', 'A', 'D')
    * @param {number} fret - Fret number (0-24)
    * @param {number} duration - Note duration in seconds
@@ -168,8 +133,8 @@ class AudioEngine {
       return;
     }
 
-    if (!this.sampler) {
-      console.error('Sampler not available');
+    if (!this.synth) {
+      console.error('Synth not available');
       return;
     }
 
@@ -189,37 +154,33 @@ class AudioEngine {
         return;
       }
 
-      // Convert frequency to note name for Tone.js
-      const noteName = Tone.Frequency(frequency).toNote();
-      console.log('Note name:', noteName);
-
       // Adjust duration based on articulation
       let adjustedDuration = duration;
-      let velocity = 0.8;
+      let velocity = 0.85;
       
       switch (articulation) {
         case 'legato':
           adjustedDuration = duration * 1.5;
-          velocity = 0.7;
+          velocity = 0.75;
           break;
         case 'staccato':
           adjustedDuration = Math.min(duration * 0.3, 0.15);
-          velocity = 0.9;
+          velocity = 0.95;
           break;
         default: // normal
           adjustedDuration = duration;
-          velocity = 0.8;
+          velocity = 0.85;
       }
 
       // Add slight random variation for natural feel
       velocity = velocity + (Math.random() - 0.5) * 0.1;
-      velocity = Math.max(0.3, Math.min(1, velocity));
+      velocity = Math.max(0.4, Math.min(1, velocity));
 
-      console.log('Triggering sampler with note:', noteName, 'duration:', adjustedDuration, 'velocity:', velocity);
+      console.log('Triggering synth - frequency:', frequency, 'duration:', adjustedDuration, 'velocity:', velocity);
       console.log('Audio context state:', Tone.getContext().state);
       
-      // Trigger the sampler with the calculated note
-      this.sampler.triggerAttackRelease(noteName, adjustedDuration, undefined, velocity);
+      // Trigger the synth with the calculated frequency
+      this.synth.triggerAttackRelease(frequency, adjustedDuration, undefined, velocity);
       
       console.log('Note triggered successfully');
     } catch (error) {
@@ -231,8 +192,8 @@ class AudioEngine {
    * Stop all currently playing notes
    */
   stopAll() {
-    if (this.sampler) {
-      this.sampler.releaseAll();
+    if (this.synth) {
+      this.synth.releaseAll();
     }
   }
 
@@ -240,8 +201,8 @@ class AudioEngine {
    * Clean up resources
    */
   dispose() {
-    if (this.sampler) {
-      this.sampler.dispose();
+    if (this.synth) {
+      this.synth.dispose();
     }
     this.initialized = false;
   }
