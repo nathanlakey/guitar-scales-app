@@ -1,4 +1,4 @@
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, DOUBLE_MARKERS } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS } from '../data/musicTheory';
 import './Fretboard.css';
 
 function Fretboard({ rootNote, scaleName }) {
@@ -24,24 +24,6 @@ function Fretboard({ rootNote, scaleName }) {
         <div className="fretboard">
           {/* Nut */}
           <div className="nut"></div>
-
-          {/* Fret markers (dots) */}
-          <div className="fret-markers-row">
-            {Array.from({ length: NUM_FRETS }, (_, i) => (
-              <div key={i + 1} className="marker-cell">
-                {FRET_MARKERS.includes(i + 1) && (
-                  DOUBLE_MARKERS.includes(i + 1) ? (
-                    <div className="double-dot">
-                      <div className="fret-dot"></div>
-                      <div className="fret-dot"></div>
-                    </div>
-                  ) : (
-                    <div className="fret-dot"></div>
-                  )
-                )}
-              </div>
-            ))}
-          </div>
 
           {/* Strings - displayed from high E (index 5) to low E (index 0) */}
           {[...fretboard].reverse().map((stringData, displayIndex) => {
