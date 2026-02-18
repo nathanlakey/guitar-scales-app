@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectChordShapes } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
@@ -25,97 +25,29 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     return chordNotes.length > 0 && chordNotes.includes(note);
   };
 
-  // Get all chord tone positions for shape visualization
-  const getChordTonePositions = () => {
-    if (chordNotes.length === 0) return [];
+  // Detect chord shapes using clustering algorithm
+  const chordShapes = detectChordShapes(fretboard, chordNotes);
 
-    const chordTonePositions = [];
+  // Calculate shape region positioning for display
+  const calculateShapeRegion = (shape) => {
+    // Convert string indices to display positions (reversed)
+    const displayMinString = STANDARD_TUNING.length - 1 - shape.maxString;
+    const displayMaxString = STANDARD_TUNING.length - 1 - shape.minString;
 
-    fretboard.forEach((stringData, stringIndex) => {
-      stringData.frets.forEach(fretData => {
-        if (fretData.inScale && isInPosition(fretData.fret) && isChordTone(fretData.note) && fretData.fret > 0) {
-          // Calculate display position (strings are reversed in display)
-          const displayStringIndex = STANDARD_TUNING.length - 1 - stringIndex;
-          chordTonePositions.push({
-            stringIndex,
-            displayStringIndex,
-            fret: fretData.fret,
-            note: fretData.note,
-            interval: fretData.interval,
-          });
-        }
-      });
-    });
-
-    return chordTonePositions;
-  };
-
-  // Generate chord shape connections based on real guitar fingering patterns
-  const generateChordShapeConnections = (chordTones) => {
-    if (chordTones.length < 2) return [];
-
-    const connections = [];
-    
-    // Group chord tones by fret to find shapes
-    const fretGroups = {};
-    chordTones.forEach(tone => {
-      if (!fretGroups[tone.fret]) {
-        fretGroups[tone.fret] = [];
-      }
-      fretGroups[tone.fret].push(tone);
-    });
-
-    // Sort chord tones by fret position
-    const sortedByFret = [...chordTones].sort((a, b) => a.fret - b.fret);
-    const minFret = sortedByFret[0].fret;
-    const maxFret = sortedByFret[sortedByFret.length - 1].fret;
-    const fretSpan = maxFret - minFret;
-
-    // Connect notes that form playable chord shapes
-    // Strategy: Connect notes on adjacent strings if they're within 4-fret span (playable hand position)
-    chordTones.forEach(tone1 => {
-      chordTones.forEach(tone2 => {
-        // Check if notes are on adjacent or nearby strings
-        const stringDistance = Math.abs(tone1.stringIndex - tone2.stringIndex);
-        const fretDistance = Math.abs(tone1.fret - tone2.fret);
-        
-        // Connect if:
-        // 1. On adjacent strings (stringDistance = 1) and within 4 frets (typical hand span)
-        // 2. On same fret across multiple strings (barre chord shape)
-        // 3. Within small area that forms a recognizable shape
-        if (
-          (stringDistance === 1 && fretDistance <= 4) || // Adjacent strings, playable span
-          (tone1.fret === tone2.fret && stringDistance <= 2) || // Barre or partial barre
-          (stringDistance <= 2 && fretDistance <= 3 && fretSpan <= 4) // Compact chord shape
-        ) {
-          // Avoid duplicate connections
-          const connectionKey = `${Math.min(tone1.stringIndex, tone2.stringIndex)}-${Math.max(tone1.stringIndex, tone2.stringIndex)}-${tone1.fret}-${tone2.fret}`;
-          
-          if (!connections.find(c => c.key === connectionKey)) {
-            connections.push({
-              key: connectionKey,
-              from: tone1,
-              to: tone2,
-              type: tone1.fret === tone2.fret ? 'horizontal' : 'diagonal'
-            });
-          }
-        }
-      });
-    });
-
-    return connections;
-  };
-
-  const chordTonePositions = getChordTonePositions();
-  const chordShapeConnections = generateChordShapeConnections(chordTonePositions);
-
-  // Calculate position for SVG coordinate system
-  const calculateNotePosition = (displayStringIndex, fret) => {
+    // Calculate pixel positions
     // String label (40px) + open cell (44px) + nut (6px) = 90px base offset
-    // Each fret is 60px wide
-    const x = 90 + (fret - 1) * 60 + 30; // Center of the fret cell
-    const y = displayStringIndex * 42 + 21; // Center of the string row
-    return { x, y };
+    // Each fret is 60px wide, each string row is 42px tall
+    const left = 90 + (shape.minFret - 1) * 60;
+    const width = shape.fretSpan * 60;
+    const top = displayMinString * 42;
+    const height = (displayMaxString - displayMinString + 1) * 42;
+
+    return {
+      left: `${left}px`,
+      width: `${width}px`,
+      top: `${top}px`,
+      height: `${height}px`,
+    };
   };
 
   // Set up visual highlighting callback for scale playback
@@ -223,74 +155,16 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
           {/* Nut */}
           <div className="nut"></div>
 
-          {/* Chord shape connections overlay */}
-          {chordShapeConnections.length > 0 && (
-            <svg
-              className="chord-shape-connections"
-              viewBox="0 0 1100 260"
-              preserveAspectRatio="none"
+          {/* Chord shape regions overlay */}
+          {chordShapes.map((shape, index) => (
+            <div
+              key={`chord-shape-${index}`}
+              className="chord-shape-region"
+              style={calculateShapeRegion(shape)}
             >
-              <defs>
-                {/* Gradient for connection lines */}
-                <linearGradient id="chord-connection-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="rgba(232, 140, 125, 0.3)" />
-                  <stop offset="50%" stopColor="rgba(232, 140, 125, 0.5)" />
-                  <stop offset="100%" stopColor="rgba(232, 140, 125, 0.3)" />
-                </linearGradient>
-                {/* Glow filter for connections */}
-                <filter id="chord-glow">
-                  <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              
-              {/* Draw connections between chord tones */}
-              {chordShapeConnections.map((connection, index) => {
-                const fromPos = calculateNotePosition(connection.from.displayStringIndex, connection.from.fret);
-                const toPos = calculateNotePosition(connection.to.displayStringIndex, connection.to.fret);
-                
-                // Create smooth curved path for diagonal connections
-                const isHorizontal = connection.type === 'horizontal';
-                const path = isHorizontal
-                  ? `M ${fromPos.x} ${fromPos.y} L ${toPos.x} ${toPos.y}` // Straight line for barre chords
-                  : `M ${fromPos.x} ${fromPos.y} Q ${(fromPos.x + toPos.x) / 2} ${(fromPos.y + toPos.y) / 2 - 10} ${toPos.x} ${toPos.y}`; // Curved for diagonal
-                
-                return (
-                  <path
-                    key={`connection-${index}`}
-                    d={path}
-                    stroke="url(#chord-connection-gradient)"
-                    strokeWidth={isHorizontal ? "3" : "2.5"}
-                    fill="none"
-                    strokeLinecap="round"
-                    filter="url(#chord-glow)"
-                    className="chord-connection-path"
-                  />
-                );
-              })}
-              
-              {/* Draw subtle glow circles at each chord tone */}
-              {chordTonePositions.map((tone, index) => {
-                const pos = calculateNotePosition(tone.displayStringIndex, tone.fret);
-                return (
-                  <circle
-                    key={`chord-glow-${index}`}
-                    cx={pos.x}
-                    cy={pos.y}
-                    r="18"
-                    fill="rgba(232, 140, 125, 0.08)"
-                    stroke="rgba(232, 140, 125, 0.2)"
-                    strokeWidth="1"
-                    filter="url(#chord-glow)"
-                    className="chord-tone-glow"
-                  />
-                );
-              })}
-            </svg>
-          )}
+              <div className="chord-shape-glow"></div>
+            </div>
+          ))}
 
           {/* Strings - displayed from high E (index 5) to low E (index 0) */}
           {[...fretboard].reverse().map((stringData, displayIndex) => {

@@ -3,6 +3,7 @@ import { generateFretboard, getScalePositions, getChordNotes, CHORDS, NOTES } fr
 import ScaleSelector from './components/ScaleSelector'
 import ScaleInfo from './components/ScaleInfo'
 import AudioControls from './components/AudioControls'
+import ChordSelector from './components/ChordSelector'
 import Fretboard from './components/Fretboard'
 import './App.css'
 
@@ -88,33 +89,16 @@ function App() {
           >
             {showIntervals ? 'Notes' : 'Intervals'}
           </button>
-
-          {/* Chord overlay controls */}
-          <select
-            className="chord-root-select"
-            value={chordRoot}
-            onChange={(e) => setChordRoot(e.target.value)}
-            title="Chord Root (optional)"
-          >
-            <option value="">No Chord</option>
-            {NOTES.map(note => (
-              <option key={note} value={note}>{note}</option>
-            ))}
-          </select>
-
-          {chordRoot && (
-            <select
-              className="chord-type-select"
-              value={chordType}
-              onChange={(e) => setChordType(e.target.value)}
-              title="Chord Type"
-            >
-              {Object.keys(CHORDS).map(chord => (
-                <option key={chord} value={chord}>{chord}</option>
-              ))}
-            </select>
-          )}
         </div>
+
+        {/* Chord Shape Selector */}
+        <ChordSelector
+          selectedRoot={chordRoot}
+          selectedType={chordType}
+          onRootChange={setChordRoot}
+          onTypeChange={setChordType}
+          onClear={() => setChordRoot('')}
+        />
 
         {/* The instrument - primary focus */}
         <Fretboard 

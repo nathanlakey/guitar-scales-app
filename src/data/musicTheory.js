@@ -269,3 +269,94 @@ export function generateFretboard(rootNote, scaleName) {
 
   return fretboard;
 }
+
+/**
+ * Detect and cluster chord shapes on the fretboard
+ * Groups chord tones into distinct playable shape regions
+ * @param {Array} fretboard - Full fretboard data
+ * @param {Array} chordNotes - Array of notes in the chord
+ * @returns {Array} Array of chord shape clusters
+ */
+export function detectChordShapes(fretboard, chordNotes) {
+  if (!chordNotes || chordNotes.length === 0) return [];
+
+  // Collect all chord tone positions
+  const chordTonePositions = [];
+  
+  fretboard.forEach((stringData, stringIndex) => {
+    stringData.frets.forEach(fretData => {
+      if (chordNotes.includes(fretData.note) && fretData.fret > 0) {
+        chordTonePositions.push({
+          stringIndex,
+          fret: fretData.fret,
+          note: fretData.note,
+        });
+      }
+    });
+  });
+
+  if (chordTonePositions.length === 0) return [];
+
+  // Cluster chord tones into distinct shapes
+  const shapes = [];
+  const used = new Set();
+
+  // Sort by fret position to process shapes from low to high
+  const sortedPositions = [...chordTonePositions].sort((a, b) => a.fret - b.fret);
+
+  sortedPositions.forEach(position => {
+    const posKey = `${position.stringIndex}-${position.fret}`;
+    if (used.has(posKey)) return;
+
+    // Find all nearby chord tones that form a playable shape
+    const shapeNotes = [];
+    let minFret = position.fret;
+    let maxFret = position.fret;
+    let minString = position.stringIndex;
+    let maxString = position.stringIndex;
+
+    // Collect notes within a 4-fret span (typical hand position)
+    chordTonePositions.forEach(tone => {
+      const toneKey = `${tone.stringIndex}-${tone.fret}`;
+      if (used.has(toneKey)) return;
+
+      // Check if this tone is within playable range of current cluster
+      const fretDistance = Math.abs(tone.fret - position.fret);
+      
+      if (fretDistance <= 4) {
+        // Check if adding this note keeps the shape compact
+        const wouldMinFret = Math.min(minFret, tone.fret);
+        const wouldMaxFret = Math.max(maxFret, tone.fret);
+        const wouldMinString = Math.min(minString, tone.stringIndex);
+        const wouldMaxString = Math.max(maxString, tone.stringIndex);
+        const wouldSpan = wouldMaxFret - wouldMinFret;
+        const wouldStringSpan = wouldMaxString - wouldMinString;
+
+        // Keep shapes within 5-fret span and covering at least 2 strings
+        if (wouldSpan <= 5 && wouldStringSpan <= 5) {
+          shapeNotes.push(tone);
+          used.add(toneKey);
+          minFret = wouldMinFret;
+          maxFret = wouldMaxFret;
+          minString = wouldMinString;
+          maxString = wouldMaxString;
+        }
+      }
+    });
+
+    // Only create a shape if we have at least 2 notes
+    if (shapeNotes.length >= 2) {
+      shapes.push({
+        notes: shapeNotes,
+        minFret,
+        maxFret,
+        minString,
+        maxString,
+        fretSpan: maxFret - minFret + 1,
+        stringSpan: maxString - minString + 1,
+      });
+    }
+  });
+
+  return shapes;
+}
