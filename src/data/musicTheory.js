@@ -107,15 +107,15 @@ function getCAGEDPositions(rootNote, scaleName) {
     }
   }
   
-  // CAGED shapes with generous overlapping spans to ensure complete patterns
-  // Each shape name corresponds to the open chord shape it resembles
-  // Wider spans ensure all notes in the shape pattern are included
+  // CAGED shapes with very generous overlapping spans
+  // Generated dynamically from full fretboard scale data
+  // Wide boundaries ensure ALL scale notes within each shape region are included
   const cagedShapes = [
-    { name: 'C Shape', offset: -3, span: 8 },  // C shape starts before root, wide span for completeness
-    { name: 'A Shape', offset: 0, span: 7 },   // A shape starts at root on low E
-    { name: 'G Shape', offset: 3, span: 8 },   // G shape starts 3 frets after root, needs wide span
-    { name: 'E Shape', offset: 7, span: 7 },   // E shape starts near octave
-    { name: 'D Shape', offset: 10, span: 8 },  // D shape, wide span for upper fretboard
+    { name: 'C Shape', offset: -4, span: 10 },  // Wide span ensures complete pattern coverage
+    { name: 'A Shape', offset: -1, span: 10 },  // Overlaps with C shape for smooth transitions
+    { name: 'G Shape', offset: 2, span: 10 },   // Wide span captures all notes in G shape region
+    { name: 'E Shape', offset: 6, span: 10 },   // Generous span for complete E shape pattern
+    { name: 'D Shape', offset: 9, span: 10 },   // Wide span extends to upper fretboard limit
   ];
   
   cagedShapes.forEach((shape, index) => {
