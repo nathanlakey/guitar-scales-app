@@ -4,7 +4,7 @@ import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
 
-function Fretboard({ rootNote, scaleName }) {
+function Fretboard({ rootNote, scaleName, showIntervals = false }) {
   const fretboard = generateFretboard(rootNote, scaleName);
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
@@ -46,6 +46,15 @@ function Fretboard({ rootNote, scaleName }) {
   const isNoteHighlighted = (stringIndex, fret) => {
     if (!highlightedNote) return false;
     return highlightedNote.stringIndex === stringIndex && highlightedNote.fret === fret;
+  };
+
+  // Get display label for a fret (note name or interval)
+  const getDisplayLabel = (fretData) => {
+    if (showIntervals) {
+      if (fretData.isRoot) return 'R';
+      return fretData.interval || '';
+    }
+    return fretData.note;
   };
 
   // String labels (high to low for display: 1st string at top)
@@ -95,7 +104,7 @@ function Fretboard({ rootNote, scaleName }) {
                         title={`${fretData.note} (Interval: ${fretData.interval}) - Click to play`}
                         onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                       >
-                        {fretData.note}
+                        {getDisplayLabel(fretData)}
                       </button>
                     )}
                   </div>

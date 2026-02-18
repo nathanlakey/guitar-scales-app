@@ -9,6 +9,7 @@ import './App.css'
 function App() {
   const [rootNote, setRootNote] = useState('C')
   const [scaleName, setScaleName] = useState('Major (Ionian)')
+  const [showIntervals, setShowIntervals] = useState(false)
 
   // Generate fretboard data for AudioControls
   const fretboardData = generateFretboard(rootNote, scaleName)
@@ -30,10 +31,23 @@ function App() {
           />
           
           <ScaleInfo rootNote={rootNote} scaleName={scaleName} />
+
+          {/* Interval display toggle */}
+          <button
+            className={`interval-toggle ${showIntervals ? 'active' : ''}`}
+            onClick={() => setShowIntervals(!showIntervals)}
+            title={showIntervals ? 'Show Note Names' : 'Show Intervals'}
+          >
+            {showIntervals ? 'Notes' : 'Intervals'}
+          </button>
         </div>
 
         {/* The instrument - primary focus */}
-        <Fretboard rootNote={rootNote} scaleName={scaleName} />
+        <Fretboard 
+          rootNote={rootNote} 
+          scaleName={scaleName}
+          showIntervals={showIntervals}
+        />
 
         {/* Audio controls - minimal and secondary */}
         <AudioControls 
