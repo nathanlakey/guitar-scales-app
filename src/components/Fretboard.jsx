@@ -169,10 +169,10 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
               preserveAspectRatio="none"
             >
               <defs>
-                {/* Subtle glow filters for each CAGED shape */}
+                {/* Clear glow filters for each CAGED shape */}
                 {Object.entries(CAGED_COLORS).map(([shape, colors]) => (
                   <filter key={`glow-${shape}`} id={`chord-glow-${shape}`}>
-                    <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
                     <feMerge>
                       <feMergeNode in="coloredBlur" />
                       <feMergeNode in="SourceGraphic" />
@@ -181,7 +181,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                 ))}
               </defs>
               
-              {/* Draw glow connections between notes of the same shape */}
+              {/* Draw clear connections between notes of the same shape */}
               {connections.map((connection, index) => {
                 const fromDisplayIndex = STANDARD_TUNING.length - 1 - connection.from.stringIndex;
                 const toDisplayIndex = STANDARD_TUNING.length - 1 - connection.to.stringIndex;
@@ -189,26 +189,23 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                 const toPos = calculateNotePosition(toDisplayIndex, connection.to.fret);
                 const colors = CAGED_COLORS[connection.cagedShape];
                 
-                // Create subtle curved path with minimal curvature
-                const midX = (fromPos.x + toPos.x) / 2;
-                const midY = (fromPos.y + toPos.y) / 2;
-                const curvature = 8 * connection.strength; // Reduced curvature
-                const path = `M ${fromPos.x} ${fromPos.y} Q ${midX} ${midY - curvature} ${toPos.x} ${toPos.y}`;
+                // Create clean, straight path aligned to note centers
+                const path = `M ${fromPos.x} ${fromPos.y} L ${toPos.x} ${toPos.y}`;
                 
                 return (
                   <path
                     key={`glow-${index}`}
                     d={path}
-                    stroke={colors.glow}
-                    strokeWidth={2 * connection.strength} // Thinner lines
+                    stroke={colors.primary}
+                    strokeWidth={3}
                     fill="none"
                     strokeLinecap="round"
                     filter={`url(#chord-glow-${connection.cagedShape})`}
                     className="chord-glow-path"
-                    opacity={0.4} // Lower base opacity
+                    opacity={0.7}
                   />
                 );
-              })}
+              })}            
             </svg>
           )}
 
@@ -233,20 +230,20 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                   // Generate multi-color class for overlapping shapes
                   let colorClasses = '';
                   let style = {};
+                  let dataAttributes = {};
                   
                   if (cagedShapes.length > 0) {
                     if (cagedShapes.length === 1) {
                       // Single shape - use that shape's color
                       colorClasses = `caged-${cagedShapes[0]}`;
                     } else {
-                      // Multiple shapes - create multi-color effect
+                      // Multiple shapes - create smooth gradient fill
                       colorClasses = 'caged-multi';
-                      // Create CSS custom properties for multi-color rendering
-                      const colors = cagedShapes.map(s => CAGED_COLORS[s].primary).join(', ');
-                      style = {
-                        '--caged-colors': colors,
-                        '--caged-count': cagedShapes.length
-                      };
+                      dataAttributes['data-shape-count'] = cagedShapes.length;
+                      // Create CSS custom properties for gradient colors
+                      cagedShapes.forEach((shape, i) => {
+                        style[`--shape-color-${i}`] = CAGED_COLORS[shape].primary;
+                      });
                     }
                   }
                   
@@ -267,6 +264,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                             colorClasses
                           }`}
                           style={style}
+                          {...dataAttributes}
                           title={getTooltipText(fretData)}
                           onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                         >

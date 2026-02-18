@@ -82,15 +82,15 @@
 
 .chord-glow-path {
   transition: opacity 0.3s ease;
-  animation: chord-glow-pulse 4s ease-in-out infinite;
 }
 
+/* No animation for clearer visibility */
 @keyframes chord-glow-pulse {
   0%, 100% {
-    opacity: 0.25;
+    opacity: 0.7;
   }
   50% {
-    opacity: 0.45;
+    opacity: 0.85;
   }
 }
 
@@ -171,33 +171,55 @@
 }
 
 /* Multi-shape membership - notes belonging to multiple CAGED shapes */
-/* Use layered glow effects for smooth color blending */
+/* Use smooth gradient fill inside the note circle */
 .note-marker.caged-multi {
   position: relative;
-  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-  /* Create blended multi-color glow using multiple layered shadows */
+  /* Gradient will be dynamically generated based on shapes */
   box-shadow: 
-    0 0 8px 2px rgba(96, 165, 250, 0.4),    /* Blue */
-    0 0 8px 2px rgba(168, 85, 247, 0.4),    /* Purple */
-    0 0 8px 2px rgba(34, 197, 94, 0.4),     /* Green */
-    0 0 8px 2px rgba(236, 72, 153, 0.4),    /* Pink */
-    0 0 8px 2px rgba(251, 146, 60, 0.4),    /* Orange */
-    0 2px 6px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  animation: multi-shape-glow 3s ease-in-out infinite;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+/* 2-color gradient for overlapping shapes */
+.note-marker.caged-multi[data-shape-count="2"] {
+  background: linear-gradient(135deg, 
+    var(--shape-color-0) 0%, 
+    var(--shape-color-0) 45%, 
+    var(--shape-color-1) 55%, 
+    var(--shape-color-1) 100%);
+}
+
+/* 3-color gradient for overlapping shapes */
+.note-marker.caged-multi[data-shape-count="3"] {
+  background: linear-gradient(135deg, 
+    var(--shape-color-0) 0%, 
+    var(--shape-color-0) 30%, 
+    var(--shape-color-1) 35%, 
+    var(--shape-color-1) 65%, 
+    var(--shape-color-2) 70%, 
+    var(--shape-color-2) 100%);
+}
+
+/* 4+ color gradient for overlapping shapes */
+.note-marker.caged-multi[data-shape-count="4"],
+.note-marker.caged-multi[data-shape-count="5"] {
+  background: linear-gradient(135deg, 
+    var(--shape-color-0) 0%, 
+    var(--shape-color-0) 22%, 
+    var(--shape-color-1) 25%, 
+    var(--shape-color-1) 47%, 
+    var(--shape-color-2) 50%, 
+    var(--shape-color-2) 72%, 
+    var(--shape-color-3) 75%, 
+    var(--shape-color-3) 100%);
 }
 
 @keyframes multi-shape-glow {
   0%, 100% {
     box-shadow: 
-      0 0 10px 3px rgba(96, 165, 250, 0.5),
-      0 0 10px 3px rgba(168, 85, 247, 0.5),
-      0 0 10px 3px rgba(34, 197, 94, 0.5),
-      0 0 10px 3px rgba(236, 72, 153, 0.5),
-      0 0 10px 3px rgba(251, 146, 60, 0.5),
-      0 2px 6px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
   50% {
     box-shadow: 
