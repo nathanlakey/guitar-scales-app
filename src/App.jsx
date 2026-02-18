@@ -11,15 +11,22 @@ function App() {
   const [scaleName, setScaleName] = useState('Major (Ionian)')
   const [showIntervals, setShowIntervals] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState('all')
+  const [positionSystem, setPositionSystem] = useState('CAGED')
 
   // Generate fretboard data for AudioControls
   const fretboardData = generateFretboard(rootNote, scaleName)
 
-  // Calculate available positions for current root/scale
+  // Calculate available positions for current root/scale/system
   const positions = useMemo(() => 
-    getScalePositions(rootNote, scaleName),
-    [rootNote, scaleName]
+    getScalePositions(rootNote, scaleName, positionSystem),
+    [rootNote, scaleName, positionSystem]
   )
+
+  // Reset position selection when system changes
+  const handleSystemChange = (newSystem) => {
+    setPositionSystem(newSystem)
+    setSelectedPosition('all')
+  }
 
   return (
     <div className="app">
@@ -39,12 +46,23 @@ function App() {
           
           <ScaleInfo rootNote={rootNote} scaleName={scaleName} />
 
+          {/* Position system selector */}
+          <select
+            className="system-select"
+            value={positionSystem}
+            onChange={(e) => handleSystemChange(e.target.value)}
+            title="Position System"
+          >
+            <option value="CAGED">CAGED</option>
+            <option value="3NPS">3NPS</option>
+          </select>
+
           {/* Position selector */}
           <select
             className="position-select"
             value={selectedPosition}
             onChange={(e) => setSelectedPosition(e.target.value)}
-            title="Select Scale Position"
+            title="Select Position"
           >
             <option value="all">All Positions</option>
             {positions.map(pos => (

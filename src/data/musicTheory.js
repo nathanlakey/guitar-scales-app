@@ -88,40 +88,123 @@ export function getIntervalNumber(note, rootNote, scaleName) {
 }
 
 /**
- * Calculate scale positions based on root note locations
- * Returns array of position objects with starting fret and range
+ * Calculate CAGED system positions
+ * Returns 5 positions based on traditional CAGED chord shapes
  */
-export function getScalePositions(rootNote, scaleName) {
+function getCAGEDPositions(rootNote, scaleName) {
   const positions = [];
   const scaleNotes = getScaleNotes(rootNote, scaleName);
   
-  // Find all root note locations on the low E string (string index 0)
+  // Find first root note on low E string
   const lowEString = STANDARD_TUNING[0]; // 'E'
-  const rootPositions = [];
+  let firstRootFret = 0;
   
   for (let fret = 0; fret <= NUM_FRETS; fret++) {
     const note = getNoteAtFret(lowEString, fret);
     if (note === rootNote) {
-      rootPositions.push(fret);
+      firstRootFret = fret;
+      break;
     }
   }
   
-  // Create positions around each root note (typically 4-fret span)
-  rootPositions.forEach((rootFret, index) => {
-    // Position spans from root to root+4 frets
-    const startFret = Math.max(0, rootFret);
-    const endFret = Math.min(NUM_FRETS, rootFret + 4);
+  // CAGED positions: each spans ~4-5 frets
+  // Position 1: E shape (root on low E)
+  // Position 2: D shape 
+  // Position 3: C shape
+  // Position 4: A shape (root on A string)
+  // Position 5: G shape
+  
+  const cagedShapes = [
+    { name: 'E Shape', offset: 0, span: 4 },
+    { name: 'D Shape', offset: 2, span: 5 },
+    { name: 'C Shape', offset: 4, span: 5 },
+    { name: 'A Shape', offset: 7, span: 4 },
+    { name: 'G Shape', offset: 9, span: 5 },
+  ];
+  
+  cagedShapes.forEach((shape, index) => {
+    const startFret = Math.max(0, firstRootFret + shape.offset);
+    const endFret = Math.min(NUM_FRETS, startFret + shape.span);
     
-    positions.push({
-      number: index + 1,
-      name: `Position ${index + 1}`,
-      startFret,
-      endFret,
-      rootFret,
-    });
+    if (startFret <= NUM_FRETS) {
+      positions.push({
+        number: index + 1,
+        name: shape.name,
+        startFret,
+        endFret,
+        system: 'CAGED',
+      });
+    }
   });
   
   return positions;
+}
+
+/**
+ * Calculate 3-Notes-Per-String (3NPS) positions
+ * Returns positions optimized for 3 notes on each string
+ */
+function get3NPSPositions(rootNote, scaleName) {
+  const positions = [];
+  const scaleNotes = getScaleNotes(rootNote, scaleName);
+  const intervals = SCALES[scaleName];
+  
+  // 3NPS works best with 7-note scales
+  if (!intervals || intervals.length < 7) {
+    // For pentatonic/other scales, fall back to simpler positioning
+    return getCAGEDPositions(rootNote, scaleName);
+  }
+  
+  // Find first root on low E string
+  const lowEString = STANDARD_TUNING[0];
+  let firstRootFret = 0;
+  
+  for (let fret = 0; fret <= NUM_FRETS; fret++) {
+    const note = getNoteAtFret(lowEString, fret);
+    if (note === rootNote) {
+      firstRootFret = fret;
+      break;
+    }
+  }
+  
+  // 3NPS positions: typically 3-4 positions covering the neck
+  // Each position spans 5-7 frets to accommodate 3 notes per string
+  const npsPositions = [
+    { name: 'Position 1', offset: 0, span: 6 },
+    { name: 'Position 2', offset: 5, span: 6 },
+    { name: 'Position 3', offset: 9, span: 6 },
+  ];
+  
+  npsPositions.forEach((pos, index) => {
+    const startFret = Math.max(0, firstRootFret + pos.offset);
+    const endFret = Math.min(NUM_FRETS, startFret + pos.span);
+    
+    if (startFret <= NUM_FRETS) {
+      positions.push({
+        number: index + 1,
+        name: pos.name,
+        startFret,
+        endFret,
+        system: '3NPS',
+      });
+    }
+  });
+  
+  return positions;
+}
+
+/**
+ * Calculate scale positions based on selected system
+ * @param {string} rootNote - The root note of the scale
+ * @param {string} scaleName - The name of the scale
+ * @param {string} system - Position system: 'CAGED' or '3NPS'
+ * Returns array of position objects with starting fret and range
+ */
+export function getScalePositions(rootNote, scaleName, system = 'CAGED') {
+  if (system === '3NPS') {
+    return get3NPSPositions(rootNote, scaleName);
+  }
+  return getCAGEDPositions(rootNote, scaleName);
 }
 
 /**
