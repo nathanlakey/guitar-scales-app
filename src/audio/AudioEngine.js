@@ -21,28 +21,45 @@ class AudioEngine {
     await Tone.start();
     console.log('Audio context started');
 
-    // Create a polyphonic synthesizer with guitar-like timbre
-    this.synth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: {
-        type: 'triangle',
-        partials: [1, 0.5, 0.3, 0.2, 0.1], // Harmonic content for warmth
+    // Create a Sampler with realistic guitar samples
+    // Using a multi-sampled approach covering the guitar's range
+    this.synth = new Tone.Sampler({
+      urls: {
+        // Sample map covering guitar range from low E (E2) to high notes
+        // Using subset of notes and Tone.js will interpolate between them
+        "E2": "https://tonejs.github.io/audio/salamander/E2.mp3",
+        "A2": "https://tonejs.github.io/audio/salamander/A2.mp3",
+        "D3": "https://tonejs.github.io/audio/salamander/D3.mp3",
+        "G3": "https://tonejs.github.io/audio/salamander/G3.mp3",
+        "B3": "https://tonejs.github.io/audio/salamander/B3.mp3",
+        "E4": "https://tonejs.github.io/audio/salamander/E4.mp3",
+        "A4": "https://tonejs.github.io/audio/salamander/A4.mp3",
+        "D5": "https://tonejs.github.io/audio/salamander/D5.mp3",
       },
-      envelope: {
-        attack: 0.005,
-        decay: 0.1,
-        sustain: 0.3,
-        release: 1.2,
+      release: 1,
+      baseUrl: "",
+      onload: () => {
+        console.log('Guitar samples loaded');
       },
-      volume: -8,
     }).toDestination();
 
-    // Add reverb for natural space
+    // Add subtle reverb for natural acoustic space
     const reverb = new Tone.Reverb({
-      decay: 2,
-      wet: 0.15,
+      decay: 1.8,
+      wet: 0.12,
     }).toDestination();
 
     this.synth.connect(reverb);
+
+    // Add gentle compression for consistent volume
+    const compressor = new Tone.Compressor({
+      threshold: -24,
+      ratio: 4,
+      attack: 0.003,
+      release: 0.1,
+    }).toDestination();
+
+    this.synth.connect(compressor);
 
     this.initialized = true;
   }
@@ -93,6 +110,18 @@ class AudioEngine {
   }
 
   /**
+   * Convert MIDI note number to note name with octave
+   * @param {number} midiNote - MIDI note number (e.g., 60 = C4)
+   * @returns {string} Note name with octave (e.g., 'C4')
+   */
+  midiToNoteName(midiNote) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const octave = Math.floor(midiNote / 12) - 1;
+    const noteName = noteNames[midiNote % 12];
+    return noteName + octave;
+  }
+
+  /**
    * Play a single note
    * @param {string} stringNote - Note name of the string (e.g., 'E', 'A', 'D')
    * @param {number} fret - Fret number (0-24)
@@ -106,43 +135,47 @@ class AudioEngine {
       return;
     }
 
-    const frequency = this.getFrequency(stringNote, fret, stringIndex);
-
-    // Adjust envelope based on articulation
-    const originalEnvelope = { ...this.synth.get().envelope };
-
-    switch (articulation) {
-      case 'legato':
-        this.synth.set({
-          envelope: {
-            attack: 0.001,
-            decay: 0.05,
-            sustain: 0.9,
-            release: 0.3,
-          },
-        });
-        break;
-      case 'staccato':
-        this.synth.set({
-          envelope: {
-            attack: 0.001,
-            decay: 0.05,
-            sustain: 0.1,
-            release: 0.1,
-          },
-        });
-        duration = Math.min(duration, 0.2);
-        break;
-      default: // normal
-        this.synth.set({ envelope: originalEnvelope });
+    // Standard tuning MIDI note numbers for open strings (low to high)
+    const openStringMidiByIndex = [40, 45, 50, 55, 59, 64];
+    
+    let baseMidi;
+    
+    if (stringIndex !== null && stringIndex >= 0 && stringIndex < 6) {
+      baseMidi = openStringMidiByIndex[stringIndex];
+    } else {
+      const openStringMidi = {
+        'A': 45,  // A2
+        'D': 50,  // D3
+        'G': 55,  // G3
+        'B': 59,  // B3
+      };
+      
+      if (stringNote === 'E') {
+        baseMidi = 40; // E2
+      } else {
+        baseMidi = openStringMidi[stringNote] || 40;
+      }
     }
 
-    this.synth.triggerAttackRelease(frequency, duration);
+    const midiNote = baseMidi + fret;
+    const noteName = this.midiToNoteName(midiNote);
 
-    // Reset envelope after note
-    setTimeout(() => {
-      this.synth.set({ envelope: originalEnvelope });
-    }, (duration + 0.1) * 1000);
+    // Adjust duration based on articulation
+    let adjustedDuration = duration;
+    
+    switch (articulation) {
+      case 'legato':
+        adjustedDuration = duration * 1.5;
+        break;
+      case 'staccato':
+        adjustedDuration = Math.min(duration * 0.4, 0.2);
+        break;
+      default: // normal
+        adjustedDuration = duration;
+    }
+
+    // Trigger the sampler with the note name
+    this.synth.triggerAttackRelease(noteName, adjustedDuration);
   }
 
   /**
