@@ -102,50 +102,39 @@ function AudioControls({ fretboardData }) {
 
   return (
     <div className="audio-controls">
-      <div className="audio-controls-header">
-        <h3>Scale Playback</h3>
-        {!isInitialized && (
-          <span className="audio-init-hint">
-            Click any control to enable audio
-          </span>
-        )}
-      </div>
-
-      <div className="audio-controls-grid">
+      {/* Single compact row of controls */}
+      <div className="audio-controls-row">
         {/* Playback buttons */}
-        <div className="control-group">
-          <label>Playback</label>
-          <div className="button-group">
-            <button
-              className={`control-button ${isPlaying && !isPaused ? 'active' : ''}`}
-              onClick={handlePlayPause}
-              title={isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
-            >
-              {isPlaying && !isPaused ? '⏸' : '▶'}
-            </button>
-            <button
-              className="control-button"
-              onClick={handleStop}
-              disabled={!isPlaying}
-              title="Stop"
-            >
-              ⏹
-            </button>
-            <button
-              className={`control-button ${looping ? 'active' : ''}`}
-              onClick={handleLoopToggle}
-              title="Loop"
-            >
-              🔁
-            </button>
-          </div>
+        <div className="button-group">
+          <button
+            className={`control-button ${isPlaying && !isPaused ? 'active' : ''}`}
+            onClick={handlePlayPause}
+            title={isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
+          >
+            {isPlaying && !isPaused ? '⏸' : '▶'}
+          </button>
+          <button
+            className="control-button"
+            onClick={handleStop}
+            disabled={!isPlaying}
+            title="Stop"
+          >
+            ⏹
+          </button>
+          <button
+            className={`control-button ${looping ? 'active' : ''}`}
+            onClick={handleLoopToggle}
+            title="Loop"
+          >
+            🔁
+          </button>
         </div>
+
+        <div className="control-divider"></div>
 
         {/* Speed control */}
         <div className="control-group">
-          <label>
-            Speed: {speed.toFixed(1)}x
-          </label>
+          <label>{speed.toFixed(1)}x</label>
           <input
             type="range"
             min="0.5"
@@ -154,41 +143,35 @@ function AudioControls({ fretboardData }) {
             value={speed}
             onChange={handleSpeedChange}
             className="speed-slider"
+            title="Speed"
           />
-          <div className="speed-labels">
-            <span>0.5x</span>
-            <span>1.0x</span>
-            <span>2.0x</span>
-          </div>
         </div>
+
+        <div className="control-divider"></div>
 
         {/* Direction select */}
-        <div className="control-group">
-          <label>Direction</label>
-          <select
-            value={direction}
-            onChange={handleDirectionChange}
-            className="control-select"
-          >
-            <option value="ascending">Ascending ⬆</option>
-            <option value="descending">Descending ⬇</option>
-            <option value="both">Both ⬍</option>
-          </select>
-        </div>
+        <select
+          value={direction}
+          onChange={handleDirectionChange}
+          className="control-select"
+          title="Direction"
+        >
+          <option value="ascending">↑ Up</option>
+          <option value="descending">↓ Down</option>
+          <option value="both">↕ Both</option>
+        </select>
 
         {/* Articulation select */}
-        <div className="control-group">
-          <label>Articulation</label>
-          <select
-            value={articulation}
-            onChange={handleArticulationChange}
-            className="control-select"
-          >
-            <option value="normal">Normal</option>
-            <option value="legato">Legato (Smooth)</option>
-            <option value="staccato">Staccato (Short)</option>
-          </select>
-        </div>
+        <select
+          value={articulation}
+          onChange={handleArticulationChange}
+          className="control-select"
+          title="Articulation"
+        >
+          <option value="normal">Normal</option>
+          <option value="legato">Legato</option>
+          <option value="staccato">Staccato</option>
+        </select>
       </div>
     </div>
   );

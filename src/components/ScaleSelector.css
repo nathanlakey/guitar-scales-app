@@ -22,12 +22,12 @@
 }
 
 .inline-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.3);
   letter-spacing: 0.5px;
   white-space: nowrap;
-  min-width: 38px;
+  min-width: 32px;
   text-transform: uppercase;
 }
 
@@ -35,17 +35,17 @@
 .note-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
 }
 
 .note-btn {
-  min-width: 32px;
-  padding: 5px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.75rem;
+  min-width: 30px;
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -53,14 +53,14 @@
 }
 
 .note-btn:hover {
-  background: rgba(143, 180, 212, 0.1);
-  border-color: rgba(143, 180, 212, 0.3);
+  background: rgba(143, 180, 212, 0.08);
+  border-color: rgba(143, 180, 212, 0.25);
   color: #8fb4d4;
 }
 
 .note-btn.active {
-  background: rgba(143, 180, 212, 0.15);
-  border-color: #8fb4d4;
+  background: rgba(143, 180, 212, 0.12);
+  border-color: rgba(143, 180, 212, 0.4);
   color: #8fb4d4;
   font-weight: 600;
 }
@@ -68,12 +68,12 @@
 /* Scale dropdown */
 .scale-dropdown {
   flex: 1;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.8rem;
+  padding: 5px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -81,14 +81,14 @@
 }
 
 .scale-dropdown:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(143, 180, 212, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(143, 180, 212, 0.25);
 }
 
 .scale-dropdown:focus {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: #8fb4d4;
-  box-shadow: 0 0 0 2px rgba(143, 180, 212, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(143, 180, 212, 0.4);
+  box-shadow: 0 0 0 1px rgba(143, 180, 212, 0.08);
 }
 
 .scale-dropdown option {

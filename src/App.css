@@ -8,7 +8,7 @@
 /* Header - ultra minimal */
 .app-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .app-title {
@@ -25,7 +25,7 @@
 .app-main {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 /* Control Bar - minimal horizontal strip */
@@ -33,10 +33,7 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 12px 0;
 }
 
 /* Responsive */

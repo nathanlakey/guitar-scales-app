@@ -1,13 +1,13 @@
 .scale-info {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .scale-notes-display {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
   align-items: center;
 }
 
@@ -15,37 +15,37 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 4px 7px;
-  border-radius: 4px;
-  background: rgba(143, 180, 212, 0.08);
-  border: 1px solid rgba(143, 180, 212, 0.15);
-  min-width: 32px;
+  gap: 1px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: rgba(143, 180, 212, 0.06);
+  border: 1px solid rgba(143, 180, 212, 0.12);
+  min-width: 28px;
 }
 
 .scale-note-chip.root {
-  background: rgba(232, 140, 125, 0.1);
-  border-color: rgba(232, 140, 125, 0.2);
+  background: rgba(232, 140, 125, 0.08);
+  border-color: rgba(232, 140, 125, 0.15);
 }
 
 .chip-interval {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.3);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   line-height: 1;
 }
 
 .chip-note {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: #8fb4d4;
+  color: rgba(143, 180, 212, 0.9);
   line-height: 1;
 }
 
 .scale-note-chip.root .chip-note {
-  color: #e88c7d;
+  color: rgba(232, 140, 125, 0.9);
 }
 
 @media (max-width: 600px) {
