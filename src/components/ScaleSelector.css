@@ -1,0 +1,166 @@
+.scale-selector {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.selector-section {
+  margin-bottom: 24px;
+}
+
+.selector-section:last-of-type {
+  margin-bottom: 16px;
+}
+
+.selector-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #8892b0;
+  margin-bottom: 12px;
+}
+
+/* Root note buttons */
+.note-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.note-btn {
+  min-width: 48px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ccd6f6;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.note-btn:hover {
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.3);
+  color: #64ffda;
+}
+
+.note-btn.active {
+  background: linear-gradient(135deg, #64ffda22, #64ffda11);
+  border-color: #64ffda;
+  color: #64ffda;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(100, 255, 218, 0.15);
+}
+
+/* Scale categories */
+.scale-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scale-category {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.category-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #a8b2d1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-header:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ccd6f6;
+}
+
+.category-header.expanded {
+  background: rgba(100, 255, 218, 0.05);
+  color: #64ffda;
+}
+
+.chevron {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.scale-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px 12px;
+}
+
+.scale-btn {
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #8892b0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scale-btn:hover {
+  background: rgba(100, 255, 218, 0.08);
+  border-color: rgba(100, 255, 218, 0.2);
+  color: #ccd6f6;
+}
+
+.scale-btn.active {
+  background: rgba(100, 255, 218, 0.12);
+  border-color: #64ffda;
+  color: #64ffda;
+  font-weight: 600;
+}
+
+/* Current selection badge */
+.current-selection {
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.selection-badge {
+  display: inline-block;
+  padding: 8px 24px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.15), rgba(100, 255, 218, 0.05));
+  color: #64ffda;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .scale-selector {
+    padding: 20px;
+  }
+
+  .note-btn {
+    min-width: 40px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+}

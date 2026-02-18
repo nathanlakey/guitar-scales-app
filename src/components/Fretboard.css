@@ -1,0 +1,259 @@
+.fretboard-container {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+}
+
+.fretboard-wrapper {
+  min-width: 900px;
+}
+
+/* Fret numbers row */
+.fret-numbers {
+  display: flex;
+  margin-left: 40px; /* align with string label offset */
+  margin-bottom: 4px;
+}
+
+.nut-label {
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.fret-number {
+  flex: 1;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #5a6785;
+  letter-spacing: 0.5px;
+}
+
+/* The fretboard itself */
+.fretboard {
+  position: relative;
+  background:
+    linear-gradient(180deg,
+      #3d2b1f 0%,
+      #4a3328 15%,
+      #5c3d2e 30%,
+      #4a3328 50%,
+      #5c3d2e 70%,
+      #4a3328 85%,
+      #3d2b1f 100%
+    );
+  border-radius: 8px;
+  padding: 8px 0;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.4),
+    0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Nut (the bar at the start of the fretboard) */
+.nut {
+  position: absolute;
+  left: 83px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(180deg, #f5f0e0, #d4c9a8, #f5f0e0);
+  border-radius: 2px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+}
+
+/* Fret marker dots */
+.fret-markers-row {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 88px;
+  right: 0;
+  display: flex;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.marker-cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fret-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #e8dcc8, #c4b49a);
+  opacity: 0.5;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.double-dot {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Guitar string row */
+.guitar-string-row {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  position: relative;
+  z-index: 2;
+}
+
+/* String label (E A D G B e) */
+.string-label {
+  width: 40px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #8892b0;
+  flex-shrink: 0;
+}
+
+/* Open note cell (before the nut) */
+.open-note-cell {
+  width: 44px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Each fret cell */
+.fret-cell {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* The actual string line */
+.string-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* String thickness varies (thickest at bottom / low E) */
+.string-0 { height: 1px; background: linear-gradient(90deg, #d4d0c8, #e8e4dc, #d4d0c8); opacity: 0.9; }
+.string-1 { height: 1.3px; background: linear-gradient(90deg, #d4d0c8, #e8e4dc, #d4d0c8); opacity: 0.85; }
+.string-2 { height: 1.6px; background: linear-gradient(90deg, #c8c0b0, #ddd6c8, #c8c0b0); opacity: 0.8; }
+.string-3 { height: 2px; background: linear-gradient(90deg, #b8b0a0, #ccc4b4, #b8b0a0); opacity: 0.8; }
+.string-4 { height: 2.5px; background: linear-gradient(90deg, #a8a090, #bbb4a4, #a8a090); opacity: 0.75; }
+.string-5 { height: 3px; background: linear-gradient(90deg, #989080, #aaa298, #989080); opacity: 0.75; }
+
+/* Fret wire */
+.fret-wire {
+  position: absolute;
+  right: 0;
+  top: -2px;
+  bottom: -2px;
+  width: 2.5px;
+  background: linear-gradient(180deg, #c0c0c0, #e0e0e0, #a0a0a0, #e0e0e0, #c0c0c0);
+  border-radius: 1px;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Note marker bubble */
+.note-marker {
+  position: relative;
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 2px 8px rgba(33, 150, 243, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  padding: 0;
+  line-height: 1;
+}
+
+.note-marker:hover {
+  transform: scale(1.2);
+  box-shadow:
+    0 4px 16px rgba(33, 150, 243, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Root note styling */
+.note-marker.root {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  box-shadow:
+    0 2px 8px rgba(238, 90, 36, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  width: 30px;
+  height: 30px;
+  font-size: 0.7rem;
+}
+
+.note-marker.root:hover {
+  box-shadow:
+    0 4px 16px rgba(238, 90, 36, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Legend */
+.fretboard-legend {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #8892b0;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.legend-dot.root {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  box-shadow: 0 1px 4px rgba(238, 90, 36, 0.4);
+}
+
+.legend-dot.scale {
+  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  box-shadow: 0 1px 4px rgba(33, 150, 243, 0.4);
+}
+
+/* Responsive scrolling */
+@media (max-width: 960px) {
+  .fretboard-container {
+    padding: 16px;
+  }
+}

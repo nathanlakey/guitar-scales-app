@@ -1,0 +1,70 @@
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.app-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ccd6f6;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.title-icon {
+  margin-right: 10px;
+  font-size: 2rem;
+}
+
+.app-subtitle {
+  font-size: 1rem;
+  color: #5a6785;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* Main content */
+.app-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Footer */
+.app-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.app-footer p {
+  color: #3d4a63;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app {
+    padding: 20px 12px 32px;
+  }
+
+  .app-title {
+    font-size: 1.6rem;
+  }
+
+  .app-subtitle {
+    font-size: 0.85rem;
+  }
+}

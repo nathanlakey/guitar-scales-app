@@ -1,0 +1,73 @@
+.scale-info {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.scale-info-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #8892b0;
+  margin: 0 0 16px 0;
+}
+
+.scale-notes-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.scale-note-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(33, 150, 243, 0.08);
+  border: 1px solid rgba(33, 150, 243, 0.2);
+  min-width: 48px;
+}
+
+.scale-note-chip.root {
+  background: rgba(238, 90, 36, 0.1);
+  border-color: rgba(238, 90, 36, 0.3);
+}
+
+.chip-interval {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #5a6785;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.scale-note-chip.root .chip-interval {
+  color: #ee5a24;
+}
+
+.chip-note {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #4fc3f7;
+}
+
+.scale-note-chip.root .chip-note {
+  color: #ff6b6b;
+}
+
+@media (max-width: 600px) {
+  .scale-note-chip {
+    min-width: 40px;
+    padding: 8px 12px;
+  }
+  .chip-note {
+    font-size: 0.95rem;
+  }
+}
