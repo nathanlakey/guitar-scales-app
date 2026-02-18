@@ -20,26 +20,24 @@ function ScaleSelector({ rootNote, scaleName, onRootChange, onScaleChange }) {
         </div>
       </div>
 
-      <div className="selector-section">
-        <label className="selector-label">Scale Type</label>
-        <div className="scale-grid">
+      {/* Clean scale dropdown */}
+      <div className="scale-select-row">
+        <span className="inline-label">Scale:</span>
+        <select 
+          className="scale-dropdown"
+          value={scaleName}
+          onChange={(e) => onScaleChange(e.target.value)}
+        >
           {Object.entries(SCALE_CATEGORIES).map(([category, scales]) => (
-            <div key={category} className="scale-group">
-              <div className="group-label">{category}</div>
-              <div className="scale-buttons">
-                {scales.map(scale => (
-                  <button
-                    key={scale}
-                    className={`scale-btn ${scale === scaleName ? 'active' : ''}`}
-                    onClick={() => onScaleChange(scale)}
-                  >
-                    {scale}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <optgroup key={category} label={category}>
+              {scales.map(scale => (
+                <option key={scale} value={scale}>
+                  {scale}
+                </option>
+              ))}
+            </optgroup>
           ))}
-        </div>
+        </select>
       </div>
 
       <div className="current-selection">
