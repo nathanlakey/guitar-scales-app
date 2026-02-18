@@ -1,14 +1,14 @@
 .scale-selector {
   background: #242424;
   border-radius: 16px;
-  padding: 28px;
-  margin-bottom: 32px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .selector-section {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .selector-section:last-of-type {
@@ -22,7 +22,7 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #9ca3af;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 /* Root note buttons */
@@ -61,19 +61,19 @@
 
 /* Scale grid - all visible */
 .scale-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
 }
 
 .scale-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .group-label {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -84,16 +84,16 @@
 .scale-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
 .scale-btn {
-  padding: 8px 14px;
+  padding: 6px 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
   color: #9ca3af;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -115,7 +115,7 @@
 /* Current selection badge */
 .current-selection {
   text-align: center;
-  padding-top: 8px;
+  padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
