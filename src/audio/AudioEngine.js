@@ -42,12 +42,26 @@ class AudioEngine {
       await reverb.generate();
       console.log('✓ Reverb generated');
 
-      // Create realistic guitar synth using PluckSynth (Karplus-Strong algorithm)
-      // This produces a natural, guitar-like plucked string sound
-      this.synth = new Tone.PolySynth(Tone.PluckSynth, {
-        attackNoise: 1,
-        dampening: 4000,
-        resonance: 0.92,
+      // Create guitar synth using PolySynth with MonoSynth (compatible with PolySynth)
+      // MonoSynth extends Monophonic class as required by PolySynth
+      this.synth = new Tone.PolySynth(Tone.MonoSynth, {
+        oscillator: {
+          type: 'triangle'
+        },
+        envelope: {
+          attack: 0.005,
+          decay: 0.1,
+          sustain: 0.3,
+          release: 1
+        },
+        filterEnvelope: {
+          attack: 0.006,
+          decay: 0.2,
+          sustain: 0.5,
+          release: 2,
+          baseFrequency: 200,
+          octaves: 4
+        }
       }).toDestination();
 
       console.log('✓ Guitar synth created and connected to destination');
