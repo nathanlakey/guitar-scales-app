@@ -1,14 +1,17 @@
 .fretboard-container {
   background: #242424;
   border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  padding: 40px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 2px 12px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow-x: auto;
+  margin: 40px 0;
 }
 
 .fretboard-wrapper {
-  min-width: 900px;
+  min-width: 1000px;
 }
 
 /* Fret numbers row */
@@ -69,7 +72,7 @@
 .guitar-string-row {
   display: flex;
   align-items: center;
-  height: 36px;
+  height: 42px;
   position: relative;
   z-index: 2;
 }
@@ -139,13 +142,13 @@
 .note-marker {
   position: relative;
   z-index: 10;
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: none;
   background: linear-gradient(135deg, #a8c8e1, #8fb4d4);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;

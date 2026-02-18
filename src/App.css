@@ -1,74 +1,62 @@
 .app {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 24px 40px;
+  padding: 16px 20px 32px;
   min-height: 100vh;
 }
 
-/* Header - simplified and refined */
+/* Header - ultra minimal */
 .app-header {
   text-align: center;
-  margin-bottom: 32px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  margin-bottom: 20px;
 }
 
 .app-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #e8e8e8;
-  margin: 0 0 6px 0;
-  letter-spacing: -0.5px;
-}
-
-.app-subtitle {
-  font-size: 0.85rem;
-  color: #6b7280;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
   margin: 0;
-  font-weight: 400;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
 }
 
 /* Main content */
 .app-main {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
-/* Control Panel - groups all controls together */
-.control-panel {
-  background: #1f1f1f;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+/* Control Bar - minimal horizontal strip */
+.control-bar {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .app {
-    padding: 16px 12px 32px;
+    padding: 12px 12px 24px;
   }
 
   .app-header {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 16px;
   }
 
   .app-title {
-    font-size: 1.4rem;
+    font-size: 0.7rem;
   }
 
-  .app-subtitle {
-    font-size: 0.8rem;
-  }
-
-  .control-panel {
-    padding: 16px;
-    gap: 14px;
+  .control-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
   }
 }

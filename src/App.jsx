@@ -17,12 +17,11 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">Fretboard Scholar</h1>
-        <p className="app-subtitle">Interactive guitar scale visualizer</p>
       </header>
 
       <main className="app-main">
-        {/* Control Panel - all controls grouped together */}
-        <div className="control-panel">
+        {/* Minimal horizontal control bar */}
+        <div className="control-bar">
           <ScaleSelector
             rootNote={rootNote}
             scaleName={scaleName}
@@ -31,12 +30,13 @@ function App() {
           />
           
           <ScaleInfo rootNote={rootNote} scaleName={scaleName} />
-          
-          <AudioControls fretboardData={fretboardData} />
         </div>
 
-        {/* Fretboard - the main focus */}
+        {/* The instrument - primary focus */}
         <Fretboard rootNote={rootNote} scaleName={scaleName} />
+
+        {/* Audio controls - minimal and secondary */}
+        <AudioControls fretboardData={fretboardData} />
       </main>
     </div>
   )

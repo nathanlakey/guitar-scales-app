@@ -1,47 +1,51 @@
 .scale-selector {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
 }
 
 /* Compact inline root note row */
 .root-note-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 /* Scale dropdown row */
 .scale-select-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex: 1;
+  max-width: 400px;
 }
 
 .inline-label {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   letter-spacing: 0.5px;
   white-space: nowrap;
-  min-width: 45px;
+  min-width: 38px;
+  text-transform: uppercase;
 }
 
-/* Root note buttons - compact */
+/* Root note buttons - ultra compact */
 .note-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
 }
 
 .note-btn {
-  min-width: 36px;
-  padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #d4d4d4;
-  font-size: 0.8rem;
+  min-width: 32px;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -49,30 +53,27 @@
 }
 
 .note-btn:hover {
-  background: rgba(143, 180, 212, 0.15);
-  border-color: rgba(143, 180, 212, 0.4);
+  background: rgba(143, 180, 212, 0.1);
+  border-color: rgba(143, 180, 212, 0.3);
   color: #8fb4d4;
-  transform: translateY(-1px);
 }
 
 .note-btn.active {
-  background: linear-gradient(135deg, rgba(143, 180, 212, 0.25), rgba(143, 180, 212, 0.15));
+  background: rgba(143, 180, 212, 0.15);
   border-color: #8fb4d4;
   color: #8fb4d4;
-  font-weight: 700;
-  box-shadow: 0 0 12px rgba(143, 180, 212, 0.2);
+  font-weight: 600;
 }
 
 /* Scale dropdown */
 .scale-dropdown {
   flex: 1;
-  max-width: 400px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  color: #d4d4d4;
-  font-size: 0.9rem;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -80,14 +81,14 @@
 }
 
 .scale-dropdown:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(143, 180, 212, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(143, 180, 212, 0.3);
 }
 
 .scale-dropdown:focus {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   border-color: #8fb4d4;
-  box-shadow: 0 0 0 3px rgba(143, 180, 212, 0.15);
+  box-shadow: 0 0 0 2px rgba(143, 180, 212, 0.1);
 }
 
 .scale-dropdown option {
@@ -105,11 +106,21 @@
 
 /* Responsive */
 @media (max-width: 600px) {
+  .scale-selector {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
   .root-note-row,
   .scale-select-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+
+  .scale-select-row {
+    max-width: none;
   }
 
   .inline-label {
