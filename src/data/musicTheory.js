@@ -120,11 +120,17 @@ function getCAGEDPositions(rootNote, scaleName) {
   ];
   
   cagedShapes.forEach((shape, index) => {
-    const startFret = Math.max(0, firstRootFret + shape.offset);
-    const endFret = Math.min(NUM_FRETS, startFret + shape.span);
+    let startFret = Math.max(0, firstRootFret + shape.offset);
+    let endFret = Math.min(NUM_FRETS, startFret + shape.span);
     
-    // Always include all 5 shapes - only exclude if completely beyond fretboard
-    if (startFret < NUM_FRETS && endFret > startFret) {
+    // If shape would start beyond fretboard, wrap it to lower octave
+    if (startFret >= NUM_FRETS) {
+      startFret = Math.max(0, startFret - 12);
+      endFret = Math.min(NUM_FRETS, startFret + shape.span);
+    }
+    
+    // Always include all 5 shapes - only exclude if range is invalid
+    if (endFret > startFret && endFret > 0) {
       positions.push({
         number: index + 1,
         name: shape.name,
