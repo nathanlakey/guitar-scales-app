@@ -13,19 +13,35 @@ function AudioControls({ fretboardData, rootNote, scaleName }) {
   const [looping, setLooping] = useState(false);
   const [articulation, setArticulation] = useState('normal');
   const [backingTrackPlaying, setBackingTrackPlaying] = useState(false);
+  const [initError, setInitError] = useState(null);
   const backingTrackBtnRef = useRef(null);
 
   // Initialize audio on first user interaction
   const handleInitialize = async () => {
-    if (!isInitialized) {
+    if (isInitialized) return true;
+    
+    try {
+      console.log('🎵 Initializing audio system...');
       await audioEngine.initialize();
       setIsInitialized(true);
+      setInitError(null);
+      console.log('✓ Audio system ready');
+      return true;
+    } catch (error) {
+      console.error('❌ Audio initialization failed:', error);
+      setInitError(error.message || 'Failed to initialize audio');
+      setIsInitialized(false);
+      return false;
     }
   };
 
   // Play/Pause toggle
   const handlePlayPause = async () => {
-    await handleInitialize();
+    const initialized = await handleInitialize();
+    if (!initialized) {
+      alert('Failed to initialize audio. Please refresh the page and try again.');
+      return;
+    }
 
     if (!isPlaying) {
       // Start playing
@@ -105,18 +121,27 @@ function AudioControls({ fretboardData, rootNote, scaleName }) {
 
   // Toggle backing track
   const handleBackingTrackToggle = async () => {
-    await handleInitialize();
+    const initialized = await handleInitialize();
+    if (!initialized) {
+      alert('Failed to initialize audio. Please refresh the page and try again.');
+      return;
+    }
     
     if (!backingTrackPlaying) {
-      await backingTrack.play(rootNote, scaleName);
-      setBackingTrackPlaying(true);
-      
-      // Sync animation duration with BPM
-      if (backingTrackBtnRef.current) {
-        const bpm = backingTrack.getBPM();
-        // Pulse every 2 beats for a relaxed rhythm
-        const pulseDuration = (60 / bpm) * 2;
-        backingTrackBtnRef.current.style.setProperty('--pulse-duration', `${pulseDuration}s`);
+      try {
+        await backingTrack.play(rootNote, scaleName);
+        setBackingTrackPlaying(true);
+        
+        // Sync animation duration with BPM
+        if (backingTrackBtnRef.current) {
+          const bpm = backingTrack.getBPM();
+          // Pulse every 2 beats for a relaxed rhythm
+          const pulseDuration = (60 / bpm) * 2;
+          backingTrackBtnRef.current.style.setProperty('--pulse-duration', `${pulseDuration}s`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to start backing track:', error);
+        alert('Failed to start backing track. Please try again.');
       }
     } else {
       backingTrack.stop();

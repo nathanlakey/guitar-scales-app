@@ -18,48 +18,68 @@ class BackingTrack {
    * Initialize the backing track synths
    */
   async initialize() {
-    if (this.initialized) return;
+    if (this.initialized) {
+      console.log('BackingTrack already initialized');
+      return true;
+    }
 
-    await Tone.start();
+    try {
+      console.log('🎹 Initializing BackingTrack...');
+      await Tone.start();
+      
+      // Verify audio context is running
+      if (Tone.getContext().state !== 'running') {
+        console.warn('⚠️ Audio context not running, attempting resume...');
+        await Tone.getContext().resume();
+      }
 
-    // Pad synth for chords
-    this.synth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: {
-        type: 'sine',
-      },
-      envelope: {
-        attack: 0.5,
-        decay: 0.3,
-        sustain: 0.7,
-        release: 1.5,
-      },
-      volume: -18,
-    }).toDestination();
+      // Pad synth for chords
+      this.synth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: {
+          type: 'sine',
+        },
+        envelope: {
+          attack: 0.5,
+          decay: 0.3,
+          sustain: 0.7,
+          release: 1.5,
+        },
+        volume: -18,
+      }).toDestination();
 
-    // Bass synth for root notes
-    this.bassSynth = new Tone.Synth({
-      oscillator: {
-        type: 'triangle',
-      },
-      envelope: {
-        attack: 0.05,
-        decay: 0.3,
-        sustain: 0.4,
-        release: 0.8,
-      },
-      volume: -15,
-    }).toDestination();
+      // Bass synth for root notes
+      this.bassSynth = new Tone.Synth({
+        oscillator: {
+          type: 'triangle',
+        },
+        envelope: {
+          attack: 0.05,
+          decay: 0.3,
+          sustain: 0.4,
+          release: 0.8,
+        },
+        volume: -15,
+      }).toDestination();
 
-    // Add reverb for atmosphere
-    const reverb = new Tone.Reverb({
-      decay: 3,
-      wet: 0.3,
-    }).toDestination();
+      // Add reverb for atmosphere
+      const reverb = new Tone.Reverb({
+        decay: 3,
+        wet: 0.3,
+      }).toDestination();
+      
+      await reverb.generate();
 
-    this.synth.connect(reverb);
-    this.bassSynth.connect(reverb);
+      this.synth.connect(reverb);
+      this.bassSynth.connect(reverb);
 
-    this.initialized = true;
+      this.initialized = true;
+      console.log('✓ BackingTrack initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to initialize BackingTrack:', error);
+      this.initialized = false;
+      throw new Error(`BackingTrack initialization failed: ${error.message}`);
+    }
   }
 
   /**
@@ -161,8 +181,14 @@ class BackingTrack {
    * Start playing the backing track
    */
   async play(rootNote, scaleName) {
+    // Ensure BackingTrack is initialized
     if (!this.initialized) {
-      await this.initialize();
+      try {
+        await this.initialize();
+      } catch (error) {
+        console.error('❌ Cannot start backing track - initialization failed:', error);
+        throw error;
+      }
     }
 
     // Stop if already playing

@@ -18,7 +18,7 @@ class AudioEngine {
   async initialize() {
     if (this.initialized) {
       console.log('Audio engine already initialized');
-      return;
+      return true;
     }
 
     try {
@@ -26,6 +26,12 @@ class AudioEngine {
       await Tone.start();
       console.log('✓ Audio context started');
       console.log('✓ Audio context state:', Tone.getContext().state);
+
+      // Verify audio context is running
+      if (Tone.getContext().state !== 'running') {
+        console.warn('⚠️ Audio context not running, attempting resume...');
+        await Tone.getContext().resume();
+      }
 
       // Create reverb for natural guitar ambience
       const reverb = new Tone.Reverb({
@@ -74,10 +80,14 @@ class AudioEngine {
       
       // Test the synth to confirm it works
       this.testSound();
+      
+      return true;
     } catch (error) {
       console.error('❌ Failed to initialize audio engine:', error);
+      console.error('Error details:', error.message, error.stack);
       this.initialized = false;
-      throw error;
+      this.synth = null;
+      throw new Error(`Audio initialization failed: ${error.message}`);
     }
   }
 
@@ -232,6 +242,13 @@ class AudioEngine {
   }
 
   /**
+   * Check if audio engine is initialized
+   */
+  isInitialized() {
+    return this.initialized && this.synth !== null;
+  }
+
+  /**
    * Clean up resources
    */
   dispose() {
@@ -239,6 +256,7 @@ class AudioEngine {
       this.synth.dispose();
     }
     this.initialized = false;
+    this.synth = null;
   }
 }
 

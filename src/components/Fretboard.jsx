@@ -85,25 +85,41 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     if (!isAudioInitialized) {
       console.log('🎵 First interaction - initializing audio engine...');
       try {
-        await audioEngine.initialize();
-        setIsAudioInitialized(true);
-        console.log('✓✓✓ Audio engine initialized successfully in Fretboard');
+        const success = await audioEngine.initialize();
+        if (success) {
+          setIsAudioInitialized(true);
+          console.log('✓✓✓ Audio engine initialized successfully in Fretboard');
+        } else {
+          throw new Error('Initialization returned false');
+        }
       } catch (error) {
         console.error('❌ Failed to initialize audio engine:', error);
-        alert('Failed to initialize audio. Please refresh the page and try again.');
+        alert(`Failed to initialize audio: ${error.message || 'Unknown error'}. Please refresh the page and try again.`);
         return;
       }
     }
+    
+    // Verify audio engine is ready before playing
+    if (!audioEngine.isInitialized()) {
+      console.error('❌ Audio engine not ready for playback');
+      alert('Audio system not ready. Please try clicking again.');
+      setIsAudioInitialized(false); // Reset state to trigger re-init on next click
+      return;
+    }
 
-    console.log('🎸 Requesting note playback...');
-    // Play the note with correct string index for accurate pitch
-    audioEngine.playNote(stringNote, fret, 0.8, 'normal', stringIndex);
+    try {
+      console.log('🎸 Requesting note playback...');
+      // Play the note with correct string index for accurate pitch
+      audioEngine.playNote(stringNote, fret, 0.8, 'normal', stringIndex);
 
-    // Visual feedback - use stringIndex for unique identification
-    setHighlightedNote({ stringIndex, fret });
-    setTimeout(() => {
-      setHighlightedNote(null);
-    }, 300);
+      // Visual feedback - use stringIndex for unique identification
+      setHighlightedNote({ stringIndex, fret });
+      setTimeout(() => {
+        setHighlightedNote(null);
+      }, 300);
+    } catch (error) {
+      console.error('❌ Error playing note:', error);
+    }
   };
 
   // Check if a note should be highlighted
