@@ -33,17 +33,9 @@ function Fretboard({ rootNote, scaleName }) {
                 {/* String label */}
                 <div className="string-label">{stringLabels[displayIndex]}</div>
 
-                {/* Open note (fret 0) */}
+                {/* Open note spacer (before the nut) */}
                 <div className="open-note-cell">
                   <div className={`string-line string-${displayIndex}`}></div>
-                  {stringData[0].inScale && (
-                    <button
-                      className={`note-marker ${stringData[0].isRoot ? 'root' : ''}`}
-                      title={`${stringData[0].note} (${stringData[0].interval})`}
-                    >
-                      {stringData[0].note}
-                    </button>
-                  )}
                 </div>
 
                 {/* Fretted notes */}
