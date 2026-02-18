@@ -11,11 +11,11 @@ function Fretboard({ rootNote, scaleName }) {
 
   // Set up visual highlighting callback for scale playback
   useEffect(() => {
-    scalePlayer.setHighlightCallback((stringNote, fret, isActive) => {
+    scalePlayer.setHighlightCallback((stringNote, fret, isActive, stringIndex) => {
       if (!isActive) {
         setHighlightedNote(null);
       } else {
-        setHighlightedNote({ stringNote, fret });
+        setHighlightedNote({ stringIndex, fret });
       }
     });
 
@@ -35,17 +35,17 @@ function Fretboard({ rootNote, scaleName }) {
     // Play the note with correct string index for accurate pitch
     audioEngine.playNote(stringNote, fret, 0.8, 'normal', stringIndex);
 
-    // Visual feedback
-    setHighlightedNote({ stringNote, fret });
+    // Visual feedback - use stringIndex for unique identification
+    setHighlightedNote({ stringIndex, fret });
     setTimeout(() => {
       setHighlightedNote(null);
     }, 300);
   };
 
   // Check if a note should be highlighted
-  const isNoteHighlighted = (stringNote, fret) => {
+  const isNoteHighlighted = (stringIndex, fret) => {
     if (!highlightedNote) return false;
-    return highlightedNote.stringNote === stringNote && highlightedNote.fret === fret;
+    return highlightedNote.stringIndex === stringIndex && highlightedNote.fret === fret;
   };
 
   // String labels (high to low for display: 1st string at top)
@@ -90,7 +90,7 @@ function Fretboard({ rootNote, scaleName }) {
                     {fretData.inScale && (
                       <button
                         className={`note-marker ${fretData.isRoot ? 'root' : ''} ${
-                          isNoteHighlighted(stringData.stringNote, fretData.fret) ? 'highlighted' : ''
+                          isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                         }`}
                         title={`${fretData.note} (Interval: ${fretData.interval}) - Click to play`}
                         onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}

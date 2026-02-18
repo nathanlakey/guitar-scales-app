@@ -77,7 +77,7 @@ class ScalePlayer {
           if (!this.isPaused) {
             // Highlight current note
             if (this.highlightCallback) {
-              this.highlightCallback(note.stringNote, note.fret, true);
+              this.highlightCallback(note.stringNote, note.fret, true, note.stringIndex);
             }
 
             // Play the note with string index for accurate pitch
@@ -92,7 +92,7 @@ class ScalePlayer {
             // Clear highlight after note duration
             setTimeout(() => {
               if (this.highlightCallback) {
-                this.highlightCallback(note.stringNote, note.fret, false);
+                this.highlightCallback(note.stringNote, note.fret, false, note.stringIndex);
               }
             }, noteDuration * 1000);
           }
