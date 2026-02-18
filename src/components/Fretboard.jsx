@@ -25,6 +25,43 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     return chordNotes.length > 0 && chordNotes.includes(note);
   };
 
+  // Calculate chord shape boundaries for visual outline
+  const getChordShapeBounds = () => {
+    if (chordNotes.length === 0) return null;
+
+    let minFret = NUM_FRETS + 1;
+    let maxFret = -1;
+    let minString = STANDARD_TUNING.length;
+    let maxString = -1;
+    let foundChordTones = false;
+
+    fretboard.forEach((stringData, stringIndex) => {
+      stringData.frets.forEach(fretData => {
+        if (fretData.inScale && isInPosition(fretData.fret) && isChordTone(fretData.note) && fretData.fret > 0) {
+          foundChordTones = true;
+          minFret = Math.min(minFret, fretData.fret);
+          maxFret = Math.max(maxFret, fretData.fret);
+          minString = Math.min(minString, stringIndex);
+          maxString = Math.max(maxString, stringIndex);
+        }
+      });
+    });
+
+    if (!foundChordTones) return null;
+
+    return {
+      minFret,
+      maxFret,
+      minString,
+      maxString,
+      // Calculate display positions (reversed for visual layout)
+      displayMinString: STANDARD_TUNING.length - 1 - maxString,
+      displayMaxString: STANDARD_TUNING.length - 1 - minString,
+    };
+  };
+
+  const chordShapeBounds = getChordShapeBounds();
+
   // Set up visual highlighting callback for scale playback
   useEffect(() => {
     scalePlayer.setHighlightCallback((stringNote, fret, isActive, stringIndex) => {
@@ -102,6 +139,21 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
         <div className="fretboard">
           {/* Nut */}
           <div className="nut"></div>
+
+          {/* Chord shape outline overlay */}
+          {chordShapeBounds && (
+            <div
+              className="chord-shape-outline"
+              style={{
+                '--chord-min-fret': chordShapeBounds.minFret,
+                '--chord-max-fret': chordShapeBounds.maxFret,
+                '--chord-min-string': chordShapeBounds.displayMinString,
+                '--chord-max-string': chordShapeBounds.displayMaxString,
+                '--fret-span': chordShapeBounds.maxFret - chordShapeBounds.minFret + 1,
+                '--string-span': chordShapeBounds.displayMaxString - chordShapeBounds.displayMinString + 1,
+              }}
+            />
+          )}
 
           {/* Strings - displayed from high E (index 5) to low E (index 0) */}
           {[...fretboard].reverse().map((stringData, displayIndex) => {
