@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { generateFretboard, getScalePositions } from './data/musicTheory'
+import { generateFretboard, getScalePositions, getChordNotes, CHORDS, NOTES } from './data/musicTheory'
 import ScaleSelector from './components/ScaleSelector'
 import ScaleInfo from './components/ScaleInfo'
 import AudioControls from './components/AudioControls'
@@ -12,6 +12,8 @@ function App() {
   const [showIntervals, setShowIntervals] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState('all')
   const [positionSystem, setPositionSystem] = useState('CAGED')
+  const [chordRoot, setChordRoot] = useState('')
+  const [chordType, setChordType] = useState('Major')
 
   // Generate fretboard data for AudioControls
   const fretboardData = generateFretboard(rootNote, scaleName)
@@ -21,6 +23,12 @@ function App() {
     getScalePositions(rootNote, scaleName, positionSystem),
     [rootNote, scaleName, positionSystem]
   )
+
+  // Calculate chord notes if chord is selected
+  const chordNotes = useMemo(() => {
+    if (!chordRoot) return [];
+    return getChordNotes(chordRoot, chordType);
+  }, [chordRoot, chordType])
 
   // Reset position selection when system changes
   const handleSystemChange = (newSystem) => {
@@ -80,6 +88,32 @@ function App() {
           >
             {showIntervals ? 'Notes' : 'Intervals'}
           </button>
+
+          {/* Chord overlay controls */}
+          <select
+            className="chord-root-select"
+            value={chordRoot}
+            onChange={(e) => setChordRoot(e.target.value)}
+            title="Chord Root (optional)"
+          >
+            <option value="">No Chord</option>
+            {NOTES.map(note => (
+              <option key={note} value={note}>{note}</option>
+            ))}
+          </select>
+
+          {chordRoot && (
+            <select
+              className="chord-type-select"
+              value={chordType}
+              onChange={(e) => setChordType(e.target.value)}
+              title="Chord Type"
+            >
+              {Object.keys(CHORDS).map(chord => (
+                <option key={chord} value={chord}>{chord}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* The instrument - primary focus */}
@@ -89,6 +123,7 @@ function App() {
           showIntervals={showIntervals}
           selectedPosition={selectedPosition}
           positions={positions}
+          chordNotes={chordNotes}
         />
 
         {/* Audio controls - minimal and secondary */}

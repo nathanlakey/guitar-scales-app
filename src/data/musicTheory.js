@@ -44,6 +44,15 @@ export const SCALES = {
   'Double Harmonic': [0, 1, 4, 5, 7, 8, 11],
 };
 
+// Chord definitions using semitone intervals from root
+export const CHORDS = {
+  'Major': [0, 4, 7],
+  'Minor': [0, 3, 7],
+  'Dominant 7': [0, 4, 7, 10],
+  'Minor 7': [0, 3, 7, 10],
+  'Major 7': [0, 4, 7, 11],
+};
+
 // Scale categories for organized display
 export const SCALE_CATEGORIES = {
   'Common': ['Major (Ionian)', 'Natural Minor (Aeolian)', 'Major Pentatonic', 'Minor Pentatonic', 'Blues'],
@@ -66,6 +75,16 @@ export function getNoteAtFret(stringNote, fret) {
  */
 export function getScaleNotes(rootNote, scaleName) {
   const intervals = SCALES[scaleName];
+  if (!intervals) return [];
+  const rootIndex = NOTES.indexOf(rootNote);
+  return intervals.map(interval => NOTES[(rootIndex + interval) % 12]);
+}
+
+/**
+ * Get all notes in a given chord
+ */
+export function getChordNotes(rootNote, chordType) {
+  const intervals = CHORDS[chordType];
   if (!intervals) return [];
   const rootIndex = NOTES.indexOf(rootNote);
   return intervals.map(interval => NOTES[(rootIndex + interval) % 12]);

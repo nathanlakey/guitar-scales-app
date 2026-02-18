@@ -4,7 +4,7 @@ import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
 
-function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [] }) {
+function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [] }) {
   const fretboard = generateFretboard(rootNote, scaleName);
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
@@ -18,6 +18,11 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   const isInPosition = (fret) => {
     if (!currentPosition) return true; // Show all if no position selected
     return fret >= currentPosition.startFret && fret <= currentPosition.endFret;
+  };
+
+  // Check if a note is a chord tone
+  const isChordTone = (note) => {
+    return chordNotes.length > 0 && chordNotes.includes(note);
   };
 
   // Set up visual highlighting callback for scale playback
@@ -120,7 +125,9 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                       <button
                         className={`note-marker ${fretData.isRoot ? 'root' : ''} ${
                           isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
-                        } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
+                        } ${showIntervals ? 'interval-mode' : 'note-mode'} ${
+                          isChordTone(fretData.note) ? 'chord-tone' : ''
+                        }`}
                         title={getTooltipText(fretData)}
                         onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                       >

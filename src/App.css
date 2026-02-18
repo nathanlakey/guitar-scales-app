@@ -125,6 +125,41 @@
   font-weight: 600;
 }
 
+/* Chord overlay selectors */
+.chord-root-select,
+.chord-type-select {
+  padding: 5px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  min-width: 90px;
+}
+
+.chord-root-select:hover,
+.chord-type-select:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(232, 140, 125, 0.25);
+}
+
+.chord-root-select:focus,
+.chord-type-select:focus {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(232, 140, 125, 0.4);
+  box-shadow: 0 0 0 1px rgba(232, 140, 125, 0.08);
+}
+
+.chord-root-select option,
+.chord-type-select option {
+  background: #1a1a1a;
+  color: #d4d4d4;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .app {

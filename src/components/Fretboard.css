@@ -223,6 +223,50 @@
     inset 0 1px 2px rgba(255, 255, 255, 0.25);
 }
 
+.note-marker.root.highlighted {
+  box-shadow:
+    0 0 20px rgba(215, 121, 104, 0.8),
+    0 0 40px rgba(215, 121, 104, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+/* Chord tone styling - distinct visual treatment */
+.note-marker.chord-tone {
+  border: 2.5px solid rgba(232, 140, 125, 0.9);
+  box-shadow:
+    0 2px 8px rgba(232, 140, 125, 0.4),
+    0 0 12px rgba(232, 140, 125, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+.note-marker.chord-tone:hover {
+  box-shadow:
+    0 4px 16px rgba(232, 140, 125, 0.5),
+    0 0 16px rgba(232, 140, 125, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+.note-marker.chord-tone.highlighted {
+  box-shadow:
+    0 0 20px rgba(232, 140, 125, 0.8),
+    0 0 40px rgba(232, 140, 125, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+/* Chord tone root - combines both styles */
+.note-marker.root.chord-tone {
+  background: linear-gradient(135deg, #f0a090, #e88c7d);
+  border: 2.5px solid rgba(232, 140, 125, 1);
+  box-shadow:
+    0 2px 10px rgba(232, 140, 125, 0.5),
+    0 0 15px rgba(232, 140, 125, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+  box-shadow:
+    0 4px 16px rgba(215, 121, 104, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
 /* Interval mode - slightly different typography for clarity */
 .note-marker.interval-mode {
   font-family: 'Courier New', monospace;
