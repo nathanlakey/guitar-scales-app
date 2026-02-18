@@ -201,10 +201,10 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                     d={path}
                     stroke={colors.glow}
                     strokeWidth={2 * connection.strength} // Thinner lines
-                    fill=\"none\"
-                    strokeLinecap=\"round\"
+                    fill="none"
+                    strokeLinecap="round"
                     filter={`url(#chord-glow-${connection.cagedShape})`}
-                    className=\"chord-glow-path\"
+                    className="chord-glow-path"
                     opacity={0.4} // Lower base opacity
                   />
                 );
