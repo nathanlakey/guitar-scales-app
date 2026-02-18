@@ -21,6 +21,7 @@ class AudioEngine {
     try {
       await Tone.start();
       console.log('Audio context started');
+      console.log('Audio context state:', Tone.getContext().state);
 
       // Create reverb first and wait for it to generate
       const reverb = new Tone.Reverb({
@@ -30,30 +31,50 @@ class AudioEngine {
       
       // Wait for reverb to be ready
       await reverb.generate();
+      console.log('Reverb generated');
 
-      // Create a polyphonic synth with realistic guitar-like characteristics
-      // Using PluckSynth for natural plucked string sound
-      this.synth = new Tone.PolySynth(Tone.PluckSynth, {
-        attackNoise: 1.5,
-        dampening: 2000,
-        resonance: 0.92,
+      // Create a reliable polyphonic synth with pluck-like characteristics
+      this.synth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: {
+          type: 'triangle',
+        },
+        envelope: {
+          attack: 0.001,
+          decay: 0.2,
+          sustain: 0.15,
+          release: 1.5,
+        },
+        volume: -8,
       }).toDestination();
 
-      // Layer with a subtle FMSynth for warmth and body
+      console.log('Main synth created');
+
+      // Layer with FMSynth for richness
       this.fmSynth = new Tone.PolySynth(Tone.FMSynth, {
-        harmonicity: 2,
-        modulationIndex: 1.5,
+        harmonicity: 3,
+        modulationIndex: 10,
+        oscillator: {
+          type: 'sine',
+        },
         envelope: {
-          attack: 0.002,
+          attack: 0.001,
           decay: 0.3,
           sustain: 0.1,
           release: 1.2,
         },
         modulation: {
-          type: 'sine',
+          type: 'square',
         },
-        volume: -18,
+        modulationEnvelope: {
+          attack: 0.002,
+          decay: 0.2,
+          sustain: 0,
+          release: 0.2,
+        },
+        volume: -20,
       }).toDestination();
+
+      console.log('FM synth created');
 
       // Connect synths to reverb
       this.synth.connect(reverb);
@@ -70,20 +91,9 @@ class AudioEngine {
       this.synth.connect(compressor);
       this.fmSynth.connect(compressor);
 
-      // Add EQ to shape guitar-like frequency response
-      const eq = new Tone.EQ3({
-        low: 2,
-        mid: 1,
-        high: -2,
-        lowFrequency: 200,
-        highFrequency: 3000,
-      }).toDestination();
-
-      this.synth.connect(eq);
-      this.fmSynth.connect(eq);
-
       this.initialized = true;
       console.log('Audio engine initialized successfully');
+      console.log('Synth status:', { synth: !!this.synth, fmSynth: !!this.fmSynth });
     } catch (error) {
       console.error('Failed to initialize audio engine:', error);
       this.initialized = false;
@@ -156,6 +166,12 @@ class AudioEngine {
       return;
     }
 
+    // Ensure audio context is running
+    if (Tone.getContext().state !== 'running') {
+      console.log('Resuming audio context...');
+      Tone.getContext().resume();
+    }
+
     try {
       // Calculate frequency using the existing getFrequency method
       const frequency = this.getFrequency(stringNote, fret, stringIndex);
@@ -181,10 +197,11 @@ class AudioEngine {
       }
 
       console.log('Triggering synths with frequency:', frequency, 'duration:', adjustedDuration);
+      console.log('Audio context state:', Tone.getContext().state);
       
       // Play with both synths for rich, layered guitar tone
       this.synth.triggerAttackRelease(frequency, adjustedDuration);
-      this.fmSynth.triggerAttackRelease(frequency, adjustedDuration * 1.2);
+      this.fmSynth.triggerAttackRelease(frequency, adjustedDuration);
       
       console.log('Note triggered successfully');
     } catch (error) {
