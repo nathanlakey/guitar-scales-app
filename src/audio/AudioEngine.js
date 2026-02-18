@@ -18,66 +18,76 @@ class AudioEngine {
   async initialize() {
     if (this.initialized) return;
 
-    await Tone.start();
-    console.log('Audio context started');
+    try {
+      await Tone.start();
+      console.log('Audio context started');
 
-    // Create a polyphonic synth with realistic guitar-like characteristics
-    // Using PluckSynth for natural plucked string sound
-    this.synth = new Tone.PolySynth(Tone.PluckSynth, {
-      attackNoise: 1.5,
-      dampening: 2000,
-      resonance: 0.92,
-    }).toDestination();
+      // Create reverb first and wait for it to generate
+      const reverb = new Tone.Reverb({
+        decay: 1.5,
+        wet: 0.15,
+      }).toDestination();
+      
+      // Wait for reverb to be ready
+      await reverb.generate();
 
-    // Layer with a subtle FMSynth for warmth and body
-    this.fmSynth = new Tone.PolySynth(Tone.FMSynth, {
-      harmonicity: 2,
-      modulationIndex: 1.5,
-      envelope: {
-        attack: 0.002,
-        decay: 0.3,
-        sustain: 0.1,
-        release: 1.2,
-      },
-      modulation: {
-        type: 'sine',
-      },
-      volume: -18,
-    }).toDestination();
+      // Create a polyphonic synth with realistic guitar-like characteristics
+      // Using PluckSynth for natural plucked string sound
+      this.synth = new Tone.PolySynth(Tone.PluckSynth, {
+        attackNoise: 1.5,
+        dampening: 2000,
+        resonance: 0.92,
+      }).toDestination();
 
-    // Add subtle reverb for natural acoustic space
-    const reverb = new Tone.Reverb({
-      decay: 1.5,
-      wet: 0.15,
-    }).toDestination();
+      // Layer with a subtle FMSynth for warmth and body
+      this.fmSynth = new Tone.PolySynth(Tone.FMSynth, {
+        harmonicity: 2,
+        modulationIndex: 1.5,
+        envelope: {
+          attack: 0.002,
+          decay: 0.3,
+          sustain: 0.1,
+          release: 1.2,
+        },
+        modulation: {
+          type: 'sine',
+        },
+        volume: -18,
+      }).toDestination();
 
-    this.synth.connect(reverb);
-    this.fmSynth.connect(reverb);
+      // Connect synths to reverb
+      this.synth.connect(reverb);
+      this.fmSynth.connect(reverb);
 
-    // Add gentle compression for consistent volume
-    const compressor = new Tone.Compressor({
-      threshold: -20,
-      ratio: 3,
-      attack: 0.003,
-      release: 0.1,
-    }).toDestination();
+      // Add gentle compression for consistent volume
+      const compressor = new Tone.Compressor({
+        threshold: -20,
+        ratio: 3,
+        attack: 0.003,
+        release: 0.1,
+      }).toDestination();
 
-    this.synth.connect(compressor);
-    this.fmSynth.connect(compressor);
+      this.synth.connect(compressor);
+      this.fmSynth.connect(compressor);
 
-    // Add EQ to shape guitar-like frequency response
-    const eq = new Tone.EQ3({
-      low: 2,
-      mid: 1,
-      high: -2,
-      lowFrequency: 200,
-      highFrequency: 3000,
-    }).toDestination();
+      // Add EQ to shape guitar-like frequency response
+      const eq = new Tone.EQ3({
+        low: 2,
+        mid: 1,
+        high: -2,
+        lowFrequency: 200,
+        highFrequency: 3000,
+      }).toDestination();
 
-    this.synth.connect(eq);
-    this.fmSynth.connect(eq);
+      this.synth.connect(eq);
+      this.fmSynth.connect(eq);
 
-    this.initialized = true;
+      this.initialized = true;
+      console.log('Audio engine initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize audio engine:', error);
+      this.initialized = false;
+    }
   }
 
   /**
@@ -139,26 +149,40 @@ class AudioEngine {
       return;
     }
 
-    // Calculate frequency using the existing getFrequency method
-    const frequency = this.getFrequency(stringNote, fret, stringIndex);
-
-    // Adjust duration based on articulation
-    let adjustedDuration = duration;
-    
-    switch (articulation) {
-      case 'legato':
-        adjustedDuration = duration * 1.5;
-        break;
-      case 'staccato':
-        adjustedDuration = Math.min(duration * 0.3, 0.15);
-        break;
-      default: // normal
-        adjustedDuration = duration;
+    if (!this.synth || !this.fmSynth) {
+      console.error('Synths not available');
+      return;
     }
 
-    // Play with both synths for rich, layered guitar tone
-    this.synth.triggerAttackRelease(frequency, adjustedDuration);
-    this.fmSynth.triggerAttackRelease(frequency, adjustedDuration * 1.2);
+    try {
+      // Calculate frequency using the existing getFrequency method
+      const frequency = this.getFrequency(stringNote, fret, stringIndex);
+      
+      if (!frequency || frequency <= 0) {
+        console.error('Invalid frequency calculated:', frequency);
+        return;
+      }
+
+      // Adjust duration based on articulation
+      let adjustedDuration = duration;
+      
+      switch (articulation) {
+        case 'legato':
+          adjustedDuration = duration * 1.5;
+          break;
+        case 'staccato':
+          adjustedDuration = Math.min(duration * 0.3, 0.15);
+          break;
+        default: // normal
+          adjustedDuration = duration;
+      }
+
+      // Play with both synths for rich, layered guitar tone
+      this.synth.triggerAttackRelease(frequency, adjustedDuration);
+      this.fmSynth.triggerAttackRelease(frequency, adjustedDuration * 1.2);
+    } catch (error) {
+      console.error('Error playing note:', error);
+    }
   }
 
   /**
