@@ -5,8 +5,8 @@
   font-weight: 400;
 
   color-scheme: dark;
-  color: #ccd6f6;
-  background-color: #0a0a1a;
+  color: #d4d4d4;
+  background-color: #1a1a1a;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -23,9 +23,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(30, 30, 80, 0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(50, 20, 60, 0.2) 0%, transparent 50%),
-    #0a0a1a;
+    radial-gradient(ellipse at 20% 50%, rgba(60, 70, 60, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(80, 60, 50, 0.1) 0%, transparent 50%),
+    #1a1a1a;
 }
 
 button {

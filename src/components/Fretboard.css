@@ -1,9 +1,9 @@
 .fretboard-container {
-  background: #1a1a2e;
+  background: #242424;
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   overflow-x: auto;
 }
 
@@ -28,7 +28,7 @@
   text-align: center;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #5a6785;
+  color: #6b7280;
   letter-spacing: 0.5px;
 }
 
@@ -80,7 +80,7 @@
   text-align: center;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #8892b0;
+  color: #9ca3af;
   flex-shrink: 0;
 }
 
@@ -143,7 +143,7 @@
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  background: linear-gradient(135deg, #8dc8a7, #6ba899);
   color: #fff;
   font-size: 0.65rem;
   font-weight: 700;
@@ -153,8 +153,8 @@
   justify-content: center;
   transition: all 0.2s ease;
   box-shadow:
-    0 2px 8px rgba(33, 150, 243, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    0 2px 8px rgba(107, 168, 153, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
   padding: 0;
   line-height: 1;
 }
@@ -162,16 +162,16 @@
 .note-marker:hover {
   transform: scale(1.2);
   box-shadow:
-    0 4px 16px rgba(33, 150, 243, 0.5),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    0 4px 16px rgba(107, 168, 153, 0.45),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
 }
 
 /* Root note styling */
 .note-marker.root {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  background: linear-gradient(135deg, #e89d8e, #d77968);
   box-shadow:
-    0 2px 8px rgba(238, 90, 36, 0.5),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    0 2px 8px rgba(215, 121, 104, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
   width: 30px;
   height: 30px;
   font-size: 0.7rem;
@@ -179,8 +179,8 @@
 
 .note-marker.root:hover {
   box-shadow:
-    0 4px 16px rgba(238, 90, 36, 0.6),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    0 4px 16px rgba(215, 121, 104, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
 }
 
 /* Legend */
@@ -198,7 +198,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
-  color: #8892b0;
+  color: #9ca3af;
 }
 
 .legend-dot {
@@ -208,13 +208,13 @@
 }
 
 .legend-dot.root {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-  box-shadow: 0 1px 4px rgba(238, 90, 36, 0.4);
+  background: linear-gradient(135deg, #e89d8e, #d77968);
+  box-shadow: 0 1px 4px rgba(215, 121, 104, 0.3);
 }
 
 .legend-dot.scale {
-  background: linear-gradient(135deg, #4fc3f7, #2196f3);
-  box-shadow: 0 1px 4px rgba(33, 150, 243, 0.4);
+  background: linear-gradient(135deg, #8dc8a7, #6ba899);
+  box-shadow: 0 1px 4px rgba(107, 168, 153, 0.3);
 }
 
 /* Responsive scrolling */

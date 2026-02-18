@@ -14,7 +14,7 @@
 .app-title {
   font-size: 2.2rem;
   font-weight: 800;
-  color: #ccd6f6;
+  color: #e8e8e8;
   margin: 0 0 8px 0;
   letter-spacing: -0.5px;
 }
@@ -26,7 +26,7 @@
 
 .app-subtitle {
   font-size: 1rem;
-  color: #5a6785;
+  color: #9ca3af;
   margin: 0;
   font-weight: 400;
   letter-spacing: 0.5px;
@@ -48,7 +48,7 @@
 }
 
 .app-footer p {
-  color: #3d4a63;
+  color: #6b7280;
   font-size: 0.8rem;
   letter-spacing: 0.5px;
   margin: 0;

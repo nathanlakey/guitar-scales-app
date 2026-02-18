@@ -1,10 +1,10 @@
 .scale-info {
-  background: #1a1a2e;
+  background: #242424;
   border-radius: 16px;
   padding: 24px 28px;
   margin-bottom: 32px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .scale-info-title {
@@ -12,7 +12,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: #8892b0;
+  color: #9ca3af;
   margin: 0 0 16px 0;
 }
 
@@ -30,36 +30,36 @@
   gap: 4px;
   padding: 10px 16px;
   border-radius: 12px;
-  background: rgba(33, 150, 243, 0.08);
-  border: 1px solid rgba(33, 150, 243, 0.2);
+  background: rgba(124, 184, 157, 0.12);
+  border: 1px solid rgba(124, 184, 157, 0.25);
   min-width: 48px;
 }
 
 .scale-note-chip.root {
-  background: rgba(238, 90, 36, 0.1);
-  border-color: rgba(238, 90, 36, 0.3);
+  background: rgba(232, 140, 125, 0.15);
+  border-color: rgba(232, 140, 125, 0.35);
 }
 
 .chip-interval {
   font-size: 0.65rem;
   font-weight: 600;
-  color: #5a6785;
+  color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .scale-note-chip.root .chip-interval {
-  color: #ee5a24;
+  color: #d77968;
 }
 
 .chip-note {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #4fc3f7;
+  color: #7cb89d;
 }
 
 .scale-note-chip.root .chip-note {
-  color: #ff6b6b;
+  color: #e88c7d;
 }
 
 @media (max-width: 600px) {
