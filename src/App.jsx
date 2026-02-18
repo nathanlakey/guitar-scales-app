@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { generateFretboard } from './data/musicTheory'
+import { useState, useMemo } from 'react'
+import { generateFretboard, getScalePositions } from './data/musicTheory'
 import ScaleSelector from './components/ScaleSelector'
 import ScaleInfo from './components/ScaleInfo'
 import AudioControls from './components/AudioControls'
@@ -10,9 +10,16 @@ function App() {
   const [rootNote, setRootNote] = useState('C')
   const [scaleName, setScaleName] = useState('Major (Ionian)')
   const [showIntervals, setShowIntervals] = useState(false)
+  const [selectedPosition, setSelectedPosition] = useState('all')
 
   // Generate fretboard data for AudioControls
   const fretboardData = generateFretboard(rootNote, scaleName)
+
+  // Calculate available positions for current root/scale
+  const positions = useMemo(() => 
+    getScalePositions(rootNote, scaleName),
+    [rootNote, scaleName]
+  )
 
   return (
     <div className="app">
@@ -32,6 +39,21 @@ function App() {
           
           <ScaleInfo rootNote={rootNote} scaleName={scaleName} />
 
+          {/* Position selector */}
+          <select
+            className="position-select"
+            value={selectedPosition}
+            onChange={(e) => setSelectedPosition(e.target.value)}
+            title="Select Scale Position"
+          >
+            <option value="all">All Positions</option>
+            {positions.map(pos => (
+              <option key={pos.number} value={pos.number}>
+                {pos.name}
+              </option>
+            ))}
+          </select>
+
           {/* Interval display toggle */}
           <button
             className={`interval-toggle ${showIntervals ? 'active' : ''}`}
@@ -47,6 +69,8 @@ function App() {
           rootNote={rootNote} 
           scaleName={scaleName}
           showIntervals={showIntervals}
+          selectedPosition={selectedPosition}
+          positions={positions}
         />
 
         {/* Audio controls - minimal and secondary */}

@@ -4,10 +4,21 @@ import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
 
-function Fretboard({ rootNote, scaleName, showIntervals = false }) {
+function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [] }) {
   const fretboard = generateFretboard(rootNote, scaleName);
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+
+  // Get the selected position data
+  const currentPosition = selectedPosition === 'all' 
+    ? null 
+    : positions.find(p => p.number === parseInt(selectedPosition));
+
+  // Check if a note is in the current position
+  const isInPosition = (fret) => {
+    if (!currentPosition) return true; // Show all if no position selected
+    return fret >= currentPosition.startFret && fret <= currentPosition.endFret;
+  };
 
   // Set up visual highlighting callback for scale playback
   useEffect(() => {
@@ -105,7 +116,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false }) {
                   <div key={fretData.fret} className="fret-cell">
                     <div className={`string-line string-${displayIndex}`}></div>
                     <div className="fret-wire"></div>
-                    {fretData.inScale && (
+                    {fretData.inScale && isInPosition(fretData.fret) && (
                       <button
                         className={`note-marker ${fretData.isRoot ? 'root' : ''} ${
                           isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''

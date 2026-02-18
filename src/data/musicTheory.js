@@ -88,6 +88,43 @@ export function getIntervalNumber(note, rootNote, scaleName) {
 }
 
 /**
+ * Calculate scale positions based on root note locations
+ * Returns array of position objects with starting fret and range
+ */
+export function getScalePositions(rootNote, scaleName) {
+  const positions = [];
+  const scaleNotes = getScaleNotes(rootNote, scaleName);
+  
+  // Find all root note locations on the low E string (string index 0)
+  const lowEString = STANDARD_TUNING[0]; // 'E'
+  const rootPositions = [];
+  
+  for (let fret = 0; fret <= NUM_FRETS; fret++) {
+    const note = getNoteAtFret(lowEString, fret);
+    if (note === rootNote) {
+      rootPositions.push(fret);
+    }
+  }
+  
+  // Create positions around each root note (typically 4-fret span)
+  rootPositions.forEach((rootFret, index) => {
+    // Position spans from root to root+4 frets
+    const startFret = Math.max(0, rootFret);
+    const endFret = Math.min(NUM_FRETS, rootFret + 4);
+    
+    positions.push({
+      number: index + 1,
+      name: `Position ${index + 1}`,
+      startFret,
+      endFret,
+      rootFret,
+    });
+  });
+  
+  return positions;
+}
+
+/**
  * Generate the full fretboard data
  */
 export function generateFretboard(rootNote, scaleName) {
