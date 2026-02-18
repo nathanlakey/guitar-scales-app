@@ -46,17 +46,17 @@
 }
 
 .note-btn:hover {
-  background: rgba(124, 184, 157, 0.15);
-  border-color: rgba(124, 184, 157, 0.4);
-  color: #7cb89d;
+  background: rgba(169, 159, 202, 0.15);
+  border-color: rgba(169, 159, 202, 0.4);
+  color: #a99fca;
 }
 
 .note-btn.active {
-  background: linear-gradient(135deg, rgba(124, 184, 157, 0.2), rgba(124, 184, 157, 0.1));
-  border-color: #7cb89d;
-  color: #7cb89d;
+  background: linear-gradient(135deg, rgba(169, 159, 202, 0.2), rgba(169, 159, 202, 0.1));
+  border-color: #a99fca;
+  color: #a99fca;
   font-weight: 700;
-  box-shadow: 0 0 16px rgba(124, 184, 157, 0.2);
+  box-shadow: 0 0 16px rgba(169, 159, 202, 0.2);
 }
 
 /* Scale categories */
@@ -93,8 +93,8 @@
 }
 
 .category-header.expanded {
-  background: rgba(124, 184, 157, 0.1);
-  color: #7cb89d;
+  background: rgba(169, 159, 202, 0.1);
+  color: #a99fca;
 }
 
 .chevron {
@@ -122,15 +122,15 @@
 }
 
 .scale-btn:hover {
-  background: rgba(124, 184, 157, 0.12);
-  border-color: rgba(124, 184, 157, 0.3);
+  background: rgba(169, 159, 202, 0.12);
+  border-color: rgba(169, 159, 202, 0.3);
   color: #d4d4d4;
 }
 
 .scale-btn.active {
-  background: rgba(124, 184, 157, 0.15);
-  border-color: #7cb89d;
-  color: #7cb89d;
+  background: rgba(169, 159, 202, 0.15);
+  border-color: #a99fca;
+  color: #a99fca;
   font-weight: 600;
 }
 
@@ -145,8 +145,8 @@
   display: inline-block;
   padding: 8px 24px;
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(124, 184, 157, 0.2), rgba(124, 184, 157, 0.08));
-  color: #7cb89d;
+  background: linear-gradient(135deg, rgba(169, 159, 202, 0.2), rgba(169, 159, 202, 0.08));
+  color: #a99fca;
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.5px;
