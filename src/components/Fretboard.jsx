@@ -25,11 +25,39 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     return chordNotes.length > 0 && chordNotes.includes(note);
   };
 
+  // Detect if we're in chord shape mode
+  const isChordShapeMode = chordNotes.length > 0;
+
   // Detect chord shapes using clustering algorithm
   const chordShapes = detectChordShapes(fretboard, chordNotes);
 
+  // Create a map of note positions to their shape index for coloring
+  const noteToShapeMap = new Map();
+  chordShapes.forEach((shape, shapeIndex) => {
+    shape.notes.forEach(note => {
+      const key = `${note.stringIndex}-${note.fret}`;
+      noteToShapeMap.set(key, shapeIndex);
+    });
+  });
+
+  // Get the shape index for a specific note position
+  const getShapeIndex = (stringIndex, fret) => {
+    const key = `${stringIndex}-${fret}`;
+    return noteToShapeMap.get(key);
+  };
+
+  // Check if a note should be displayed
+  const shouldDisplayNote = (fretData, stringIndex) => {
+    // In chord shape mode, show chord tones regardless of scale
+    if (isChordShapeMode) {
+      return isChordTone(fretData.note) && fretData.fret > 0;
+    }
+    // In scale mode, show scale notes in position
+    return fretData.inScale && isInPosition(fretData.fret);
+  };
+
   // Calculate shape region positioning for display
-  const calculateShapeRegion = (shape) => {
+  const calculateShapeRegion = (shape, shapeIndex) => {
     // Convert string indices to display positions (reversed)
     const displayMinString = STANDARD_TUNING.length - 1 - shape.maxString;
     const displayMaxString = STANDARD_TUNING.length - 1 - shape.minString;
@@ -42,11 +70,24 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     const top = displayMinString * 42;
     const height = (displayMaxString - displayMinString + 1) * 42;
 
+    // Generate distinct colors for each shape
+    const colors = [
+      { bg: 'rgba(96, 165, 250, 0.15)', border: 'rgba(96, 165, 250, 0.3)', shadow: 'rgba(96, 165, 250, 0.2)' }, // Blue
+      { bg: 'rgba(168, 85, 247, 0.15)', border: 'rgba(168, 85, 247, 0.3)', shadow: 'rgba(168, 85, 247, 0.2)' }, // Purple
+      { bg: 'rgba(236, 72, 153, 0.15)', border: 'rgba(236, 72, 153, 0.3)', shadow: 'rgba(236, 72, 153, 0.2)' }, // Pink
+      { bg: 'rgba(34, 197, 94, 0.15)', border: 'rgba(34, 197, 94, 0.3)', shadow: 'rgba(34, 197, 94, 0.2)' }, // Green
+      { bg: 'rgba(251, 146, 60, 0.15)', border: 'rgba(251, 146, 60, 0.3)', shadow: 'rgba(251, 146, 60, 0.2)' }, // Orange
+    ];
+    const colorSet = colors[shapeIndex % colors.length];
+
     return {
       left: `${left}px`,
       width: `${width}px`,
       top: `${top}px`,
       height: `${height}px`,
+      '--shape-bg': colorSet.bg,
+      '--shape-border': colorSet.border,
+      '--shape-shadow': colorSet.shadow,
     };
   };
 
@@ -160,7 +201,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
             <div
               key={`chord-shape-${index}`}
               className="chord-shape-region"
-              style={calculateShapeRegion(shape)}
+              style={calculateShapeRegion(shape, index)}
             >
               <div className="chord-shape-glow"></div>
             </div>
@@ -180,25 +221,35 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                 </div>
 
                 {/* Fretted notes */}
-                {stringData.frets.slice(1).map(fretData => (
-                  <div key={fretData.fret} className="fret-cell">
-                    <div className={`string-line string-${displayIndex}`}></div>
-                    <div className="fret-wire"></div>
-                    {fretData.inScale && isInPosition(fretData.fret) && (
-                      <button
-                        className={`note-marker ${fretData.isRoot ? 'root' : ''} ${
-                          isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
-                        } ${showIntervals ? 'interval-mode' : 'note-mode'} ${
-                          isChordTone(fretData.note) ? 'chord-tone' : ''
-                        }`}
-                        title={getTooltipText(fretData)}
-                        onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
-                      >
-                        {getDisplayLabel(fretData)}
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {stringData.frets.slice(1).map(fretData => {
+                  const shapeIndex = getShapeIndex(stringData.stringIndex, fretData.fret);
+                  const shouldDisplay = shouldDisplayNote(fretData, stringData.stringIndex);
+                  
+                  return (
+                    <div key={fretData.fret} className="fret-cell">
+                      <div className={`string-line string-${displayIndex}`}></div>
+                      <div className="fret-wire"></div>
+                      {shouldDisplay && (
+                        <button
+                          className={`note-marker ${
+                            isChordShapeMode && isChordTone(fretData.note) && fretData.note === chordNotes[0] ? 'chord-root' : 
+                            fretData.isRoot ? 'root' : ''
+                          } ${
+                            isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
+                          } ${showIntervals ? 'interval-mode' : 'note-mode'} ${
+                            isChordTone(fretData.note) ? 'chord-tone' : ''
+                          } ${
+                            shapeIndex !== undefined ? `chord-shape-${shapeIndex % 5}` : ''
+                          }`}
+                          title={getTooltipText(fretData)}
+                          onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
+                        >
+                          {getDisplayLabel(fretData)}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             );
           })}

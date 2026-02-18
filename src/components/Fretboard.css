@@ -82,29 +82,69 @@
   inset: 0;
   background: radial-gradient(
     ellipse at center,
-    rgba(96, 165, 250, 0.15) 0%,
-    rgba(96, 165, 250, 0.12) 30%,
-    rgba(96, 165, 250, 0.08) 60%,
+    var(--shape-bg, rgba(96, 165, 250, 0.15)) 0%,
+    var(--shape-bg, rgba(96, 165, 250, 0.12)) 30%,
     transparent 100%
   );
-  border: 2px solid rgba(96, 165, 250, 0.3);
+  border: 2px solid var(--shape-border, rgba(96, 165, 250, 0.3));
   border-radius: 16px;
   box-shadow:
-    0 0 20px rgba(96, 165, 250, 0.2),
-    0 0 40px rgba(96, 165, 250, 0.1),
-    inset 0 0 30px rgba(96, 165, 250, 0.08);
+    0 0 20px var(--shape-shadow, rgba(96, 165, 250, 0.2)),
+    0 0 40px var(--shape-shadow, rgba(96, 165, 250, 0.1)),
+    inset 0 0 30px var(--shape-shadow, rgba(96, 165, 250, 0.08));
   animation: chord-region-pulse 3s ease-in-out infinite;
 }
 
 @keyframes chord-region-pulse {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.7;
     transform: scale(1);
   }
   50% {
-    opacity: 0.85;
-    transform: scale(1.02);
+    opacity: 0.95;
+    transform: scale(1.01);
   }
+}
+
+/* Chord root note (first note of chord) */
+.note-marker.chord-root {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 
+    0 2px 8px rgba(239, 68, 68, 0.3),
+    0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.note-marker.chord-root:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  box-shadow: 
+    0 4px 12px rgba(239, 68, 68, 0.4),
+    0 0 30px rgba(239, 68, 68, 0.3);
+}
+
+/* Shape-specific note colors */
+.note-marker.chord-shape-0 {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
+}
+
+.note-marker.chord-shape-1 {
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+}
+
+.note-marker.chord-shape-2 {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+}
+
+.note-marker.chord-shape-3 {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.note-marker.chord-shape-4 {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.3);
 }
 
 /* Guitar string row */
