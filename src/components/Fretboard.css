@@ -223,6 +223,22 @@
     inset 0 1px 2px rgba(255, 255, 255, 0.25);
 }
 
+/* Interval mode - slightly different typography for clarity */
+.note-marker.interval-mode {
+  font-family: 'Courier New', monospace;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.note-marker.interval-mode.root {
+  font-family: inherit;
+  font-weight: 900;
+}
+  box-shadow:
+    0 4px 16px rgba(215, 121, 104, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
 /* Highlighted root note */
 .note-marker.root.highlighted {
   animation: pulseRoot 0.6s ease-in-out;

@@ -57,6 +57,15 @@ function Fretboard({ rootNote, scaleName, showIntervals = false }) {
     return fretData.note;
   };
 
+  // Get tooltip text based on display mode
+  const getTooltipText = (fretData) => {
+    if (showIntervals) {
+      const intervalLabel = fretData.isRoot ? 'Root' : `Interval: ${fretData.interval}`;
+      return `${intervalLabel} (${fretData.note}) - Click to play`;
+    }
+    return `${fretData.note} - Click to play`;
+  };
+
   // String labels (high to low for display: 1st string at top)
   const stringLabels = ['e', 'B', 'G', 'D', 'A', 'E'];
 
@@ -100,8 +109,8 @@ function Fretboard({ rootNote, scaleName, showIntervals = false }) {
                       <button
                         className={`note-marker ${fretData.isRoot ? 'root' : ''} ${
                           isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
-                        }`}
-                        title={`${fretData.note} (Interval: ${fretData.interval}) - Click to play`}
+                        } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
+                        title={getTooltipText(fretData)}
                         onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                       >
                         {getDisplayLabel(fretData)}
