@@ -216,6 +216,13 @@ class BackingTrack {
   }
 
   /**
+   * Get current BPM for tempo-synced animations
+   */
+  getBPM() {
+    return Tone.Transport.bpm.value;
+  }
+
+  /**
    * Update backing track when root/scale changes
    */
   async update(rootNote, scaleName) {

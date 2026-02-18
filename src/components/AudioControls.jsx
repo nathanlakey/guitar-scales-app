@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import backingTrack from '../audio/BackingTrack';
@@ -13,6 +13,7 @@ function AudioControls({ fretboardData, rootNote, scaleName }) {
   const [looping, setLooping] = useState(false);
   const [articulation, setArticulation] = useState('normal');
   const [backingTrackPlaying, setBackingTrackPlaying] = useState(false);
+  const backingTrackBtnRef = useRef(null);
 
   // Initialize audio on first user interaction
   const handleInitialize = async () => {
@@ -109,6 +110,14 @@ function AudioControls({ fretboardData, rootNote, scaleName }) {
     if (!backingTrackPlaying) {
       await backingTrack.play(rootNote, scaleName);
       setBackingTrackPlaying(true);
+      
+      // Sync animation duration with BPM
+      if (backingTrackBtnRef.current) {
+        const bpm = backingTrack.getBPM();
+        // Pulse every 2 beats for a relaxed rhythm
+        const pulseDuration = (60 / bpm) * 2;
+        backingTrackBtnRef.current.style.setProperty('--pulse-duration', `${pulseDuration}s`);
+      }
     } else {
       backingTrack.stop();
       setBackingTrackPlaying(false);
@@ -119,6 +128,13 @@ function AudioControls({ fretboardData, rootNote, scaleName }) {
   useEffect(() => {
     if (backingTrackPlaying) {
       backingTrack.update(rootNote, scaleName);
+      
+      // Re-sync animation timing after update
+      if (backingTrackBtnRef.current) {
+        const bpm = backingTrack.getBPM();
+        const pulseDuration = (60 / bpm) * 2;
+        backingTrackBtnRef.current.style.setProperty('--pulse-duration', `${pulseDuration}s`);
+      }
     }
   }, [rootNote, scaleName, backingTrackPlaying]);
 
@@ -173,6 +189,7 @@ function AudioControls({ fretboardData, rootNote, scaleName }) {
 
         {/* Backing track toggle */}
         <button
+          ref={backingTrackBtnRef}
           className={`control-button backing-track-btn ${backingTrackPlaying ? 'active' : ''}`}
           onClick={handleBackingTrackToggle}
           title={backingTrackPlaying ? 'Stop Backing Track' : 'Play Backing Track'}

@@ -80,10 +80,11 @@
   font-size: 18px;
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --pulse-duration: 1.5s; /* Default, will be overridden by JS */
 }
 
 .backing-track-btn.active {
-  animation: musicPulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: musicPulse var(--pulse-duration) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .backing-track-btn.active::before {
@@ -92,7 +93,7 @@
   inset: -2px;
   border-radius: 4px;
   background: radial-gradient(circle, rgba(143, 180, 212, 0.15), transparent 70%);
-  animation: glowPulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: glowPulse var(--pulse-duration) cubic-bezier(0.4, 0, 0.2, 1) infinite;
   pointer-events: none;
   z-index: -1;
 }
