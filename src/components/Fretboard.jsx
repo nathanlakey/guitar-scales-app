@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectChordShapes } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectCAGEDChordShapes, CAGED_COLORS } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
 
-function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [] }) {
+function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '' }) {
   const fretboard = generateFretboard(rootNote, scaleName);
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
@@ -26,24 +26,15 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   };
 
   // Detect if we're in chord shape mode
-  const isChordShapeMode = chordNotes.length > 0;
+  const isChordShapeMode = chordNotes.length > 0 && chordRoot;
 
-  // Detect chord shapes using clustering algorithm
-  const chordShapes = detectChordShapes(fretboard, chordNotes);
+  // Detect CAGED chord shapes with multi-shape membership
+  const { shapes: cagedShapes, noteToShapes, connections } = detectCAGEDChordShapes(chordRoot, chordNotes, fretboard);
 
-  // Create a map of note positions to their shape index for coloring
-  const noteToShapeMap = new Map();
-  chordShapes.forEach((shape, shapeIndex) => {
-    shape.notes.forEach(note => {
-      const key = `${note.stringIndex}-${note.fret}`;
-      noteToShapeMap.set(key, shapeIndex);
-    });
-  });
-
-  // Get the shape index for a specific note position
-  const getShapeIndex = (stringIndex, fret) => {
+  // Get the CAGED shapes for a specific note position
+  const getCAGEDShapes = (stringIndex, fret) => {
     const key = `${stringIndex}-${fret}`;
-    return noteToShapeMap.get(key);
+    return noteToShapes.get(key) || [];
   };
 
   // Check if a note should be displayed
@@ -56,39 +47,13 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     return fretData.inScale && isInPosition(fretData.fret);
   };
 
-  // Calculate shape region positioning for display
-  const calculateShapeRegion = (shape, shapeIndex) => {
-    // Convert string indices to display positions (reversed)
-    const displayMinString = STANDARD_TUNING.length - 1 - shape.maxString;
-    const displayMaxString = STANDARD_TUNING.length - 1 - shape.minString;
-
-    // Calculate pixel positions
+  // Calculate position for SVG coordinate system
+  const calculateNotePosition = (displayStringIndex, fret) => {
     // String label (40px) + open cell (44px) + nut (6px) = 90px base offset
-    // Each fret is 60px wide, each string row is 42px tall
-    const left = 90 + (shape.minFret - 1) * 60;
-    const width = shape.fretSpan * 60;
-    const top = displayMinString * 42;
-    const height = (displayMaxString - displayMinString + 1) * 42;
-
-    // Generate distinct colors for each shape
-    const colors = [
-      { bg: 'rgba(96, 165, 250, 0.15)', border: 'rgba(96, 165, 250, 0.3)', shadow: 'rgba(96, 165, 250, 0.2)' }, // Blue
-      { bg: 'rgba(168, 85, 247, 0.15)', border: 'rgba(168, 85, 247, 0.3)', shadow: 'rgba(168, 85, 247, 0.2)' }, // Purple
-      { bg: 'rgba(236, 72, 153, 0.15)', border: 'rgba(236, 72, 153, 0.3)', shadow: 'rgba(236, 72, 153, 0.2)' }, // Pink
-      { bg: 'rgba(34, 197, 94, 0.15)', border: 'rgba(34, 197, 94, 0.3)', shadow: 'rgba(34, 197, 94, 0.2)' }, // Green
-      { bg: 'rgba(251, 146, 60, 0.15)', border: 'rgba(251, 146, 60, 0.3)', shadow: 'rgba(251, 146, 60, 0.2)' }, // Orange
-    ];
-    const colorSet = colors[shapeIndex % colors.length];
-
-    return {
-      left: `${left}px`,
-      width: `${width}px`,
-      top: `${top}px`,
-      height: `${height}px`,
-      '--shape-bg': colorSet.bg,
-      '--shape-border': colorSet.border,
-      '--shape-shadow': colorSet.shadow,
-    };
+    // Each fret is 60px wide
+    const x = 90 + (fret - 1) * 60 + 30; // Center of the fret cell
+    const y = displayStringIndex * 42 + 21; // Center of the string row
+    return { x, y };
   };
 
   // Set up visual highlighting callback for scale playback
@@ -196,16 +161,57 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
           {/* Nut */}
           <div className="nut"></div>
 
-          {/* Chord shape regions overlay */}
-          {chordShapes.map((shape, index) => (
-            <div
-              key={`chord-shape-${index}`}
-              className="chord-shape-region"
-              style={calculateShapeRegion(shape, index)}
+          {/* CAGED chord shape glow connections */}
+          {isChordShapeMode && connections.length > 0 && (
+            <svg
+              className="chord-glow-connections"
+              viewBox="0 0 1100 260"
+              preserveAspectRatio="none"
             >
-              <div className="chord-shape-glow"></div>
-            </div>
-          ))}
+              <defs>
+                {/* Glow filters for each CAGED shape */}
+                {Object.entries(CAGED_COLORS).map(([shape, colors]) => (
+                  <filter key={`glow-${shape}`} id={`chord-glow-${shape}`}>
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                ))}
+              </defs>
+              
+              {/* Draw glow connections between notes of the same shape */}
+              {connections.map((connection, index) => {
+                const fromDisplayIndex = STANDARD_TUNING.length - 1 - connection.from.stringIndex;
+                const toDisplayIndex = STANDARD_TUNING.length - 1 - connection.to.stringIndex;
+                const fromPos = calculateNotePosition(fromDisplayIndex, connection.from.fret);
+                const toPos = calculateNotePosition(toDisplayIndex, connection.to.fret);
+                const colors = CAGED_COLORS[connection.cagedShape];
+                
+                // Create subtle curved path
+                const midX = (fromPos.x + toPos.x) / 2;
+                const midY = (fromPos.y + toPos.y) / 2;
+                const curvature = 15 * connection.strength;
+                const path = `M ${fromPos.x} ${fromPos.y} Q ${midX} ${midY - curvature} ${toPos.x} ${toPos.y}`;
+                
+                return (
+                  <path
+                    key={`glow-${index}`}
+                    d={path}
+                    stroke={colors.glow}
+                    strokeWidth={3 * connection.strength}
+                    fill="none"
+                    strokeLinecap="round"
+                    filter={`url(#chord-glow-${connection.cagedShape})`}
+                    className="chord-glow-path"
+                    opacity={0.6}
+                  />
+                );
+              })}
+            </svg>
+          )}
 
           {/* Strings - displayed from high E (index 5) to low E (index 0) */}
           {[...fretboard].reverse().map((stringData, displayIndex) => {
@@ -222,8 +228,28 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
                 {/* Fretted notes */}
                 {stringData.frets.slice(1).map(fretData => {
-                  const shapeIndex = getShapeIndex(stringData.stringIndex, fretData.fret);
+                  const cagedShapes = getCAGEDShapes(stringData.stringIndex, fretData.fret);
                   const shouldDisplay = shouldDisplayNote(fretData, stringData.stringIndex);
+                  
+                  // Generate multi-color class for overlapping shapes
+                  let colorClasses = '';
+                  let style = {};
+                  
+                  if (cagedShapes.length > 0) {
+                    if (cagedShapes.length === 1) {
+                      // Single shape - use that shape's color
+                      colorClasses = `caged-${cagedShapes[0]}`;
+                    } else {
+                      // Multiple shapes - create multi-color effect
+                      colorClasses = 'caged-multi';
+                      // Create CSS custom properties for multi-color rendering
+                      const colors = cagedShapes.map(s => CAGED_COLORS[s].primary).join(', ');
+                      style = {
+                        '--caged-colors': colors,
+                        '--caged-count': cagedShapes.length
+                      };
+                    }
+                  }
                   
                   return (
                     <div key={fretData.fret} className="fret-cell">
@@ -232,15 +258,16 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                       {shouldDisplay && (
                         <button
                           className={`note-marker ${
-                            isChordShapeMode && isChordTone(fretData.note) && fretData.note === chordNotes[0] ? 'chord-root' : 
+                            isChordShapeMode && isChordTone(fretData.note) && fretData.note === chordRoot ? 'chord-root' : 
                             fretData.isRoot ? 'root' : ''
                           } ${
                             isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                           } ${showIntervals ? 'interval-mode' : 'note-mode'} ${
                             isChordTone(fretData.note) ? 'chord-tone' : ''
                           } ${
-                            shapeIndex !== undefined ? `chord-shape-${shapeIndex % 5}` : ''
+                            colorClasses
                           }`}
+                          style={style}
                           title={getTooltipText(fretData)}
                           onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                         >

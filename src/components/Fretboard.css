@@ -68,83 +68,146 @@
   z-index: 5;
 }
 
-/* Chord shape region overlay - distinct colored areas for each playable shape */
-.chord-shape-region {
+/* CAGED chord shape glow connections - subtle SVG-based connections */
+.chord-glow-connections {
   position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 2;
-  border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
 }
 
-.chord-shape-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    var(--shape-bg, rgba(96, 165, 250, 0.15)) 0%,
-    var(--shape-bg, rgba(96, 165, 250, 0.12)) 30%,
-    transparent 100%
-  );
-  border: 2px solid var(--shape-border, rgba(96, 165, 250, 0.3));
-  border-radius: 16px;
-  box-shadow:
-    0 0 20px var(--shape-shadow, rgba(96, 165, 250, 0.2)),
-    0 0 40px var(--shape-shadow, rgba(96, 165, 250, 0.1)),
-    inset 0 0 30px var(--shape-shadow, rgba(96, 165, 250, 0.08));
-  animation: chord-region-pulse 3s ease-in-out infinite;
+.chord-glow-path {
+  transition: opacity 0.3s ease;
+  animation: chord-glow-pulse 4s ease-in-out infinite;
 }
 
-@keyframes chord-region-pulse {
+@keyframes chord-glow-pulse {
   0%, 100% {
-    opacity: 0.7;
-    transform: scale(1);
+    opacity: 0.4;
   }
   50% {
-    opacity: 0.95;
-    transform: scale(1.01);
+    opacity: 0.7;
   }
 }
 
-/* Chord root note (first note of chord) */
-.note-marker.chord-root {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 
-    0 2px 8px rgba(239, 68, 68, 0.3),
-    0 0 20px rgba(239, 68, 68, 0.2);
-}
-
-.note-marker.chord-root:hover {
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-  box-shadow: 
-    0 4px 12px rgba(239, 68, 68, 0.4),
-    0 0 30px rgba(239, 68, 68, 0.3);
-}
-
-/* Shape-specific note colors */
-.note-marker.chord-shape-0 {
+/* CAGED shape colors - C, A, G, E, D */
+.note-marker.caged-C {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(96, 165, 250, 0.4),
+    0 0 20px rgba(96, 165, 250, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.note-marker.chord-shape-1 {
+.note-marker.caged-C:hover {
+  background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+  box-shadow: 
+    0 4px 12px rgba(96, 165, 250, 0.5),
+    0 0 30px rgba(96, 165, 250, 0.4);
+}
+
+.note-marker.caged-A {
   background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(168, 85, 247, 0.4),
+    0 0 20px rgba(168, 85, 247, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.note-marker.chord-shape-2 {
-  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+.note-marker.caged-A:hover {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+  box-shadow: 
+    0 4px 12px rgba(168, 85, 247, 0.5),
+    0 0 30px rgba(168, 85, 247, 0.4);
 }
 
-.note-marker.chord-shape-3 {
+.note-marker.caged-G {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(34, 197, 94, 0.4),
+    0 0 20px rgba(34, 197, 94, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.note-marker.chord-shape-4 {
+.note-marker.caged-G:hover {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  box-shadow: 
+    0 4px 12px rgba(34, 197, 94, 0.5),
+    0 0 30px rgba(34, 197, 94, 0.4);
+}
+
+.note-marker.caged-E {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  box-shadow: 
+    0 2px 8px rgba(236, 72, 153, 0.4),
+    0 0 20px rgba(236, 72, 153, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.note-marker.caged-E:hover {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  box-shadow: 
+    0 4px 12px rgba(236, 72, 153, 0.5),
+    0 0 30px rgba(236, 72, 153, 0.4);
+}
+
+.note-marker.caged-D {
   background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
-  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(251, 146, 60, 0.4),
+    0 0 20px rgba(251, 146, 60, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.note-marker.caged-D:hover {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+  box-shadow: 
+    0 4px 12px rgba(251, 146, 60, 0.5),
+    0 0 30px rgba(251, 146, 60, 0.4);
+}
+
+/* Multi-shape membership - notes belonging to multiple CAGED shapes */
+.note-marker.caged-multi {
+  position: relative;
+  background: conic-gradient(
+    from 0deg,
+    #60a5fa 0deg 72deg,
+    #a855f7 72deg 144deg,
+    #22c55e 144deg 216deg,
+    #ec4899 216deg 288deg,
+    #fb923c 288deg 360deg
+  );
+  box-shadow: 
+    0 2px 8px rgba(150, 150, 250, 0.4),
+    0 0 25px rgba(150, 150, 250, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: multi-shape-pulse 3s ease-in-out infinite;
+}
+
+@keyframes multi-shape-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 2px 8px rgba(150, 150, 250, 0.4),
+      0 0 25px rgba(150, 150, 250, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 3px 12px rgba(150, 150, 250, 0.6),
+      0 0 35px rgba(150, 150, 250, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+}
+
+.note-marker.caged-multi:hover {
+  transform: scale(1.15);
+  box-shadow: 
+    0 4px 16px rgba(150, 150, 250, 0.7),
+    0 0 45px rgba(150, 150, 250, 0.6);
 }
 
 /* Guitar string row */

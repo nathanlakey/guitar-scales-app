@@ -108,6 +108,7 @@ function App() {
           selectedPosition={selectedPosition}
           positions={positions}
           chordNotes={chordNotes}
+          chordRoot={chordRoot}
         />
 
         {/* Audio controls - minimal and secondary */}

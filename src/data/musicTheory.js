@@ -360,3 +360,160 @@ export function detectChordShapes(fretboard, chordNotes) {
 
   return shapes;
 }
+
+// CAGED shape colors - fixed and consistent
+export const CAGED_COLORS = {
+  'C': { 
+    name: 'C Shape',
+    primary: 'rgba(59, 130, 246, 1)', // Blue
+    glow: 'rgba(59, 130, 246, 0.6)',
+    light: 'rgba(96, 165, 250, 0.8)',
+    shadow: 'rgba(59, 130, 246, 0.3)'
+  },
+  'A': { 
+    name: 'A Shape',
+    primary: 'rgba(168, 85, 247, 1)', // Purple
+    glow: 'rgba(168, 85, 247, 0.6)',
+    light: 'rgba(192, 132, 252, 0.8)',
+    shadow: 'rgba(168, 85, 247, 0.3)'
+  },
+  'G': { 
+    name: 'G Shape',
+    primary: 'rgba(34, 197, 94, 1)', // Green
+    glow: 'rgba(34, 197, 94, 0.6)',
+    light: 'rgba(74, 222, 128, 0.8)',
+    shadow: 'rgba(34, 197, 94, 0.3)'
+  },
+  'E': { 
+    name: 'E Shape',
+    primary: 'rgba(236, 72, 153, 1)', // Pink
+    glow: 'rgba(236, 72, 153, 0.6)',
+    light: 'rgba(244, 114, 182, 0.8)',
+    shadow: 'rgba(236, 72, 153, 0.3)'
+  },
+  'D': { 
+    name: 'D Shape',
+    primary: 'rgba(251, 146, 60, 1)', // Orange
+    glow: 'rgba(251, 146, 60, 0.6)',
+    light: 'rgba(251, 191, 36, 0.8)',
+    shadow: 'rgba(251, 146, 60, 0.3)'
+  }
+};
+
+/**
+ * Detect CAGED chord shapes on the fretboard
+ * Returns shapes with CAGED shape assignment and multi-shape membership
+ * @param {string} chordRoot - Root note of the chord
+ * @param {Array} chordNotes - Array of notes in the chord  
+ * @param {Array} fretboard - Full fretboard data
+ * @returns {Object} Object containing shapes array and note-to-shapes mapping
+ */
+export function detectCAGEDChordShapes(chordRoot, chordNotes, fretboard) {
+  if (!chordNotes || chordNotes.length === 0 || !chordRoot) {
+    return { shapes: [], noteToShapes: new Map(), connections: [] };
+  }
+
+  // Find all root note positions on the fretboard
+  const rootPositions = [];
+  fretboard.forEach((stringData, stringIndex) => {
+    stringData.frets.forEach(fretData => {
+      if (fretData.note === chordRoot && fretData.fret > 0 && fretData.fret <= NUM_FRETS) {
+        rootPositions.push({
+          stringIndex,
+          fret: fretData.fret,
+          note: fretData.note
+        });
+      }
+    });
+  });
+
+  // CAGED shape patterns based on root note positions
+  // Each shape is identified by which string the root typically appears on
+  const cagedShapePatterns = {
+    'E': { rootStrings: [0, 5], name: 'E' }, // Root on low E or high E (strings 0, 5)
+    'D': { rootStrings: [3], name: 'D' },    // Root on D string (string 2)
+    'C': { rootStrings: [4], name: 'C' },    // Root on A string (string 1)
+    'A': { rootStrings: [2], name: 'A' },    // Root on G string (string 3)
+    'G': { rootStrings: [1], name: 'G' },    // Root on B string (string 4)
+  };
+
+  const shapes = [];
+  const noteToShapes = new Map();
+  const connections = [];
+
+  // For each root position, identify the CAGED shape and collect chord tones
+  rootPositions.forEach(rootPos => {
+    // Determine which CAGED shape this represents
+    let cagedShape = null;
+    for (const [shapeName, pattern] of Object.entries(cagedShapePatterns)) {
+      if (pattern.rootStrings.includes(rootPos.stringIndex)) {
+        cagedShape = shapeName;
+        break;
+      }
+    }
+
+    if (!cagedShape) return;
+
+    // Collect all chord tones within a playable range around this root
+    const shapeNotes = [];
+    const minFret = Math.max(0, rootPos.fret - 2);
+    const maxFret = Math.min(NUM_FRETS, rootPos.fret + 4);
+
+    fretboard.forEach((stringData, stringIndex) => {
+      stringData.frets.forEach(fretData => {
+        if (chordNotes.includes(fretData.note) && 
+            fretData.fret >= minFret && 
+            fretData.fret <= maxFret &&
+            fretData.fret > 0) {
+          const noteKey = `${stringIndex}-${fretData.fret}`;
+          
+          shapeNotes.push({
+            stringIndex,
+            fret: fretData.fret,
+            note: fretData.note,
+            isRoot: fretData.note === chordRoot
+          });
+
+          // Track which shapes this note belongs to
+          if (!noteToShapes.has(noteKey)) {
+            noteToShapes.set(noteKey, []);
+          }
+          noteToShapes.get(noteKey).push(cagedShape);
+        }
+      });
+    });
+
+    // Only add shapes with at least 2 notes
+    if (shapeNotes.length >= 2) {
+      shapes.push({
+        cagedShape,
+        notes: shapeNotes,
+        rootPosition: rootPos,
+        minFret,
+        maxFret
+      });
+
+      // Generate glow connections within this shape
+      shapeNotes.forEach((note1, i) => {
+        shapeNotes.forEach((note2, j) => {
+          if (i < j) {
+            const stringDist = Math.abs(note1.stringIndex - note2.stringIndex);
+            const fretDist = Math.abs(note1.fret - note2.fret);
+            
+            // Connect notes that are close enough to be in the same hand position
+            if (stringDist <= 2 && fretDist <= 4) {
+              connections.push({
+                from: note1,
+                to: note2,
+                cagedShape,
+                strength: 1 / (stringDist + fretDist + 1) // Closer = stronger glow
+              });
+            }
+          }
+        });
+      });
+    }
+  });
+
+  return { shapes, noteToShapes, connections };
+}
