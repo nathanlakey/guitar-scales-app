@@ -21,45 +21,61 @@ class AudioEngine {
     await Tone.start();
     console.log('Audio context started');
 
-    // Create a Sampler with realistic guitar samples
-    // Using a multi-sampled approach covering the guitar's range
-    this.synth = new Tone.Sampler({
-      urls: {
-        // Sample map covering guitar range from low E (E2) to high notes
-        // Using subset of notes and Tone.js will interpolate between them
-        "E2": "https://tonejs.github.io/audio/salamander/E2.mp3",
-        "A2": "https://tonejs.github.io/audio/salamander/A2.mp3",
-        "D3": "https://tonejs.github.io/audio/salamander/D3.mp3",
-        "G3": "https://tonejs.github.io/audio/salamander/G3.mp3",
-        "B3": "https://tonejs.github.io/audio/salamander/B3.mp3",
-        "E4": "https://tonejs.github.io/audio/salamander/E4.mp3",
-        "A4": "https://tonejs.github.io/audio/salamander/A4.mp3",
-        "D5": "https://tonejs.github.io/audio/salamander/D5.mp3",
+    // Create a polyphonic synth with realistic guitar-like characteristics
+    // Using PluckSynth for natural plucked string sound
+    this.synth = new Tone.PolySynth(Tone.PluckSynth, {
+      attackNoise: 1.5,
+      dampening: 2000,
+      resonance: 0.92,
+    }).toDestination();
+
+    // Layer with a subtle FMSynth for warmth and body
+    this.fmSynth = new Tone.PolySynth(Tone.FMSynth, {
+      harmonicity: 2,
+      modulationIndex: 1.5,
+      envelope: {
+        attack: 0.002,
+        decay: 0.3,
+        sustain: 0.1,
+        release: 1.2,
       },
-      release: 1,
-      baseUrl: "",
-      onload: () => {
-        console.log('Guitar samples loaded');
+      modulation: {
+        type: 'sine',
       },
+      volume: -18,
     }).toDestination();
 
     // Add subtle reverb for natural acoustic space
     const reverb = new Tone.Reverb({
-      decay: 1.8,
-      wet: 0.12,
+      decay: 1.5,
+      wet: 0.15,
     }).toDestination();
 
     this.synth.connect(reverb);
+    this.fmSynth.connect(reverb);
 
     // Add gentle compression for consistent volume
     const compressor = new Tone.Compressor({
-      threshold: -24,
-      ratio: 4,
+      threshold: -20,
+      ratio: 3,
       attack: 0.003,
       release: 0.1,
     }).toDestination();
 
     this.synth.connect(compressor);
+    this.fmSynth.connect(compressor);
+
+    // Add EQ to shape guitar-like frequency response
+    const eq = new Tone.EQ3({
+      low: 2,
+      mid: 1,
+      high: -2,
+      lowFrequency: 200,
+      highFrequency: 3000,
+    }).toDestination();
+
+    this.synth.connect(eq);
+    this.fmSynth.connect(eq);
 
     this.initialized = true;
   }
@@ -110,18 +126,6 @@ class AudioEngine {
   }
 
   /**
-   * Convert MIDI note number to note name with octave
-   * @param {number} midiNote - MIDI note number (e.g., 60 = C4)
-   * @returns {string} Note name with octave (e.g., 'C4')
-   */
-  midiToNoteName(midiNote) {
-    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const octave = Math.floor(midiNote / 12) - 1;
-    const noteName = noteNames[midiNote % 12];
-    return noteName + octave;
-  }
-
-  /**
    * Play a single note
    * @param {string} stringNote - Note name of the string (e.g., 'E', 'A', 'D')
    * @param {number} fret - Fret number (0-24)
@@ -135,30 +139,8 @@ class AudioEngine {
       return;
     }
 
-    // Standard tuning MIDI note numbers for open strings (low to high)
-    const openStringMidiByIndex = [40, 45, 50, 55, 59, 64];
-    
-    let baseMidi;
-    
-    if (stringIndex !== null && stringIndex >= 0 && stringIndex < 6) {
-      baseMidi = openStringMidiByIndex[stringIndex];
-    } else {
-      const openStringMidi = {
-        'A': 45,  // A2
-        'D': 50,  // D3
-        'G': 55,  // G3
-        'B': 59,  // B3
-      };
-      
-      if (stringNote === 'E') {
-        baseMidi = 40; // E2
-      } else {
-        baseMidi = openStringMidi[stringNote] || 40;
-      }
-    }
-
-    const midiNote = baseMidi + fret;
-    const noteName = this.midiToNoteName(midiNote);
+    // Calculate frequency using the existing getFrequency method
+    const frequency = this.getFrequency(stringNote, fret, stringIndex);
 
     // Adjust duration based on articulation
     let adjustedDuration = duration;
@@ -168,14 +150,15 @@ class AudioEngine {
         adjustedDuration = duration * 1.5;
         break;
       case 'staccato':
-        adjustedDuration = Math.min(duration * 0.4, 0.2);
+        adjustedDuration = Math.min(duration * 0.3, 0.15);
         break;
       default: // normal
         adjustedDuration = duration;
     }
 
-    // Trigger the sampler with the note name
-    this.synth.triggerAttackRelease(noteName, adjustedDuration);
+    // Play with both synths for rich, layered guitar tone
+    this.synth.triggerAttackRelease(frequency, adjustedDuration);
+    this.fmSynth.triggerAttackRelease(frequency, adjustedDuration * 1.2);
   }
 
   /**
@@ -184,6 +167,9 @@ class AudioEngine {
   stopAll() {
     if (this.synth) {
       this.synth.releaseAll();
+    }
+    if (this.fmSynth) {
+      this.fmSynth.releaseAll();
     }
   }
 
