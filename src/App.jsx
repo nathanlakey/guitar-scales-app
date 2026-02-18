@@ -36,7 +36,11 @@ function App() {
         <Fretboard rootNote={rootNote} scaleName={scaleName} />
 
         {/* Audio controls - minimal and secondary */}
-        <AudioControls fretboardData={fretboardData} />
+        <AudioControls 
+          fretboardData={fretboardData}
+          rootNote={rootNote}
+          scaleName={scaleName}
+        />
       </main>
     </div>
   )

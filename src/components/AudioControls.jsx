@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
+import backingTrack from '../audio/BackingTrack';
 import './AudioControls.css';
 
-function AudioControls({ fretboardData }) {
+function AudioControls({ fretboardData, rootNote, scaleName }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -11,6 +12,7 @@ function AudioControls({ fretboardData }) {
   const [direction, setDirection] = useState('ascending');
   const [looping, setLooping] = useState(false);
   const [articulation, setArticulation] = useState('normal');
+  const [backingTrackPlaying, setBackingTrackPlaying] = useState(false);
 
   // Initialize audio on first user interaction
   const handleInitialize = async () => {
@@ -100,6 +102,26 @@ function AudioControls({ fretboardData }) {
     scalePlayer.setArticulation(newArticulation);
   };
 
+  // Toggle backing track
+  const handleBackingTrackToggle = async () => {
+    await handleInitialize();
+    
+    if (!backingTrackPlaying) {
+      await backingTrack.play(rootNote, scaleName);
+      setBackingTrackPlaying(true);
+    } else {
+      backingTrack.stop();
+      setBackingTrackPlaying(false);
+    }
+  };
+
+  // Update backing track when root/scale changes
+  useEffect(() => {
+    if (backingTrackPlaying) {
+      backingTrack.update(rootNote, scaleName);
+    }
+  }, [rootNote, scaleName, backingTrackPlaying]);
+
   return (
     <div className="audio-controls">
       {/* Single compact row of controls */}
@@ -146,6 +168,17 @@ function AudioControls({ fretboardData }) {
             title="Speed"
           />
         </div>
+
+        <div className="control-divider"></div>
+
+        {/* Backing track toggle */}
+        <button
+          className={`control-button backing-track-btn ${backingTrackPlaying ? 'active' : ''}`}
+          onClick={handleBackingTrackToggle}
+          title={backingTrackPlaying ? 'Stop Backing Track' : 'Play Backing Track'}
+        >
+          ♫
+        </button>
 
         <div className="control-divider"></div>
 
