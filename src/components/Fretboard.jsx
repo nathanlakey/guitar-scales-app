@@ -1,8 +1,52 @@
+import { useState, useEffect } from 'react';
 import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS } from '../data/musicTheory';
+import audioEngine from '../audio/AudioEngine';
+import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
 
 function Fretboard({ rootNote, scaleName }) {
   const fretboard = generateFretboard(rootNote, scaleName);
+  const [highlightedNote, setHighlightedNote] = useState(null);
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+
+  // Set up visual highlighting callback for scale playback
+  useEffect(() => {
+    scalePlayer.setHighlightCallback((stringNote, fret, isActive) => {
+      if (!isActive) {
+        setHighlightedNote(null);
+      } else {
+        setHighlightedNote({ stringNote, fret });
+      }
+    });
+
+    return () => {
+      scalePlayer.setHighlightCallback(null);
+    };
+  }, []);
+
+  // Handle note click - play individual note
+  const handleNoteClick = async (stringNote, fret, note) => {
+    // Initialize audio on first interaction
+    if (!isAudioInitialized) {
+      await audioEngine.initialize();
+      setIsAudioInitialized(true);
+    }
+
+    // Play the note
+    audioEngine.playNote(stringNote, fret, 0.8, 'normal');
+
+    // Visual feedback
+    setHighlightedNote({ stringNote, fret });
+    setTimeout(() => {
+      setHighlightedNote(null);
+    }, 300);
+  };
+
+  // Check if a note should be highlighted
+  const isNoteHighlighted = (stringNote, fret) => {
+    if (!highlightedNote) return false;
+    return highlightedNote.stringNote === stringNote && highlightedNote.fret === fret;
+  };
 
   // String labels (high to low for display: 1st string at top)
   const stringLabels = ['e', 'B', 'G', 'D', 'A', 'E'];
@@ -45,8 +89,11 @@ function Fretboard({ rootNote, scaleName }) {
                     <div className="fret-wire"></div>
                     {fretData.inScale && (
                       <button
-                        className={`note-marker ${fretData.isRoot ? 'root' : ''}`}
-                        title={`${fretData.note} (Interval: ${fretData.interval})`}
+                        className={`note-marker ${fretData.isRoot ? 'root' : ''} ${
+                          isNoteHighlighted(stringData.stringNote, fretData.fret) ? 'highlighted' : ''
+                        }`}
+                        title={`${fretData.note} (Interval: ${fretData.interval}) - Click to play`}
+                        onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note)}
                       >
                         {fretData.note}
                       </button>

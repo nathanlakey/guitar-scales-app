@@ -166,6 +166,43 @@
     inset 0 1px 2px rgba(255, 255, 255, 0.25);
 }
 
+.note-marker:active {
+  transform: scale(1.1);
+}
+
+/* Highlighted note during playback */
+.note-marker.highlighted {
+  animation: pulse 0.6s ease-in-out;
+  transform: scale(1.3);
+  box-shadow:
+    0 0 20px rgba(143, 180, 212, 0.8),
+    0 0 40px rgba(143, 180, 212, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 2px 8px rgba(143, 180, 212, 0.35),
+      inset 0 1px 2px rgba(255, 255, 255, 0.25);
+  }
+  50% {
+    transform: scale(1.4);
+    box-shadow:
+      0 0 25px rgba(143, 180, 212, 0.9),
+      0 0 50px rgba(143, 180, 212, 0.5),
+      inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    transform: scale(1.3);
+    box-shadow:
+      0 0 20px rgba(143, 180, 212, 0.8),
+      0 0 40px rgba(143, 180, 212, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  }
+}
+
 /* Root note styling */
 .note-marker.root {
   background: linear-gradient(135deg, #e89d8e, #d77968);
@@ -181,6 +218,38 @@
   box-shadow:
     0 4px 16px rgba(215, 121, 104, 0.5),
     inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+/* Highlighted root note */
+.note-marker.root.highlighted {
+  animation: pulseRoot 0.6s ease-in-out;
+  box-shadow:
+    0 0 20px rgba(215, 121, 104, 0.8),
+    0 0 40px rgba(215, 121, 104, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+@keyframes pulseRoot {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 2px 8px rgba(215, 121, 104, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.25);
+  }
+  50% {
+    transform: scale(1.4);
+    box-shadow:
+      0 0 25px rgba(215, 121, 104, 0.9),
+      0 0 50px rgba(215, 121, 104, 0.5),
+      inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    transform: scale(1.3);
+    box-shadow:
+      0 0 20px rgba(215, 121, 104, 0.8),
+      0 0 40px rgba(215, 121, 104, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  }
 }
 
 /* Legend */

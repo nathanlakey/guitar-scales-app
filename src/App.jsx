@@ -1,12 +1,17 @@
 import { useState } from 'react'
+import { generateFretboard } from './data/musicTheory'
 import ScaleSelector from './components/ScaleSelector'
 import ScaleInfo from './components/ScaleInfo'
+import AudioControls from './components/AudioControls'
 import Fretboard from './components/Fretboard'
 import './App.css'
 
 function App() {
   const [rootNote, setRootNote] = useState('C')
   const [scaleName, setScaleName] = useState('Major (Ionian)')
+
+  // Generate fretboard data for AudioControls
+  const fretboardData = generateFretboard(rootNote, scaleName)
 
   return (
     <div className="app">
@@ -28,11 +33,13 @@ function App() {
 
         <ScaleInfo rootNote={rootNote} scaleName={scaleName} />
 
+        <AudioControls fretboardData={fretboardData} />
+
         <Fretboard rootNote={rootNote} scaleName={scaleName} />
       </main>
 
       <footer className="app-footer">
-        <p>Select a root note and scale to see it mapped across the fretboard</p>
+        <p>Click any note on the fretboard to hear it • Use playback controls to practice scales</p>
       </footer>
     </div>
   )
