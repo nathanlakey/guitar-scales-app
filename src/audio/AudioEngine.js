@@ -180,6 +180,9 @@ class AudioEngine {
     if (this.synth) {
       this.synth.dispose();
     }
+    if (this.fmSynth) {
+      this.fmSynth.dispose();
+    }
     this.initialized = false;
   }
 }
