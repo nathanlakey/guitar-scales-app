@@ -1,17 +1,66 @@
 .scale-selector {
   background: #242424;
   border-radius: 16px;
-  padding: 20px 24px;
+  padding: 16px 20px;
   margin-bottom: 24px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.selector-section {
+/* Compact inline root note row */
+.root-note-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.selector-section:last-of-type {
+.inline-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Root note buttons - compact */
+.note-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.note-btn {
+  min-width: 36px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #d4d4d4;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.note-btn:hover {
+  background: rgba(143, 180, 212, 0.15);
+  border-color: rgba(143, 180, 212, 0.4);
+  color: #8fb4d4;
+  transform: translateY(-1px);
+}
+
+.note-btn.active {
+  background: linear-gradient(135deg, rgba(143, 180, 212, 0.25), rgba(143, 180, 212, 0.15));
+  border-color: #8fb4d4;
+  color: #8fb4d4;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(143, 180, 212, 0.2);
+}
+.selector-section {
   margin-bottom: 16px;
 }
 
@@ -24,41 +73,6 @@
   color: #9ca3af;
   margin-bottom: 8px;
 }
-
-/* Root note buttons */
-.note-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.note-btn {
-  min-width: 48px;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #d4d4d4;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.note-btn:hover {
-  background: rgba(143, 180, 212, 0.15);
-  border-color: rgba(143, 180, 212, 0.4);
-  color: #8fb4d4;
-}
-
-.note-btn.active {
-  background: linear-gradient(135deg, rgba(143, 180, 212, 0.2), rgba(143, 180, 212, 0.1));
-  border-color: #8fb4d4;
-  color: #8fb4d4;
-  font-weight: 700;
-  box-shadow: 0 0 16px rgba(143, 180, 212, 0.2);
-}
-
 /* Scale grid - all visible */
 .scale-grid {
   display: grid;

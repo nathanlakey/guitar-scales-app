@@ -4,8 +4,9 @@ import './ScaleSelector.css';
 function ScaleSelector({ rootNote, scaleName, onRootChange, onScaleChange }) {
   return (
     <div className="scale-selector">
-      <div className="selector-section">
-        <label className="selector-label">Root Note</label>
+      {/* Compact inline root note selector */}
+      <div className="root-note-row">
+        <span className="inline-label">Root:</span>
         <div className="note-buttons">
           {[...NOTES].sort().map(note => (
             <button
