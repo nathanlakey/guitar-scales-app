@@ -30,8 +30,8 @@
   gap: 4px;
   padding: 10px 16px;
   border-radius: 12px;
-  background: rgba(169, 159, 202, 0.12);
-  border: 1px solid rgba(169, 159, 202, 0.25);
+  background: rgba(143, 180, 212, 0.12);
+  border: 1px solid rgba(143, 180, 212, 0.25);
   min-width: 48px;
 }
 
@@ -55,7 +55,7 @@
 .chip-note {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #a99fca;
+  color: #8fb4d4;
 }
 
 .scale-note-chip.root .chip-note {
