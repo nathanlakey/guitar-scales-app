@@ -79,22 +79,23 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
   // Handle note click - play individual note
   const handleNoteClick = async (stringNote, fret, note, stringIndex) => {
-    console.log('Note clicked:', { stringNote, fret, note, stringIndex });
+    console.log('🎯 Fretboard note clicked:', { stringNote, fret, note, stringIndex });
     
     // Initialize audio on first interaction
     if (!isAudioInitialized) {
-      console.log('Initializing audio engine...');
+      console.log('🎵 First interaction - initializing audio engine...');
       try {
         await audioEngine.initialize();
         setIsAudioInitialized(true);
-        console.log('Audio engine initialized successfully');
+        console.log('✓✓✓ Audio engine initialized successfully in Fretboard');
       } catch (error) {
-        console.error('Failed to initialize audio engine:', error);
+        console.error('❌ Failed to initialize audio engine:', error);
+        alert('Failed to initialize audio. Please refresh the page and try again.');
         return;
       }
     }
 
-    console.log('Playing note...');
+    console.log('🎸 Requesting note playback...');
     // Play the note with correct string index for accurate pitch
     audioEngine.playNote(stringNote, fret, 0.8, 'normal', stringIndex);
 

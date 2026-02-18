@@ -16,12 +16,16 @@ class AudioEngine {
    * Must be called after user interaction (browser autoplay policy)
    */
   async initialize() {
-    if (this.initialized) return;
+    if (this.initialized) {
+      console.log('Audio engine already initialized');
+      return;
+    }
 
     try {
+      // Start Tone.js audio context
       await Tone.start();
-      console.log('Audio context started');
-      console.log('Audio context state:', Tone.getContext().state);
+      console.log('✓ Audio context started');
+      console.log('✓ Audio context state:', Tone.getContext().state);
 
       // Create reverb for natural guitar ambience
       const reverb = new Tone.Reverb({
@@ -30,7 +34,7 @@ class AudioEngine {
       }).toDestination();
       
       await reverb.generate();
-      console.log('Reverb generated');
+      console.log('✓ Reverb generated');
 
       // Create realistic guitar synth using PluckSynth (Karplus-Strong algorithm)
       // This produces a natural, guitar-like plucked string sound
@@ -38,9 +42,9 @@ class AudioEngine {
         attackNoise: 1,
         dampening: 4000,
         resonance: 0.92,
-      }).connect(reverb);
+      }).toDestination();
 
-      console.log('Guitar synth created');
+      console.log('✓ Guitar synth created and connected to destination');
 
       // Add compression for consistent dynamics
       const compressor = new Tone.Compressor({
@@ -64,11 +68,30 @@ class AudioEngine {
       this.synth.connect(eq);
 
       this.initialized = true;
-      console.log('Audio engine initialized successfully');
-      console.log('Synth status:', { synth: !!this.synth });
+      console.log('✓✓✓ AUDIO ENGINE FULLY INITIALIZED ✓✓✓');
+      console.log('Synth ready:', !!this.synth);
+      console.log('Context state:', Tone.getContext().state);
+      
+      // Test the synth to confirm it works
+      this.testSound();
     } catch (error) {
-      console.error('Failed to initialize audio engine:', error);
+      console.error('❌ Failed to initialize audio engine:', error);
       this.initialized = false;
+      throw error;
+    }
+  }
+
+  /**
+   * Test sound to verify audio system is working
+   */
+  testSound() {
+    try {
+      console.log('🔊 Testing audio system...');
+      // Play a quick test tone
+      this.synth.triggerAttackRelease('C4', 0.1);
+      console.log('✓ Test sound triggered successfully');
+    } catch (error) {
+      console.error('❌ Test sound failed:', error);
     }
   }
 
@@ -126,33 +149,38 @@ class AudioEngine {
    * @param {number} stringIndex - Optional: string index (0-5) for precise pitch
    */
   playNote(stringNote, fret, duration = 0.5, articulation = 'normal', stringIndex = null) {
-    console.log('playNote called:', { stringNote, fret, duration, articulation, stringIndex, initialized: this.initialized });
+    console.log('🎸 playNote called:', { stringNote, fret, duration, articulation, stringIndex, initialized: this.initialized });
     
     if (!this.initialized) {
-      console.warn('AudioEngine not initialized. Call initialize() first.');
+      console.error('❌ AudioEngine not initialized. Call initialize() first.');
       return;
     }
 
     if (!this.synth) {
-      console.error('Synth not available');
+      console.error('❌ Synth not available');
       return;
     }
 
     // Ensure audio context is running
-    if (Tone.getContext().state !== 'running') {
-      console.log('Resuming audio context...');
+    const contextState = Tone.getContext().state;
+    if (contextState !== 'running') {
+      console.log('⚠️ Resuming audio context... Current state:', contextState);
       Tone.getContext().resume();
     }
 
     try {
       // Calculate frequency using the existing getFrequency method
       const frequency = this.getFrequency(stringNote, fret, stringIndex);
-      console.log('Calculated frequency:', frequency, 'Hz');
+      console.log('✓ Calculated frequency:', frequency, 'Hz');
       
       if (!frequency || frequency <= 0) {
-        console.error('Invalid frequency calculated:', frequency);
+        console.error('❌ Invalid frequency calculated:', frequency);
         return;
       }
+
+      // Convert frequency to note name for Tone.js
+      const noteName = Tone.Frequency(frequency, 'hz').toNote();
+      console.log('✓ Converted to note name:', noteName);
 
       // Adjust duration based on articulation
       let adjustedDuration = duration;
@@ -176,15 +204,21 @@ class AudioEngine {
       velocity = velocity + (Math.random() - 0.5) * 0.1;
       velocity = Math.max(0.4, Math.min(1, velocity));
 
-      console.log('Triggering synth - frequency:', frequency, 'duration:', adjustedDuration, 'velocity:', velocity);
-      console.log('Audio context state:', Tone.getContext().state);
+      console.log('🔊 Triggering synth:', { 
+        noteName, 
+        frequency: frequency.toFixed(2) + ' Hz',
+        duration: adjustedDuration, 
+        velocity: velocity.toFixed(2),
+        contextState: Tone.getContext().state 
+      });
       
-      // Trigger the synth with the calculated frequency
-      this.synth.triggerAttackRelease(frequency, adjustedDuration, undefined, velocity);
+      // Trigger the synth with the note name
+      this.synth.triggerAttackRelease(noteName, adjustedDuration, undefined, velocity);
       
-      console.log('Note triggered successfully');
+      console.log('✓✓✓ Note triggered successfully!');
     } catch (error) {
-      console.error('Error playing note:', error);
+      console.error('❌ Error playing note:', error);
+      console.error('Error stack:', error.stack);
     }
   }
 
