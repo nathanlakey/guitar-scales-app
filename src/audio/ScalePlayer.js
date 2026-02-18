@@ -80,12 +80,13 @@ class ScalePlayer {
               this.highlightCallback(note.stringNote, note.fret, true);
             }
 
-            // Play the note
+            // Play the note with string index for accurate pitch
             audioEngine.playNote(
               note.stringNote,
               note.fret,
               noteDuration,
-              this.articulation
+              this.articulation,
+              note.stringIndex
             );
 
             // Clear highlight after note duration
@@ -123,14 +124,14 @@ class ScalePlayer {
     // Filter to only notes in scale and sort by string/fret
     const inScaleNotes = scaleNotes.filter((n) => n.inScale);
 
-    // Sort ascending (low to high)
+    // Sort ascending (low to high pitch)
+    // Lower stringIndex = lower pitch (0 = low E, 5 = high E)
     const sortedNotes = [...inScaleNotes].sort((a, b) => {
-      // Convert string names to numbers (E2=6, A=5, D=4, G=3, B=2, E=1)
-      const stringOrder = { E2: 6, A: 5, D: 4, G: 3, B: 2, E: 1 };
-      const stringA = stringOrder[a.stringNote] || 0;
-      const stringB = stringOrder[b.stringNote] || 0;
+      // Use stringIndex for accurate sorting (0=low E, 5=high E)
+      const stringA = a.stringIndex !== undefined ? a.stringIndex : 0;
+      const stringB = b.stringIndex !== undefined ? b.stringIndex : 0;
 
-      if (stringA !== stringB) return stringB - stringA; // Higher strings first
+      if (stringA !== stringB) return stringA - stringB; // Lower strings (lower pitch) first
       return a.fret - b.fret; // Lower frets first
     });
 

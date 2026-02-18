@@ -25,15 +25,15 @@ function Fretboard({ rootNote, scaleName }) {
   }, []);
 
   // Handle note click - play individual note
-  const handleNoteClick = async (stringNote, fret, note) => {
+  const handleNoteClick = async (stringNote, fret, note, stringIndex) => {
     // Initialize audio on first interaction
     if (!isAudioInitialized) {
       await audioEngine.initialize();
       setIsAudioInitialized(true);
     }
 
-    // Play the note
-    audioEngine.playNote(stringNote, fret, 0.8, 'normal');
+    // Play the note with correct string index for accurate pitch
+    audioEngine.playNote(stringNote, fret, 0.8, 'normal', stringIndex);
 
     // Visual feedback
     setHighlightedNote({ stringNote, fret });
@@ -83,7 +83,7 @@ function Fretboard({ rootNote, scaleName }) {
                 </div>
 
                 {/* Fretted notes */}
-                {stringData.slice(1).map(fretData => (
+                {stringData.frets.slice(1).map(fretData => (
                   <div key={fretData.fret} className="fret-cell">
                     <div className={`string-line string-${displayIndex}`}></div>
                     <div className="fret-wire"></div>
@@ -93,7 +93,7 @@ function Fretboard({ rootNote, scaleName }) {
                           isNoteHighlighted(stringData.stringNote, fretData.fret) ? 'highlighted' : ''
                         }`}
                         title={`${fretData.note} (Interval: ${fretData.interval}) - Click to play`}
-                        onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note)}
+                        onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                       >
                         {fretData.note}
                       </button>

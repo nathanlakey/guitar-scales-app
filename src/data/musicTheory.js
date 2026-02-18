@@ -108,13 +108,20 @@ export function generateFretboard(rootNote, scaleName) {
       stringData.push({
         note,
         fret: f,
+        fretNumber: f,
         string: s,
+        stringIndex: s,
+        stringNote: openNote,
         inScale,
         isRoot: root,
         interval,
       });
     }
-    fretboard.push(stringData);
+    fretboard.push({
+      stringNote: openNote,
+      stringIndex: s,
+      frets: stringData
+    });
   }
 
   return fretboard;

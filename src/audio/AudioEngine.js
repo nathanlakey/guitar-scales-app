@@ -50,47 +50,43 @@ class AudioEngine {
   /**
    * Convert string and fret to frequency
    * Uses scientific pitch notation and equal temperament tuning
+   * Standard tuning (low to high): E2, A2, D3, G3, B3, E4
+   * @param {string} stringNote - The open note of the string ('E', 'A', 'D', 'G', 'B')
+   * @param {number} fret - Fret number (0-24)
+   * @param {number} stringIndex - Optional: string index (0-5) for disambiguation
    */
-  getFrequency(stringNote, fret) {
-    const noteToMidi = {
-      C: 0,
-      'C#': 1,
-      Db: 1,
-      D: 2,
-      'D#': 3,
-      Eb: 3,
-      E: 4,
-      F: 5,
-      'F#': 6,
-      Gb: 6,
-      G: 7,
-      'G#': 8,
-      Ab: 8,
-      A: 9,
-      'A#': 10,
-      Bb: 10,
-      B: 11,
-    };
-
-    // Standard tuning MIDI note numbers (string 1 = high E)
-    const stringMidi = {
-      E: 64, // High E (E4)
-      B: 59, // B3
-      G: 55, // G3
-      D: 50, // D3
-      A: 45, // A2
-      E2: 40, // Low E (E2)
-    };
-
+  getFrequency(stringNote, fret, stringIndex = null) {
+    // Standard tuning MIDI note numbers for open strings (low to high)
+    // Matches STANDARD_TUNING array: ['E', 'A', 'D', 'G', 'B', 'E']
+    const openStringMidiByIndex = [40, 45, 50, 55, 59, 64];
+    
     let baseMidi;
-    if (stringNote === 'E' && fret === 0) {
-      // Determine which E string (check context or default to high E)
-      baseMidi = stringMidi.E;
+    
+    if (stringIndex !== null && stringIndex >= 0 && stringIndex < 6) {
+      // Use the string index for precise MIDI note (preferred method)
+      baseMidi = openStringMidiByIndex[stringIndex];
     } else {
-      baseMidi = stringMidi[stringNote] || stringMidi.E2;
+      // Fallback: determine by note name
+      const openStringMidi = {
+        'A': 45,  // A2
+        'D': 50,  // D3
+        'G': 55,  // G3
+        'B': 59,  // B3
+      };
+      
+      if (stringNote === 'E') {
+        // Default to low E if no index provided
+        baseMidi = 40; // E2
+      } else {
+        baseMidi = openStringMidi[stringNote] || 40;
+      }
     }
 
+    // Calculate the MIDI note number for this fret
     const midiNote = baseMidi + fret;
+    
+    // Convert MIDI note to frequency using A440 tuning
+    // Formula: f = 440 * 2^((n - 69) / 12) where 69 is A4 (MIDI note 69)
     const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
 
     return frequency;
@@ -102,14 +98,15 @@ class AudioEngine {
    * @param {number} fret - Fret number (0-24)
    * @param {number} duration - Note duration in seconds
    * @param {string} articulation - Playing style ('normal', 'legato', 'staccato')
+   * @param {number} stringIndex - Optional: string index (0-5) for precise pitch
    */
-  playNote(stringNote, fret, duration = 0.5, articulation = 'normal') {
+  playNote(stringNote, fret, duration = 0.5, articulation = 'normal', stringIndex = null) {
     if (!this.initialized) {
       console.warn('AudioEngine not initialized. Call initialize() first.');
       return;
     }
 
-    const frequency = this.getFrequency(stringNote, fret);
+    const frequency = this.getFrequency(stringNote, fret, stringIndex);
 
     // Adjust envelope based on articulation
     const originalEnvelope = { ...this.synth.get().envelope };
