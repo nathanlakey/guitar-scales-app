@@ -15,6 +15,8 @@ function App() {
   const [positionSystem, setPositionSystem] = useState('CAGED')
   const [chordRoot, setChordRoot] = useState('')
   const [chordType, setChordType] = useState('Major')
+  const [cagedPosition, setCagedPosition] = useState('ALL')
+  const [showScaleOverlay, setShowScaleOverlay] = useState(false)
 
   // Generate fretboard data for AudioControls
   const fretboardData = generateFretboard(rootNote, scaleName)
@@ -98,6 +100,10 @@ function App() {
           onRootChange={setChordRoot}
           onTypeChange={setChordType}
           onClear={() => setChordRoot('')}
+          selectedPosition={cagedPosition}
+          onPositionChange={setCagedPosition}
+          showScaleOverlay={showScaleOverlay}
+          onScaleOverlayChange={setShowScaleOverlay}
         />
 
         {/* The instrument - primary focus */}
@@ -109,6 +115,8 @@ function App() {
           positions={positions}
           chordNotes={chordNotes}
           chordRoot={chordRoot}
+          cagedPosition={cagedPosition}
+          showScaleOverlay={showScaleOverlay}
         />
 
         {/* Audio controls - minimal and secondary */}

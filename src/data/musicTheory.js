@@ -63,6 +63,25 @@ export const SCALE_CATEGORIES = {
 };
 
 // ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * @typedef {Object} FretboardNote
+ * @property {number} stringIndex - String index (0 = high E, 5 = low E)
+ * @property {number} fret - Fret number
+ * @property {string} note - Note name (e.g., 'C', 'D#', 'F')
+ * @property {'root'|'third'|'fifth'|'scale'|'other'} role - Harmonic role
+ * @property {string} [shape] - CAGED shape name (C, A, G, E, D)
+ */
+
+/**
+ * @typedef {Object} CAGEDTemplate
+ * @property {number} rootStringIndex - String where root note is located
+ * @property {Array<{stringOffset: number, fretOffset: number}>} positions - Shape positions
+ */
+
+// ============================================================================
 // CORE NOTE MATH FUNCTIONS (Single Source of Truth)
 // ============================================================================
 
@@ -433,218 +452,6 @@ export function detectChordShapes(fretboard, chordNotes) {
   return shapes;
 }
 
-// CAGED shape colors - fixed and consistent
-export const CAGED_COLORS = {
-  'C': { 
-    name: 'C Shape',
-    primary: 'rgba(239, 68, 68, 1)', // Red
-    glow: 'rgba(239, 68, 68, 0.6)',
-    light: 'rgba(248, 113, 113, 0.8)',
-    shadow: 'rgba(239, 68, 68, 0.3)'
-  },
-  'A': { 
-    name: 'A Shape',
-    primary: 'rgba(168, 85, 247, 1)', // Purple
-    glow: 'rgba(168, 85, 247, 0.6)',
-    light: 'rgba(192, 132, 252, 0.8)',
-    shadow: 'rgba(168, 85, 247, 0.3)'
-  },
-  'G': { 
-    name: 'G Shape',
-    primary: 'rgba(34, 197, 94, 1)', // Green
-    glow: 'rgba(34, 197, 94, 0.6)',
-    light: 'rgba(74, 222, 128, 0.8)',
-    shadow: 'rgba(34, 197, 94, 0.3)'
-  },
-  'E': { 
-    name: 'E Shape',
-    primary: 'rgba(234, 179, 8, 1)', // Yellow
-    glow: 'rgba(234, 179, 8, 0.6)',
-    light: 'rgba(250, 204, 21, 0.8)',
-    shadow: 'rgba(234, 179, 8, 0.3)'
-  },
-  'D': { 
-    name: 'D Shape',
-    primary: 'rgba(6, 182, 212, 1)', // Cyan
-    glow: 'rgba(6, 182, 212, 0.6)',
-    light: 'rgba(34, 211, 238, 0.8)',
-    shadow: 'rgba(6, 182, 212, 0.3)'
-  }
-};
-
-/**
- * Detect CAGED chord shapes on the fretboard
- * Returns shapes with CAGED shape assignment and multi-shape membership
- * @param {string} chordRoot - Root note of the chord
- * @param {Array} chordNotes - Array of notes in the chord  
- * @param {Array} fretboard - Full fretboard data
- * @returns {Object} Object containing shapes array and note-to-shapes mapping
- */
-// True CAGED major chord shape templates
-// Each template defines note positions relative to the root note
-// Format: { stringOffset: number, fretOffset: number, interval: 'R' | '3' | '5' }
-const CAGED_TEMPLATES = {
-  // C shape - root on A string, C-form barre chord
-  'C': {
-    rootString: 1, // A string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
-      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on D string
-      { stringOffset: 2, fretOffset: 0, interval: '3' },  // 3rd on G string
-      { stringOffset: 3, fretOffset: 1, interval: 'R' },  // Root on B string
-      { stringOffset: 4, fretOffset: 0, interval: '5' }   // 5th on high E string
-    ]
-  },
-  // A shape - root on A string, open A-form
-  'A': {
-    rootString: 1, // A string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
-      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on D string
-      { stringOffset: 2, fretOffset: 1, interval: '3' },  // 3rd on G string
-      { stringOffset: 3, fretOffset: 2, interval: 'R' },  // Root on B string
-      { stringOffset: 4, fretOffset: 0, interval: '5' }   // 5th on high E string
-    ]
-  },
-  // G shape - root on low E string, G-form barre
-  'G': {
-    rootString: 0, // Low E string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on low E
-      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on A string
-      { stringOffset: 2, fretOffset: 0, interval: '3' },  // 3rd on D string
-      { stringOffset: 3, fretOffset: 0, interval: 'R' },  // Root on G string
-      { stringOffset: 4, fretOffset: 0, interval: '5' },  // 5th on B string
-      { stringOffset: 5, fretOffset: 0, interval: 'R' }   // Root on high E
-    ]
-  },
-  // E shape - root on low E string, E-form barre
-  'E': {
-    rootString: 0, // Low E string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on low E
-      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on A string
-      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on D string
-      { stringOffset: 3, fretOffset: 1, interval: '3' },  // 3rd on G string
-      { stringOffset: 4, fretOffset: 0, interval: '5' },  // 5th on B string
-      { stringOffset: 5, fretOffset: 0, interval: 'R' }   // Root on high E
-    ]
-  },
-  // D shape - root on D string, triangle shape
-  'D': {
-    rootString: 2, // D string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on D string
-      { stringOffset: 1, fretOffset: 2, interval: '3' },  // 3rd on G string
-      { stringOffset: 2, fretOffset: 3, interval: 'R' },  // Root on B string
-      { stringOffset: 3, fretOffset: 2, interval: '5' }   // 5th on high E string
-    ]
-  }
-};
-
-// Helper to calculate note at a given interval from root
-function getNoteAtInterval(root, interval, chordNotes) {
-  // For major chords: R = 0, 3 = 4 semitones, 5 = 7 semitones
-  const intervalMap = {
-    'R': 0,
-    '3': 4,
-    '5': 7
-  };
-  
-  const rootIndex = NOTES.indexOf(root);
-  const targetIndex = (rootIndex + intervalMap[interval]) % 12;
-  return NOTES[targetIndex];
-}
-
-export function detectCAGEDChordShapes(chordRoot, chordNotes, fretboard) {
-  if (!chordNotes || chordNotes.length === 0 || !chordRoot) {
-    return { shapes: [], noteToShapes: new Map(), connections: [] };
-  }
-
-  const shapes = [];
-  const noteToShapes = new Map();
-  const connections = [];
-
-  // For each CAGED shape template
-  Object.entries(CAGED_TEMPLATES).forEach(([shapeName, template]) => {
-    // Find all valid root positions for this shape type
-    const validRootPositions = [];
-    
-    fretboard.forEach((stringData, stringIndex) => {
-      // Only look for roots on the correct string for this shape
-      if (stringIndex === template.rootString) {
-        stringData.frets.forEach(fretData => {
-          if (fretData.note === chordRoot && fretData.fret > 0 && fretData.fret <= NUM_FRETS) {
-            validRootPositions.push({
-              stringIndex,
-              fret: fretData.fret,
-              note: fretData.note
-            });
-          }
-        });
-      }
-    });
-
-    // For each valid root position, generate a shape instance
-    validRootPositions.forEach(rootPos => {
-      const shapeNotes = [];
-      let isValidShape = true;
-
-      // Apply template to generate shape notes
-      template.notes.forEach(templateNote => {
-        const targetString = rootPos.stringIndex + templateNote.stringOffset;
-        const targetFret = rootPos.fret + templateNote.fretOffset;
-        
-        // Check if position is valid on fretboard
-        if (targetString < 0 || targetString >= STANDARD_TUNING.length ||
-            targetFret < 1 || targetFret > NUM_FRETS) {
-          isValidShape = false;
-          return;
-        }
-
-        // Get expected note at this interval
-        const expectedNote = getNoteAtInterval(chordRoot, templateNote.interval, chordNotes);
-        
-        // Get actual note at this position on fretboard
-        const stringData = fretboard[targetString];
-        const fretData = stringData.frets[targetFret];
-        
-        // Verify the note matches the template
-        if (fretData && fretData.note === expectedNote && chordNotes.includes(fretData.note)) {
-          const noteKey = `${targetString}-${targetFret}`;
-          
-          shapeNotes.push({
-            stringIndex: targetString,
-            fret: targetFret,
-            note: fretData.note,
-            isRoot: fretData.note === chordRoot,
-            interval: templateNote.interval
-          });
-
-          // Track which shapes this note belongs to
-          if (!noteToShapes.has(noteKey)) {
-            noteToShapes.set(noteKey, []);
-          }
-          noteToShapes.get(noteKey).push(shapeName);
-        } else {
-          isValidShape = false;
-        }
-      });
-
-      // Only add complete, valid shapes
-      if (isValidShape && shapeNotes.length === template.notes.length) {
-        shapes.push({
-          cagedShape: shapeName,
-          notes: shapeNotes,
-          rootPosition: rootPos
-        });
-      }
-    });
-  });
-
-  return { shapes, noteToShapes, connections };
-}
-
 // ============================================================================
 // CAGED CHORD SYSTEM (Production-Ready)
 // ============================================================================
@@ -738,7 +545,7 @@ const CAGED_TEMPLATES = {
  * Generate CAGED chord shape for a specific shape type and root
  * @param {string} shapeType - Shape type ('C', 'A', 'G', 'E', 'D')
  * @param {string} root - Root note
- * @returns {Array} Array of note objects with stringIndex, fret, note, role
+ * @returns {FretboardNote[]} Array of note objects with stringIndex, fret, note, role
  */
 export function generateCAGEDShape(shapeType, root) {
   const template = CAGED_TEMPLATES[shapeType];
@@ -773,13 +580,16 @@ export function generateCAGEDShape(shapeType, root) {
                      : note === fifthNote ? 'fifth'
                      : 'other';
 
-          notes.push({
-            stringIndex,
-            fret: noteFret,
-            note,
-            role,
-            shape: shapeType
-          });
+          // ONLY include chord tones (root, third, fifth) - NEVER 'other'
+          if (role !== 'other') {
+            notes.push({
+              stringIndex,
+              fret: noteFret,
+              note,
+              role,
+              shape: shapeType
+            });
+          }
         }
       }
     }
@@ -791,7 +601,7 @@ export function generateCAGEDShape(shapeType, root) {
 /**
  * Generate all CAGED shapes for a given root
  * @param {string} root - Root note
- * @returns {Array} Combined array of all CAGED shape notes without duplicates
+ * @returns {FretboardNote[]} Combined array of all CAGED shape notes without duplicates
  */
 export function generateAllCAGEDShapes(root) {
   const allNotes = [];

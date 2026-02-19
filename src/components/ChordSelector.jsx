@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { NOTES, CHORDS } from '../data/musicTheory';
 import './ChordSelector.css';
 
-function ChordSelector({ selectedRoot, selectedType, onRootChange, onTypeChange, onClear }) {
+function ChordSelector({ selectedRoot, selectedType, onRootChange, onTypeChange, onClear, selectedPosition, onPositionChange, showScaleOverlay, onScaleOverlayChange }) {
   return (
     <div className="chord-selector">
       <div className="chord-selector-header">
@@ -44,6 +45,35 @@ function ChordSelector({ selectedRoot, selectedType, onRootChange, onTypeChange,
               <option key={chordType} value={chordType}>{chordType}</option>
             ))}
           </select>
+        </div>
+
+        <div className="chord-control-group">
+          <label className="chord-control-label">Position</label>
+          <select
+            value={selectedPosition}
+            onChange={(e) => onPositionChange(e.target.value)}
+            className="chord-select"
+            disabled={!selectedRoot}
+          >
+            <option value="ALL">All Positions</option>
+            <option value="C">C Shape</option>
+            <option value="A">A Shape</option>
+            <option value="G">G Shape</option>
+            <option value="E">E Shape</option>
+            <option value="D">D Shape</option>
+          </select>
+        </div>
+
+        <div className="chord-control-group">
+          <label className="chord-control-label">
+            <input
+              type="checkbox"
+              checked={showScaleOverlay}
+              onChange={(e) => onScaleOverlayChange(e.target.checked)}
+              disabled={!selectedRoot}
+            />
+            Show Scale Overlay
+          </label>
         </div>
       </div>
 

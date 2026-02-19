@@ -10,6 +10,36 @@
   margin: 24px 0;
 }
 
+/* Visual hierarchy for notes */
+.note-root {
+  background: #ff5757 !important;
+  color: #ffffff !important;
+  transform: scale(1.15);
+  box-shadow: 0 0 14px rgba(255, 87, 87, 0.9);
+  z-index: 3;
+  font-weight: 700;
+}
+
+.note-chord {
+  background: #5aa9ff !important;
+  color: #ffffff !important;
+  transform: scale(1.0);
+  box-shadow: 0 0 10px rgba(90, 169, 255, 0.6);
+  z-index: 2;
+  font-weight: 600;
+}
+
+.note-scale {
+  background: #8bbcff !important;
+  color: #1a1a1a !important;
+  opacity: 0.45;
+  transform: scale(0.8);
+  box-shadow: none;
+  z-index: 1;
+  font-weight: 500;
+  border: 1px solid rgba(139, 188, 255, 0.4);
+}
+
 .fretboard-wrapper {
   min-width: 1000px;
 }

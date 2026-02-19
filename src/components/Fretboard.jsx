@@ -1,17 +1,91 @@
-import { useState, useEffect } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectCAGEDChordShapes, CAGED_COLORS, generateAllCAGEDShapes } from '../data/musicTheory';
+import { useState, useEffect, useMemo } from 'react';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getNoteAt } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
 
-function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '' }) {
+function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '', cagedPosition = 'ALL', showScaleOverlay = false }) {
   const fretboard = generateFretboard(rootNote, scaleName);
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
 
-  // Generate all CAGED major shapes for the selected chord root
+  // Generate all CAGED major shapes for the selected chord root (memoized for performance)
+  // PURE - NEVER modified after generation
   const cagedRoot = chordRoot || rootNote;
-  const cagedNotes = cagedRoot ? generateAllCAGEDShapes(cagedRoot) : [];
+  const cagedNotes = useMemo(() => {
+    if (!cagedRoot) return [];
+    if (cagedPosition === 'ALL') {
+      return generateAllCAGEDShapes(cagedRoot);
+    }
+    return generateCAGEDShape(cagedPosition, cagedRoot);
+  }, [cagedRoot, cagedPosition]);
+
+  // Generate scale notes across fretboard (memoized for performance)
+  // PURE - NEVER modified after generation
+  const scaleNotes = useMemo(() => {
+    if (!showScaleOverlay || !cagedRoot) return [];
+    
+    const scale = getMajorScale(cagedRoot);
+    const notes = [];
+    
+    for (let stringIndex = 0; stringIndex < 6; stringIndex++) {
+      for (let fret = 0; fret <= NUM_FRETS; fret++) {
+        const note = getNoteAt(stringIndex, fret);
+        if (scale.includes(note)) {
+          notes.push({
+            stringIndex,
+            fret,
+            note,
+            role: 'scale',
+            isScaleTone: true
+          });
+        }
+      }
+    }
+    
+    return notes;
+  }, [cagedRoot, showScaleOverlay]);
+
+  // Filter scale notes by position (NEVER affects cagedNotes)
+  const visibleScaleNotes = useMemo(() => {
+    if (!showScaleOverlay || scaleNotes.length === 0) return [];
+    
+    // Show all scale notes if "All Positions" selected
+    if (cagedPosition === 'ALL') {
+      return scaleNotes;
+    }
+    
+    // Filter scale notes to match CAGED position's fret range
+    if (cagedNotes.length === 0) return scaleNotes;
+    
+    const frets = cagedNotes.map(n => n.fret);
+    const minFret = Math.min(...frets);
+    const maxFret = Math.max(...frets);
+    
+    return scaleNotes.filter(note =>
+      note.fret >= minFret - 1 &&
+      note.fret <= maxFret + 1
+    );
+  }, [scaleNotes, cagedNotes, showScaleOverlay, cagedPosition]);
+
+  // Combine chord notes and scale notes WITHOUT mutation
+  const allVisibleNotes = useMemo(() => {
+    // If scale overlay is off, show only CAGED chord notes
+    if (!showScaleOverlay) {
+      return cagedNotes;
+    }
+    
+    // Combine CAGED notes with visible scale notes, removing duplicates
+    return [
+      ...cagedNotes,
+      ...visibleScaleNotes.filter(scaleNote =>
+        !cagedNotes.some(chordNote =>
+          chordNote.stringIndex === scaleNote.stringIndex &&
+          chordNote.fret === scaleNote.fret
+        )
+      )
+    ];
+  }, [cagedNotes, visibleScaleNotes, showScaleOverlay]);
 
   // Get the selected position data
   const currentPosition = selectedPosition === 'all' 
@@ -32,25 +106,16 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   // Detect if we're in chord shape mode
   const isChordShapeMode = chordNotes.length > 0 && chordRoot;
 
-  // Detect CAGED chord shapes with multi-shape membership
-  const { shapes: cagedShapes, noteToShapes, connections } = detectCAGEDChordShapes(chordRoot, chordNotes, fretboard);
-
-  // Get the CAGED shapes for a specific note position
-  const getCAGEDShapes = (stringIndex, fret) => {
-    const key = `${stringIndex}-${fret}`;
-    return noteToShapes.get(key) || [];
-  };
-
   // Get the CAGED note data for a specific position
   const getCAGEDNote = (stringIndex, fret) => {
-    return cagedNotes.find(note => 
+    return allVisibleNotes.find(note => 
       note.stringIndex === stringIndex && note.fret === fret
     );
   };
 
-  // Check if a note should be displayed - show all CAGED notes
+  // Check if a note should be displayed - show all visible notes
   const shouldDisplayNote = (fretData, stringIndex) => {
-    const noteExists = cagedNotes.find(note => 
+    const noteExists = allVisibleNotes.find(note => 
       note.stringIndex === stringIndex && note.fret === fretData.fret
     );
     return noteExists !== undefined;
@@ -82,21 +147,16 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
   // Handle note click - play individual note
   const handleNoteClick = async (stringNote, fret, note, stringIndex) => {
-    console.log('🎯 Fretboard note clicked:', { stringNote, fret, note, stringIndex });
-    
     // Initialize audio on first interaction
     if (!isAudioInitialized) {
-      console.log('🎵 First interaction - initializing audio engine...');
       try {
         const success = await audioEngine.initialize();
         if (success) {
           setIsAudioInitialized(true);
-          console.log('✓✓✓ Audio engine initialized successfully in Fretboard');
         } else {
           throw new Error('Initialization returned false');
         }
       } catch (error) {
-        console.error('❌ Failed to initialize audio engine:', error);
         alert(`Failed to initialize audio: ${error.message || 'Unknown error'}. Please refresh the page and try again.`);
         return;
       }
@@ -104,14 +164,12 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     
     // Verify audio engine is ready before playing
     if (!audioEngine.isInitialized()) {
-      console.error('❌ Audio engine not ready for playback');
       alert('Audio system not ready. Please try clicking again.');
-      setIsAudioInitialized(false); // Reset state to trigger re-init on next click
+      setIsAudioInitialized(false);
       return;
     }
 
     try {
-      console.log('🎸 Requesting note playback...');
       // Play the note with correct string index for accurate pitch
       audioEngine.playNote(stringNote, fret, 0.8, 'normal', stringIndex);
 
@@ -121,7 +179,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
         setHighlightedNote(null);
       }, 300);
     } catch (error) {
-      console.error('❌ Error playing note:', error);
+      // Silent fail - audio errors are non-critical
     }
   };
 
@@ -186,46 +244,26 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
                 {/* Fretted notes */}
                 {stringData.frets.slice(1).map(fretData => {
-                  const cagedShapes = getCAGEDShapes(stringData.stringIndex, fretData.fret);
                   const shouldDisplay = shouldDisplayNote(fretData, stringData.stringIndex);
                   const cagedNote = getCAGEDNote(stringData.stringIndex, fretData.fret);
                   
-                  let colorClasses = '';
-                  let style = {};
-                  let dataAttributes = {};
-                  
+                  // Determine visual hierarchy classification
+                  let visualType = '';
                   if (shouldDisplay && cagedNote) {
-                    // Role-based color rendering
-                    if (cagedNote.role === 'root') {
-                      style.backgroundColor = '#ff0000'; // Red for root
-                      style.color = '#ffffff';
-                    } else if (cagedNote.role === 'third') {
-                      style.backgroundColor = '#ffff00'; // Yellow for third
-                      style.color = '#000000';
-                    } else if (cagedNote.role === 'fifth') {
-                      style.backgroundColor = '#0000ff'; // Blue for fifth
-                      style.color = '#ffffff';
+                    const isRoot = cagedNote.role === 'root';
+                    const isChordTone = cagedNote.role === 'third' || cagedNote.role === 'fifth' || cagedNote.role === 'root';
+                    const isScaleTone = cagedNote.role === 'scale' || cagedNote.isScaleTone;
+                    
+                    if (isRoot) {
+                      visualType = 'root';
+                    } else if (isChordTone) {
+                      visualType = 'chord';
+                    } else if (isScaleTone) {
+                      visualType = 'scale';
                     }
                   }
                   
-                  // ORIGINAL CAGED COLOR LOGIC (temporarily disabled):
-                  // if (cagedShapes.length > 0) {
-                  //   if (cagedShapes.length === 1) {
-                  //     // Single CAGED shape - use that shape's dedicated color
-                  //     colorClasses = `caged-${cagedShapes[0]}`;
-                  //   } else {
-                  //     // Multiple CAGED shapes - blend shape colors using gradient fill
-                  //     colorClasses = 'caged-multi';
-                  //     dataAttributes['data-shape-count'] = cagedShapes.length;
-                  //     // Map each CAGED shape to its color (NOT note color)
-                  //     cagedShapes.forEach((shape, i) => {
-                  //       style[`--shape-color-${i}`] = CAGED_COLORS[shape].primary;
-                  //     });
-                  //   }
-                  // }
-                  
-                  // Determine if this note is a root based ONLY on note.role
-                  const isRoot = cagedNote && cagedNote.role === 'root';
+                  const isRoot = visualType === 'root';
                   
                   return (
                     <div key={fretData.fret} className="fret-cell">
@@ -234,14 +272,10 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                       {shouldDisplay && (
                         <button
                           className={`note-marker ${
-                            isRoot ? 'root' : ''
+                            visualType ? `note-${visualType}` : ''
                           } ${
                             isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
-                          } ${showIntervals ? 'interval-mode' : 'note-mode'} ${
-                            colorClasses
-                          }`}
-                          style={style}
-                          {...dataAttributes}
+                          } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
                           title={getTooltipText(fretData)}
                           onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                         >
@@ -254,18 +288,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="fretboard-legend">
-        <div className="legend-item">
-          <div className="legend-dot root"></div>
-          <span>Root Note</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-dot scale"></div>
-          <span>Scale Note</span>
         </div>
       </div>
     </div>
