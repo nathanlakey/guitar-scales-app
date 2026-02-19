@@ -161,53 +161,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
           {/* Nut */}
           <div className="nut"></div>
 
-          {/* CAGED chord shape glow connections */}
-          {isChordShapeMode && connections.length > 0 && (
-            <svg
-              className="chord-glow-connections"
-              viewBox="0 0 1100 260"
-              preserveAspectRatio="none"
-            >
-              <defs>
-                {/* Clear glow filters for each CAGED shape */}
-                {Object.entries(CAGED_COLORS).map(([shape, colors]) => (
-                  <filter key={`glow-${shape}`} id={`chord-glow-${shape}`}>
-                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                    <feMerge>
-                      <feMergeNode in="coloredBlur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                ))}
-              </defs>
-              
-              {/* Draw clear connections between notes of the same shape */}
-              {connections.map((connection, index) => {
-                const fromDisplayIndex = STANDARD_TUNING.length - 1 - connection.from.stringIndex;
-                const toDisplayIndex = STANDARD_TUNING.length - 1 - connection.to.stringIndex;
-                const fromPos = calculateNotePosition(fromDisplayIndex, connection.from.fret);
-                const toPos = calculateNotePosition(toDisplayIndex, connection.to.fret);
-                const colors = CAGED_COLORS[connection.cagedShape];
-                
-                // Create clean, straight path aligned to note centers
-                const path = `M ${fromPos.x} ${fromPos.y} L ${toPos.x} ${toPos.y}`;
-                
-                return (
-                  <path
-                    key={`glow-${index}`}
-                    d={path}
-                    stroke={colors.primary}
-                    strokeWidth={3}
-                    fill="none"
-                    strokeLinecap="round"
-                    filter={`url(#chord-glow-${connection.cagedShape})`}
-                    className="chord-glow-path"
-                    opacity={0.7}
-                  />
-                );
-              })}            
-            </svg>
-          )}
+          {/* CAGED chord shape coloring - no connections, color-only visualization */}
 
           {/* Strings - displayed from high E (index 5) to low E (index 0) */}
           {[...fretboard].reverse().map((stringData, displayIndex) => {
@@ -227,20 +181,21 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                   const cagedShapes = getCAGEDShapes(stringData.stringIndex, fretData.fret);
                   const shouldDisplay = shouldDisplayNote(fretData, stringData.stringIndex);
                   
-                  // Generate multi-color class for overlapping shapes
+                  // Color assignment based on CAGED shape identity (C, A, G, E, D shapes)
+                  // NOT based on note names - each shape has its own fixed color
                   let colorClasses = '';
                   let style = {};
                   let dataAttributes = {};
                   
                   if (cagedShapes.length > 0) {
                     if (cagedShapes.length === 1) {
-                      // Single shape - use that shape's color
+                      // Single CAGED shape - use that shape's dedicated color
                       colorClasses = `caged-${cagedShapes[0]}`;
                     } else {
-                      // Multiple shapes - create smooth gradient fill
+                      // Multiple CAGED shapes - blend shape colors using gradient fill
                       colorClasses = 'caged-multi';
                       dataAttributes['data-shape-count'] = cagedShapes.length;
-                      // Create CSS custom properties for gradient colors
+                      // Map each CAGED shape to its color (NOT note color)
                       cagedShapes.forEach((shape, i) => {
                         style[`--shape-color-${i}`] = CAGED_COLORS[shape].primary;
                       });
