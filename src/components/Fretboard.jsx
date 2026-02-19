@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectCAGEDChordShapes, CAGED_COLORS, generateAShapeMajor } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectCAGEDChordShapes, CAGED_COLORS, generateAllCAGEDShapes } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
@@ -9,11 +9,15 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
 
-  // TEMPORARY TEST: Generate A shape major positions for visual verification
-  const testNotes = generateAShapeMajor("C");
+  // Generate all CAGED major shapes for the selected chord root
+  // Use chordRoot if available, otherwise fall back to scale rootNote
+  const cagedRoot = chordRoot || rootNote;
+  console.log("Fretboard received root:", cagedRoot);
+  console.log("Generating CAGED shapes for root:", cagedRoot);
+  const cagedNotes = cagedRoot ? generateAllCAGEDShapes(cagedRoot) : [];
   
-  // Debug: log test notes
-  console.log("A Shape Test Notes:", testNotes);
+  // Debug: log all CAGED notes
+  console.log("All CAGED Shapes:", cagedNotes);
 
   // Get the selected position data
   const currentPosition = selectedPosition === 'all' 
@@ -43,31 +47,19 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     return noteToShapes.get(key) || [];
   };
 
-  // TEMPORARY TEST: Check if a note is in the A shape test output
-  const isAShapeTestNote = (stringIndex, fret) => {
-    // Debug: log what we're comparing
-    const found = testNotes.some(note => {
-      const match = note.stringIndex === stringIndex && note.fret === fret;
-      if (match) {
-        console.log(`Match found: stringIndex ${stringIndex}, fret ${fret}`);
-      }
-      return match;
-    });
-    return found;
+  // Get the CAGED note data for a specific position
+  const getCAGEDNote = (stringIndex, fret) => {
+    return cagedNotes.find(note => 
+      note.stringIndex === stringIndex && note.fret === fret
+    );
   };
 
-  // Check if a note should be displayed
+  // Check if a note should be displayed - show all CAGED notes
   const shouldDisplayNote = (fretData, stringIndex) => {
-    // TEMPORARY TEST: Only show A shape major notes
-    return isAShapeTestNote(stringIndex, fretData.fret);
-    
-    // ORIGINAL LOGIC (temporarily disabled):
-    // In chord shape mode, show chord tones regardless of scale
-    // if (isChordShapeMode) {
-    //   return isChordTone(fretData.note) && fretData.fret > 0;
-    // }
-    // In scale mode, show scale notes in position
-    // return fretData.inScale && isInPosition(fretData.fret);
+    const noteExists = cagedNotes.find(note => 
+      note.stringIndex === stringIndex && note.fret === fretData.fret
+    );
+    return noteExists !== undefined;
   };
 
   // Calculate position for SVG coordinate system
@@ -186,33 +178,40 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
           {/* CAGED chord shape coloring - no connections, color-only visualization */}
 
-          {/* Strings - displayed from high E (index 5) to low E (index 0) */}
-          {[...fretboard].reverse().map((stringData, displayIndex) => {
-            const stringIndex = STANDARD_TUNING.length - 1 - displayIndex;
+          {/* Strings - displayed from stringIndex 0 (high E) to stringIndex 5 (low E) */}
+          {fretboard.map((stringData, stringIndex) => {
             return (
               <div key={stringIndex} className="guitar-string-row">
                 {/* String label */}
-                <div className="string-label">{stringLabels[displayIndex]}</div>
+                <div className="string-label">{stringLabels[stringIndex]}</div>
 
                 {/* Open note spacer (before the nut) */}
                 <div className="open-note-cell">
-                  <div className={`string-line string-${displayIndex}`}></div>
+                  <div className={`string-line string-${stringIndex}`}></div>
                 </div>
 
                 {/* Fretted notes */}
                 {stringData.frets.slice(1).map(fretData => {
                   const cagedShapes = getCAGEDShapes(stringData.stringIndex, fretData.fret);
                   const shouldDisplay = shouldDisplayNote(fretData, stringData.stringIndex);
+                  const cagedNote = getCAGEDNote(stringData.stringIndex, fretData.fret);
                   
-                  // TEMPORARY TEST: Use bright green for E shape test notes
                   let colorClasses = '';
                   let style = {};
                   let dataAttributes = {};
                   
-                  if (shouldDisplay) {
-                    // Bright green test color
-                    style.backgroundColor = '#00ff00';
-                    style.color = '#000000';
+                  if (shouldDisplay && cagedNote) {
+                    // Role-based color rendering
+                    if (cagedNote.role === 'root') {
+                      style.backgroundColor = '#ff0000'; // Red for root
+                      style.color = '#ffffff';
+                    } else if (cagedNote.role === 'third') {
+                      style.backgroundColor = '#ffff00'; // Yellow for third
+                      style.color = '#000000';
+                    } else if (cagedNote.role === 'fifth') {
+                      style.backgroundColor = '#0000ff'; // Blue for fifth
+                      style.color = '#ffffff';
+                    }
                   }
                   
                   // ORIGINAL CAGED COLOR LOGIC (temporarily disabled):
@@ -231,20 +230,20 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                   //   }
                   // }
                   
+                  // Determine if this note is a root based ONLY on note.role
+                  const isRoot = cagedNote && cagedNote.role === 'root';
+                  
                   return (
                     <div key={fretData.fret} className="fret-cell">
-                      <div className={`string-line string-${displayIndex}`}></div>
+                      <div className={`string-line string-${stringIndex}`}></div>
                       <div className="fret-wire"></div>
                       {shouldDisplay && (
                         <button
                           className={`note-marker ${
-                            isChordShapeMode && isChordTone(fretData.note) && fretData.note === chordRoot ? 'chord-root' : 
-                            fretData.isRoot ? 'root' : ''
+                            isRoot ? 'root' : ''
                           } ${
                             isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                           } ${showIntervals ? 'interval-mode' : 'note-mode'} ${
-                            isChordTone(fretData.note) ? 'chord-tone' : ''
-                          } ${
                             colorClasses
                           }`}
                           style={style}

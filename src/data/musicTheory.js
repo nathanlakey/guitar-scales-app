@@ -10,8 +10,8 @@ export const ENHARMONIC = {
   'A#': 'Bb',
 };
 
-// Standard guitar tuning (low to high): E A D G B E
-export const STANDARD_TUNING = ['E', 'A', 'D', 'G', 'B', 'E'];
+// Standard guitar tuning (stringIndex 0 = high E, stringIndex 5 = low E)
+export const STANDARD_TUNING = ['E', 'B', 'G', 'D', 'A', 'E'];
 
 // Number of frets to display
 export const NUM_FRETS = 15;
@@ -573,6 +573,151 @@ export function detectCAGEDChordShapes(chordRoot, chordNotes, fretboard) {
   return { shapes, noteToShapes, connections };
 }
 
+// ============================================================================
+// CAGED SHAPE TEMPLATE DEFINITIONS
+// ============================================================================
+
+/**
+ * Template definitions for CAGED major chord shapes
+ * Each template contains rootStringIndex and offset patterns relative to the root note position
+ */
+const CAGED_MAJOR_TEMPLATES = {
+  C: {
+    rootStringIndex: 4,
+    offsets: [
+      { stringOffset: 0, fretOffset: 0, role: "root" },
+      { stringOffset: -1, fretOffset: -1, role: "fifth" },
+      { stringOffset: -2, fretOffset: -3, role: "root" },
+      { stringOffset: -3, fretOffset: -2, role: "third" },
+      { stringOffset: -4, fretOffset: -3, role: "fifth" }
+    ]
+  },
+
+  A: {
+    rootStringIndex: 4,
+    offsets: [
+      { stringOffset: 0, fretOffset: 0, role: "root" },
+      { stringOffset: -1, fretOffset: 2, role: "fifth" },
+      { stringOffset: -2, fretOffset: 2, role: "root" },
+      { stringOffset: -3, fretOffset: 2, role: "third" },
+      { stringOffset: -4, fretOffset: 0, role: "fifth" }
+    ]
+  },
+
+  G: {
+    rootStringIndex: 5,
+    offsets: [
+      { stringOffset: 0, fretOffset: 0, role: "root" },
+      { stringOffset: -1, fretOffset: -1, role: "third" },
+      { stringOffset: -2, fretOffset: -3, role: "fifth" },
+      { stringOffset: -3, fretOffset: -3, role: "root" },
+      { stringOffset: -4, fretOffset: 0, role: "third" },
+      { stringOffset: -5, fretOffset: 0, role: "fifth" }
+    ]
+  },
+
+  E: {
+    rootStringIndex: 5,
+    offsets: [
+      { stringOffset: 0, fretOffset: 0, role: "root" },
+      { stringOffset: -1, fretOffset: 2, role: "fifth" },
+      { stringOffset: -2, fretOffset: 2, role: "root" },
+      { stringOffset: -3, fretOffset: 1, role: "third" },
+      { stringOffset: -4, fretOffset: 0, role: "fifth" },
+      { stringOffset: -5, fretOffset: 0, role: "root" }
+    ]
+  },
+
+  D: {
+    rootStringIndex: 1,
+    offsets: [
+      { stringOffset: 0, fretOffset: 0, role: "root" },
+      { stringOffset: 1, fretOffset: -1, role: "third" },
+      { stringOffset: 2, fretOffset: -3, role: "fifth" },
+      { stringOffset: 3, fretOffset: -3, role: "root" },
+      { stringOffset: -1, fretOffset: -1, role: "fifth" }
+    ]
+  }
+};
+
+// ============================================================================
+// UNIFIED SHAPE GENERATOR
+// ============================================================================
+
+/**
+ * Generate chord shape notes from a template definition
+ * This is the core engine for all CAGED shape generation
+ * 
+ * @param {string} rootNote - The root note (e.g., 'A', 'C', 'E')
+ * @param {number} rootStringIndex - The string index where the root note is located (0-5)
+ * @param {Array} template - Array of {stringOffset, fretOffset, role} objects
+ * @param {string} shapeName - The name of the shape ('E', 'A', 'C', 'G', 'D')
+ * @returns {Array} Array of note objects with stringIndex, fret, note, role, shape, rootFret
+ */
+function generateShapeFromTemplate(rootNote, rootStringIndex, template, shapeName) {
+  const shapeNotes = [];
+
+  // Get major chord notes (root, third, fifth)
+  const chordNotes = getChordNotes(rootNote, 'Major');
+  const thirdNote = chordNotes[1];  // Major third
+  const fifthNote = chordNotes[2];  // Perfect fifth
+
+  // Find all positions of root note on the specified root string
+  const rootString = STANDARD_TUNING[rootStringIndex];
+  
+  for (let fret = 0; fret <= NUM_FRETS; fret++) {
+    const noteAtFret = getNoteAtFret(rootString, fret);
+    
+    // If this fret has the root note, generate the shape from this position
+    if (noteAtFret === rootNote) {
+      const rootFret = fret;
+      
+      // Log the start of a new shape instance
+      console.log(`\n${shapeName} shape instance:`);
+      console.log(`root: ${rootNote}`);
+      console.log(`stringIndex: ${rootStringIndex}`);
+      console.log(`fret: ${rootFret}`);
+      console.log('\nnotes:');
+      
+      // Apply template offsets to generate all notes in the shape
+      for (const templateNote of template) {
+        const stringIndex = rootStringIndex + templateNote.stringOffset;
+        const shapeFret = rootFret + templateNote.fretOffset;
+        
+        // Only include notes within fretboard bounds
+        if (stringIndex >= 0 && stringIndex <= 5 && shapeFret >= 0 && shapeFret <= NUM_FRETS) {
+          const stringNote = STANDARD_TUNING[stringIndex];
+          const note = getNoteAtFret(stringNote, shapeFret);
+          
+          // Determine role based on actual note value, not template position
+          const role = note === rootNote ? "root" 
+                     : note === thirdNote ? "third"
+                     : note === fifthNote ? "fifth"
+                     : "other";
+          
+          shapeNotes.push({
+            stringIndex: stringIndex,
+            fret: shapeFret,
+            note: note,
+            role: role,
+            shape: shapeName,
+            rootFret: rootFret
+          });
+          
+          // Log each generated note
+          console.log(`stringIndex ${stringIndex} fret ${shapeFret} note ${note} role ${role}`);
+        }
+      }
+    }
+  }
+
+  return shapeNotes;
+}
+
+// ============================================================================
+// CAGED SHAPE GENERATORS (refactored to use templates)
+// ============================================================================
+
 /**
  * Generate E shape major chord positions using explicit template offsets
  * This is an isolated function for testing template-based chord generation
@@ -581,58 +726,14 @@ export function detectCAGEDChordShapes(chordRoot, chordNotes, fretboard) {
  * @returns {Array} Array of shape note positions with stringIndex and fret
  */
 export function generateEShapeMajor(rootNote) {
-  // E shape major template - offsets relative to root on low E string
-  // Using renderer indexing: 0=low E, 1=A, 2=D, 3=G, 4=B, 5=high E
-  const template = {
-    // stringIndex: fret offset from root
-    0: 0,  // Root on low E string (stringIndex 0)
-    1: 2,  // A string - 2 frets higher
-    2: 2,  // D string - 2 frets higher
-    3: 1,  // G string - 1 fret higher
-    4: 0,  // B string - Same fret as root
-    5: 0   // high E string - Same fret as root
-  };
+  // E shape root is on the low E string (stringIndex 5)
+  const notes = generateShapeFromTemplate(rootNote, 5, CAGED_MAJOR_TEMPLATES.E.offsets, 'E');
 
-  const shapeNotes = [];
+  console.log("Debug E Shape:", notes.map(n =>
+    `stringIndex ${n.stringIndex} fret ${n.fret} note ${n.note} role ${n.role}`
+  ));
 
-  // Find all positions of root note on low E string (stringIndex 0)
-  const lowEString = STANDARD_TUNING[0]; // stringIndex 0 = low E
-  
-  for (let fret = 0; fret <= NUM_FRETS; fret++) {
-    const noteAtFret = getNoteAtFret(lowEString, fret);
-    
-    // If this fret has the root note, generate the E shape from this position
-    if (noteAtFret === rootNote) {
-      const rootFret = fret;
-      
-      // Log the start of a new shape instance
-      console.log('\nE shape instance:');
-      console.log(`root: ${rootNote}`);
-      console.log(`stringIndex: 0`);
-      console.log(`fret: ${rootFret}`);
-      console.log('\nnotes:');
-      
-      // Apply template offsets to generate all notes in the shape
-      for (let stringIndex = 0; stringIndex <= 5; stringIndex++) {
-        const fretOffset = template[stringIndex];
-        const shapeFret = rootFret + fretOffset;
-        
-        // Only include notes within fretboard bounds
-        if (shapeFret >= 0 && shapeFret <= NUM_FRETS) {
-          shapeNotes.push({
-            stringIndex: stringIndex,
-            fret: shapeFret,
-            rootPosition: rootFret
-          });
-          
-          // Log each generated note
-          console.log(`stringIndex ${stringIndex} fret ${shapeFret}`);
-        }
-      }
-    }
-  }
-
-  return shapeNotes;
+  return notes;
 }
 
 /**
@@ -643,60 +744,14 @@ export function generateEShapeMajor(rootNote) {
  * @returns {Array} Array of shape note positions with stringIndex and fret
  */
 export function generateAShapeMajor(rootNote) {
-  // A shape major template - offsets relative to root on A string
-  // Using renderer indexing: 0=low E, 1=A, 2=D, 3=G, 4=B, 5=high E
-  // Note: stringIndex 0 (low E) is NOT included in A shape
-  const template = {
-    // stringIndex: fret offset from root
-    1: 0,  // Root on A string (stringIndex 1)
-    2: 2,  // D string - 2 frets higher
-    3: 2,  // G string - 2 frets higher
-    4: 2,  // B string - 2 frets higher
-    5: 0   // high E string - Same fret as root
-  };
+  // A shape root is on the A string (stringIndex 4)
+  const notes = generateShapeFromTemplate(rootNote, 4, CAGED_MAJOR_TEMPLATES.A.offsets, 'A');
 
-  const shapeNotes = [];
+  console.log("Debug A Shape:", notes.map(n =>
+    `stringIndex ${n.stringIndex} fret ${n.fret} note ${n.note} role ${n.role}`
+  ));
 
-  // Find all positions of root note on A string (stringIndex 1)
-  const aString = STANDARD_TUNING[1]; // stringIndex 1 = A string
-  
-  for (let fret = 0; fret <= NUM_FRETS; fret++) {
-    const noteAtFret = getNoteAtFret(aString, fret);
-    
-    // If this fret has the root note, generate the A shape from this position
-    if (noteAtFret === rootNote) {
-      const rootFret = fret;
-      
-      // Log the start of a new shape instance
-      console.log('\nA shape instance:');
-      console.log(`root: ${rootNote}`);
-      console.log(`stringIndex: 1`);
-      console.log(`fret: ${rootFret}`);
-      console.log('\nnotes:');
-      
-      // Apply template offsets to generate all notes in the shape
-      // Note: We skip stringIndex 0 (low E string)
-      for (let stringIndex = 1; stringIndex <= 5; stringIndex++) {
-        const fretOffset = template[stringIndex];
-        const shapeFret = rootFret + fretOffset;
-        
-        // Only include notes within fretboard bounds
-        if (shapeFret >= 0 && shapeFret <= NUM_FRETS) {
-          shapeNotes.push({
-            stringIndex: stringIndex,
-            fret: shapeFret,
-            rootFret: rootFret,
-            shape: 'A'
-          });
-          
-          // Log each generated note
-          console.log(`stringIndex ${stringIndex} fret ${shapeFret}`);
-        }
-      }
-    }
-  }
-
-  return shapeNotes;
+  return notes;
 }
 
 /**
@@ -707,71 +762,223 @@ export function generateAShapeMajor(rootNote) {
  * @returns {Array} Array of shape note positions with stringIndex and fret
  */
 export function generateCShapeMajor(rootNote) {
-  // C shape major template - offsets relative to root position
-  // Using renderer indexing: 0=low E, 1=A, 2=D, 3=G, 4=B, 5=high E
-  // Note: stringIndex 0 (low E) is NOT included in C shape
-  const template = {
-    // stringIndex: fret offset from root
-    5: 3,  // high E string - 3 frets higher than rootFret
-    4: 2,  // B string - 2 frets higher than rootFret
-    3: 0,  // G string - Same fret as rootFret
-    2: 1,  // D string - 1 fret higher than rootFret
-    1: 0   // A string - Same fret as rootFret
-  };
-
+  // C shape root is ALWAYS on the A string (stringIndex 4)
+  const rootStringIndex = 4;
   const shapeNotes = [];
+  const template = CAGED_MAJOR_TEMPLATES.C.offsets;
 
-  // Find all positions of root note on B string (stringIndex 4)
-  const bString = STANDARD_TUNING[4]; // stringIndex 4 = B string
+  // Get major chord notes (root, third, fifth)
+  const chordNotes = getChordNotes(rootNote, 'Major');
+  const thirdNote = chordNotes[1];  // Major third
+  const fifthNote = chordNotes[2];  // Perfect fifth
+
+  // Find all positions of root note on A string (stringIndex 4)
+  const aString = STANDARD_TUNING[rootStringIndex];
   
   for (let fret = 0; fret <= NUM_FRETS; fret++) {
-    const noteAtFret = getNoteAtFret(bString, fret);
+    const noteAtFret = getNoteAtFret(aString, fret);
     
     // If this fret has the root note, generate the C shape from this position
     if (noteAtFret === rootNote) {
       const rootFret = fret;
       
       // Log the start of a new shape instance
-      console.log('\nC shape instance:');
+      console.log(`\nC shape instance:`);
       console.log(`root: ${rootNote}`);
-      console.log(`stringIndex: 4`);
+      console.log(`stringIndex: ${rootStringIndex}`);
       console.log(`fret: ${rootFret}`);
       console.log('\nnotes:');
       
       // Apply template offsets to generate all notes in the shape
-      // Note: We skip stringIndex 0 (low E string)
-      for (let stringIndex = 1; stringIndex <= 5; stringIndex++) {
-        const fretOffset = template[stringIndex];
-        const shapeFret = rootFret + fretOffset;
+      for (const templateNote of template) {
+        const stringIndex = rootStringIndex + templateNote.stringOffset;
+        const shapeFret = rootFret + templateNote.fretOffset;
         
-        // Only include notes within fretboard bounds
-        if (shapeFret >= 0 && shapeFret <= NUM_FRETS) {
+        // Only include notes within fretboard bounds (exclude negative frets)
+        if (stringIndex >= 0 && stringIndex <= 5 && shapeFret >= 0 && shapeFret <= NUM_FRETS) {
+          const stringNote = STANDARD_TUNING[stringIndex];
+          const note = getNoteAtFret(stringNote, shapeFret);
+          
+          // Determine role based on actual note value, not template position
+          const role = note === rootNote ? "root" 
+                     : note === thirdNote ? "third"
+                     : note === fifthNote ? "fifth"
+                     : "other";
+          
           shapeNotes.push({
             stringIndex: stringIndex,
             fret: shapeFret,
-            rootFret: rootFret,
-            shape: 'C'
+            note: note,
+            role: role,
+            shape: 'C',
+            rootFret: rootFret
           });
           
           // Log each generated note
-          console.log(`stringIndex ${stringIndex} fret ${shapeFret}`);
+          console.log(`stringIndex ${stringIndex} fret ${shapeFret} note ${note} role ${role}`);
         }
       }
     }
   }
 
+  console.log("Debug C Shape:", shapeNotes.map(n =>
+    `stringIndex ${n.stringIndex} fret ${n.fret} note ${n.note} role ${n.role}`
+  ));
+
   return shapeNotes;
 }
 
-// TEMPORARY TEST: Testing A shape generation
-console.log("Testing A shape for C:");
-const testAShape = generateAShapeMajor("C");
-console.log(testAShape);
+/**
+ * Generate G shape major chord positions using explicit template offsets
+ * This is an isolated function for testing template-based chord generation
+ * 
+ * @param {string} rootNote - The root note (e.g., 'A', 'C', 'E')
+ * @returns {Array} Array of shape note positions with stringIndex and fret
+ */
+export function generateGShapeMajor(rootNote) {
+  // G shape root is on the high E string (stringIndex 5)
+  const notes = generateShapeFromTemplate(rootNote, 5, CAGED_MAJOR_TEMPLATES.G.offsets, 'G');
 
-// TEMPORARY TEST: Testing C shape generation
-console.log("Testing C shape for C:");
-const cShapeTest = generateCShapeMajor("C");
+  console.log("Debug G Shape:", notes.map(n =>
+    `stringIndex ${n.stringIndex} fret ${n.fret} note ${n.note} role ${n.role}`
+  ));
 
-if (cShapeTest && cShapeTest.length > 0) {
-  console.log("C Shape Test Notes:", cShapeTest);
+  return notes;
+}
+
+/**
+ * Generate D shape major chord positions using explicit template offsets
+ * This is an isolated function for testing template-based chord generation
+ * 
+ * @param {string} rootNote - The root note (e.g., 'A', 'C', 'E')
+ * @returns {Array} Array of shape note positions with stringIndex and fret
+ */
+export function generateDShapeMajor(rootNote) {
+  // D shape root is ALWAYS on the B string (stringIndex 1)
+  const rootStringIndex = 1;
+  const shapeNotes = [];
+  const template = CAGED_MAJOR_TEMPLATES.D.offsets;
+
+  // Get major chord notes (root, third, fifth)
+  const chordNotes = getChordNotes(rootNote, 'Major');
+  const thirdNote = chordNotes[1];  // Major third
+  const fifthNote = chordNotes[2];  // Perfect fifth
+
+  // Find all positions of root note on B string (stringIndex 1)
+  const bString = STANDARD_TUNING[rootStringIndex];
+  
+  for (let fret = 0; fret <= NUM_FRETS; fret++) {
+    const noteAtFret = getNoteAtFret(bString, fret);
+    
+    // If this fret has the root note AND fret >= 5, generate the D shape from this position
+    if (noteAtFret === rootNote && fret >= 5) {
+      const rootFret = fret;
+      
+      // Log the start of a new shape instance
+      console.log(`\nD shape instance:`);
+      console.log(`root: ${rootNote}`);
+      console.log(`stringIndex: ${rootStringIndex}`);
+      console.log(`fret: ${rootFret}`);
+      console.log('\nnotes:');
+      
+      // Apply template offsets to generate all notes in the shape
+      for (const templateNote of template) {
+        const stringIndex = rootStringIndex + templateNote.stringOffset;
+        const shapeFret = rootFret + templateNote.fretOffset;
+        
+        // Only include notes within fretboard bounds
+        if (stringIndex >= 0 && stringIndex <= 5 && shapeFret >= 0 && shapeFret <= NUM_FRETS) {
+          const stringNote = STANDARD_TUNING[stringIndex];
+          const note = getNoteAtFret(stringNote, shapeFret);
+          
+          // Determine role based on actual note value, not template position
+          const role = note === rootNote ? "root" 
+                     : note === thirdNote ? "third"
+                     : note === fifthNote ? "fifth"
+                     : "other";
+          
+          shapeNotes.push({
+            stringIndex: stringIndex,
+            fret: shapeFret,
+            note: note,
+            role: role,
+            shape: 'D',
+            rootFret: rootFret
+          });
+          
+          // Log each generated note
+          console.log(`stringIndex ${stringIndex} fret ${shapeFret} note ${note} role ${role}`);
+        }
+      }
+    }
+  }
+
+  console.log("Debug D Shape:", shapeNotes.map(n =>
+    `stringIndex ${n.stringIndex} fret ${n.fret} note ${n.note} role ${n.role}`
+  ));
+
+  return shapeNotes;
+}
+
+/**
+ * Generate all CAGED major chord shapes for a given root note
+ * Combines E, A, C, G, and D shapes into a single array
+ * 
+ * @param {string} rootNote - The root note (e.g., 'A', 'C', 'E')
+ * @returns {Array} Combined array of all CAGED shape notes
+ */
+export function generateAllCAGEDMajorShapes(rootNote) {
+  const eShape = generateEShapeMajor(rootNote);
+  const aShape = generateAShapeMajor(rootNote);
+  const cShape = generateCShapeMajor(rootNote);
+  const gShape = generateGShapeMajor(rootNote);
+  const dShape = generateDShapeMajor(rootNote);
+
+  // Combine all shapes into one array
+  const allShapes = [
+    ...eShape,
+    ...aShape,
+    ...cShape,
+    ...gShape,
+    ...dShape
+  ];
+
+  return allShapes;
+}
+
+/**
+ * Generate all CAGED major chord shapes for a given root note
+ * Uses the template-based generator and removes duplicate notes
+ * 
+ * @param {string} rootNote - The root note (e.g., 'A', 'C', 'E')
+ * @returns {Array} Combined array of all CAGED shape notes without duplicates
+ */
+export function generateAllCAGEDShapes(rootNote) {
+  console.log("generateAllCAGEDShapes root:", rootNote);
+  
+  let allNotes = [];
+
+  // Generate notes for each CAGED shape
+  for (const shapeName in CAGED_MAJOR_TEMPLATES) {
+    let shapeNotes = [];
+    
+    // Call the appropriate generator for each shape
+    if (shapeName === 'C') shapeNotes = generateCShapeMajor(rootNote);
+    else if (shapeName === 'A') shapeNotes = generateAShapeMajor(rootNote);
+    else if (shapeName === 'G') shapeNotes = generateGShapeMajor(rootNote);
+    else if (shapeName === 'E') shapeNotes = generateEShapeMajor(rootNote);
+    else if (shapeName === 'D') shapeNotes = generateDShapeMajor(rootNote);
+    
+    allNotes.push(...shapeNotes);
+  }
+
+  // Remove duplicates based on stringIndex and fret
+  const unique = new Map();
+
+  allNotes.forEach(note => {
+    const key = `${note.stringIndex}-${note.fret}`;
+    unique.set(key, note);
+  });
+
+  return Array.from(unique.values());
 }
