@@ -68,25 +68,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     );
   }, [scaleNotes, cagedNotes, showScaleOverlay, cagedPosition]);
 
-  // Combine chord notes and scale notes WITHOUT mutation
-  const allVisibleNotes = useMemo(() => {
-    // If scale overlay is off, show only CAGED chord notes
-    if (!showScaleOverlay) {
-      return cagedNotes;
-    }
-    
-    // Combine CAGED notes with visible scale notes, removing duplicates
-    return [
-      ...cagedNotes,
-      ...visibleScaleNotes.filter(scaleNote =>
-        !cagedNotes.some(chordNote =>
-          chordNote.stringIndex === scaleNote.stringIndex &&
-          chordNote.fret === scaleNote.fret
-        )
-      )
-    ];
-  }, [cagedNotes, visibleScaleNotes, showScaleOverlay]);
-
   // Get the selected position data
   const currentPosition = selectedPosition === 'all' 
     ? null 
@@ -106,19 +87,18 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   // Detect if we're in chord shape mode
   const isChordShapeMode = chordNotes.length > 0 && chordRoot;
 
-  // Get the CAGED note data for a specific position
-  const getCAGEDNote = (stringIndex, fret) => {
-    return allVisibleNotes.find(note => 
+  // Check if a chord note exists at position
+  const getChordNote = (stringIndex, fret) => {
+    return cagedNotes.find(note => 
       note.stringIndex === stringIndex && note.fret === fret
     );
   };
 
-  // Check if a note should be displayed - show all visible notes
-  const shouldDisplayNote = (fretData, stringIndex) => {
-    const noteExists = allVisibleNotes.find(note => 
-      note.stringIndex === stringIndex && note.fret === fretData.fret
+  // Check if a scale note exists at position
+  const getScaleNote = (stringIndex, fret) => {
+    return visibleScaleNotes.find(note => 
+      note.stringIndex === stringIndex && note.fret === fret
     );
-    return noteExists !== undefined;
   };
 
   // Calculate position for SVG coordinate system
@@ -244,36 +224,22 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
                 {/* Fretted notes */}
                 {stringData.frets.slice(1).map(fretData => {
-                  const shouldDisplay = shouldDisplayNote(fretData, stringData.stringIndex);
-                  const cagedNote = getCAGEDNote(stringData.stringIndex, fretData.fret);
+                  const chordNote = getChordNote(stringData.stringIndex, fretData.fret);
+                  const scaleNote = getScaleNote(stringData.stringIndex, fretData.fret);
                   
-                  // Determine visual hierarchy classification
-                  let visualType = '';
-                  if (shouldDisplay && cagedNote) {
-                    const isRoot = cagedNote.role === 'root';
-                    const isChordTone = cagedNote.role === 'third' || cagedNote.role === 'fifth' || cagedNote.role === 'root';
-                    const isScaleTone = cagedNote.role === 'scale' || cagedNote.isScaleTone;
-                    
-                    if (isRoot) {
-                      visualType = 'root';
-                    } else if (isChordTone) {
-                      visualType = 'chord';
-                    } else if (isScaleTone) {
-                      visualType = 'scale';
-                    }
-                  }
-                  
-                  const isRoot = visualType === 'root';
+                  // Determine if this position should display a note
+                  const hasChordNote = !!chordNote;
+                  const hasScaleNote = !!scaleNote && !hasChordNote; // Don't show scale if chord exists at same position
                   
                   return (
                     <div key={fretData.fret} className="fret-cell">
                       <div className={`string-line string-${stringIndex}`}></div>
                       <div className="fret-wire"></div>
-                      {shouldDisplay && (
+                      
+                      {/* LAYER 1: Scale notes (background) */}
+                      {hasScaleNote && (
                         <button
-                          className={`note-marker ${
-                            visualType ? `note-${visualType}` : ''
-                          } ${
+                          className={`note-marker note-scale ${
                             isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                           } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
                           title={getTooltipText(fretData)}
@@ -282,6 +248,24 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                           {getDisplayLabel(fretData)}
                         </button>
                       )}
+                      
+                      {/* LAYER 2: Chord notes (foreground) */}
+                      {hasChordNote && (() => {
+                        const isRoot = chordNote.role === 'root';
+                        const visualType = isRoot ? 'root' : 'chord';
+                        
+                        return (
+                          <button
+                            className={`note-marker note-${visualType} ${
+                              isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
+                            } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
+                            title={getTooltipText(fretData)}
+                            onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
+                          >
+                            {getDisplayLabel(fretData)}
+                          </button>
+                        );
+                      })()}
                     </div>
                   );
                 })}
