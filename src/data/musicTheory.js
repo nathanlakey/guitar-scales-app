@@ -412,7 +412,41 @@ export const CAGED_COLORS = {
 // Each template defines note positions relative to the root note
 // Format: { stringOffset: number, fretOffset: number, interval: 'R' | '3' | '5' }
 const CAGED_TEMPLATES = {
-  // E shape - root on low E string (index 0)
+  // C shape - root on A string, C-form barre chord
+  'C': {
+    rootString: 1, // A string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
+      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on D string
+      { stringOffset: 2, fretOffset: 0, interval: 'R' },  // Root on G string
+      { stringOffset: 3, fretOffset: 1, interval: '3' },  // 3rd on B string
+      { stringOffset: 4, fretOffset: 0, interval: 'R' }   // Root on high E string
+    ]
+  },
+  // A shape - root on A string, open A-form
+  'A': {
+    rootString: 1, // A string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
+      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on D string
+      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on G string
+      { stringOffset: 3, fretOffset: 2, interval: '3' },  // 3rd on B string
+      { stringOffset: 4, fretOffset: 0, interval: '5' }   // 5th on high E string
+    ]
+  },
+  // G shape - root on low E string, G-form barre
+  'G': {
+    rootString: 0, // Low E string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on low E
+      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on A string
+      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on D string
+      { stringOffset: 3, fretOffset: 0, interval: '3' },  // 3rd on G string
+      { stringOffset: 4, fretOffset: 0, interval: 'R' },  // Root on B string
+      { stringOffset: 5, fretOffset: 3, interval: '5' }   // 5th on high E
+    ]
+  },
+  // E shape - root on low E string, E-form barre
   'E': {
     rootString: 0, // Low E string
     notes: [
@@ -424,7 +458,7 @@ const CAGED_TEMPLATES = {
       { stringOffset: 5, fretOffset: 0, interval: 'R' }   // Root on high E
     ]
   },
-  // D shape - root on D string (index 2)
+  // D shape - root on D string, triangle shape
   'D': {
     rootString: 2, // D string
     notes: [
@@ -432,40 +466,6 @@ const CAGED_TEMPLATES = {
       { stringOffset: 1, fretOffset: 2, interval: '3' },  // 3rd on G string
       { stringOffset: 2, fretOffset: 3, interval: '5' },  // 5th on B string
       { stringOffset: 3, fretOffset: 2, interval: 'R' }   // Root on high E string
-    ]
-  },
-  // C shape - root on A string (index 1)
-  'C': {
-    rootString: 1, // A string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
-      { stringOffset: 1, fretOffset: 2, interval: '3' },  // 3rd on D string
-      { stringOffset: 2, fretOffset: 2, interval: '5' },  // 5th on G string
-      { stringOffset: 3, fretOffset: 1, interval: 'R' },  // Root on B string
-      { stringOffset: 4, fretOffset: 1, interval: '3' }   // 3rd on high E string
-    ]
-  },
-  // A shape - root on A string (index 1)
-  'A': {
-    rootString: 1, // A string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
-      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on D string
-      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on G string
-      { stringOffset: 3, fretOffset: 2, interval: '3' },  // 3rd on B string
-      { stringOffset: 4, fretOffset: 0, interval: '5' }   // 5th on high E string
-    ]
-  },
-  // G shape - root on low E string (index 0)
-  'G': {
-    rootString: 0, // Low E string
-    notes: [
-      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on low E
-      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on A string
-      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on D string
-      { stringOffset: 3, fretOffset: 0, interval: '3' },  // 3rd on G string
-      { stringOffset: 4, fretOffset: 0, interval: '5' },  // 5th on B string
-      { stringOffset: 5, fretOffset: 0, interval: 'R' }   // Root on high E
     ]
   }
 };
