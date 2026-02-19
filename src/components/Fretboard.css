@@ -181,37 +181,28 @@
   border: 2px solid rgba(255, 255, 255, 0.7);
 }
 
-/* 2-color gradient for overlapping shapes */
+/* 2-color gradient for overlapping shapes - smooth blend */
 .note-marker.caged-multi[data-shape-count="2"] {
   background: linear-gradient(135deg, 
     var(--shape-color-0) 0%, 
-    var(--shape-color-0) 45%, 
-    var(--shape-color-1) 55%, 
     var(--shape-color-1) 100%);
 }
 
-/* 3-color gradient for overlapping shapes */
+/* 3-color gradient for overlapping shapes - smooth blend */
 .note-marker.caged-multi[data-shape-count="3"] {
   background: linear-gradient(135deg, 
     var(--shape-color-0) 0%, 
-    var(--shape-color-0) 30%, 
-    var(--shape-color-1) 35%, 
-    var(--shape-color-1) 65%, 
-    var(--shape-color-2) 70%, 
+    var(--shape-color-1) 50%, 
     var(--shape-color-2) 100%);
 }
 
-/* 4+ color gradient for overlapping shapes */
+/* 4+ color gradient for overlapping shapes - smooth blend */
 .note-marker.caged-multi[data-shape-count="4"],
 .note-marker.caged-multi[data-shape-count="5"] {
   background: linear-gradient(135deg, 
     var(--shape-color-0) 0%, 
-    var(--shape-color-0) 22%, 
-    var(--shape-color-1) 25%, 
-    var(--shape-color-1) 47%, 
-    var(--shape-color-2) 50%, 
-    var(--shape-color-2) 72%, 
-    var(--shape-color-3) 75%, 
+    var(--shape-color-1) 33%, 
+    var(--shape-color-2) 67%, 
     var(--shape-color-3) 100%);
 }
 

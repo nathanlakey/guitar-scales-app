@@ -418,9 +418,9 @@ const CAGED_TEMPLATES = {
     notes: [
       { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
       { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on D string
-      { stringOffset: 2, fretOffset: 0, interval: 'R' },  // Root on G string
+      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on G string
       { stringOffset: 3, fretOffset: 1, interval: '3' },  // 3rd on B string
-      { stringOffset: 4, fretOffset: 0, interval: 'R' }   // Root on high E string
+      { stringOffset: 4, fretOffset: 0, interval: '5' }   // 5th on high E string
     ]
   },
   // A shape - root on A string, open A-form
