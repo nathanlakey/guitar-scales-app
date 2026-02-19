@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectCAGEDChordShapes, CAGED_COLORS } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, detectCAGEDChordShapes, CAGED_COLORS, generateAShapeMajor } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
@@ -8,6 +8,12 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   const fretboard = generateFretboard(rootNote, scaleName);
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+
+  // TEMPORARY TEST: Generate A shape major positions for visual verification
+  const testNotes = generateAShapeMajor("C");
+  
+  // Debug: log test notes
+  console.log("A Shape Test Notes:", testNotes);
 
   // Get the selected position data
   const currentPosition = selectedPosition === 'all' 
@@ -37,14 +43,31 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     return noteToShapes.get(key) || [];
   };
 
+  // TEMPORARY TEST: Check if a note is in the A shape test output
+  const isAShapeTestNote = (stringIndex, fret) => {
+    // Debug: log what we're comparing
+    const found = testNotes.some(note => {
+      const match = note.stringIndex === stringIndex && note.fret === fret;
+      if (match) {
+        console.log(`Match found: stringIndex ${stringIndex}, fret ${fret}`);
+      }
+      return match;
+    });
+    return found;
+  };
+
   // Check if a note should be displayed
   const shouldDisplayNote = (fretData, stringIndex) => {
+    // TEMPORARY TEST: Only show A shape major notes
+    return isAShapeTestNote(stringIndex, fretData.fret);
+    
+    // ORIGINAL LOGIC (temporarily disabled):
     // In chord shape mode, show chord tones regardless of scale
-    if (isChordShapeMode) {
-      return isChordTone(fretData.note) && fretData.fret > 0;
-    }
+    // if (isChordShapeMode) {
+    //   return isChordTone(fretData.note) && fretData.fret > 0;
+    // }
     // In scale mode, show scale notes in position
-    return fretData.inScale && isInPosition(fretData.fret);
+    // return fretData.inScale && isInPosition(fretData.fret);
   };
 
   // Calculate position for SVG coordinate system
@@ -181,26 +204,32 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                   const cagedShapes = getCAGEDShapes(stringData.stringIndex, fretData.fret);
                   const shouldDisplay = shouldDisplayNote(fretData, stringData.stringIndex);
                   
-                  // Color assignment based on CAGED shape identity (C, A, G, E, D shapes)
-                  // NOT based on note names - each shape has its own fixed color
+                  // TEMPORARY TEST: Use bright green for E shape test notes
                   let colorClasses = '';
                   let style = {};
                   let dataAttributes = {};
                   
-                  if (cagedShapes.length > 0) {
-                    if (cagedShapes.length === 1) {
-                      // Single CAGED shape - use that shape's dedicated color
-                      colorClasses = `caged-${cagedShapes[0]}`;
-                    } else {
-                      // Multiple CAGED shapes - blend shape colors using gradient fill
-                      colorClasses = 'caged-multi';
-                      dataAttributes['data-shape-count'] = cagedShapes.length;
-                      // Map each CAGED shape to its color (NOT note color)
-                      cagedShapes.forEach((shape, i) => {
-                        style[`--shape-color-${i}`] = CAGED_COLORS[shape].primary;
-                      });
-                    }
+                  if (shouldDisplay) {
+                    // Bright green test color
+                    style.backgroundColor = '#00ff00';
+                    style.color = '#000000';
                   }
+                  
+                  // ORIGINAL CAGED COLOR LOGIC (temporarily disabled):
+                  // if (cagedShapes.length > 0) {
+                  //   if (cagedShapes.length === 1) {
+                  //     // Single CAGED shape - use that shape's dedicated color
+                  //     colorClasses = `caged-${cagedShapes[0]}`;
+                  //   } else {
+                  //     // Multiple CAGED shapes - blend shape colors using gradient fill
+                  //     colorClasses = 'caged-multi';
+                  //     dataAttributes['data-shape-count'] = cagedShapes.length;
+                  //     // Map each CAGED shape to its color (NOT note color)
+                  //     cagedShapes.forEach((shape, i) => {
+                  //       style[`--shape-color-${i}`] = CAGED_COLORS[shape].primary;
+                  //     });
+                  //   }
+                  // }
                   
                   return (
                     <div key={fretData.fret} className="fret-cell">
