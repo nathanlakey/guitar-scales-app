@@ -408,122 +408,166 @@ export const CAGED_COLORS = {
  * @param {Array} fretboard - Full fretboard data
  * @returns {Object} Object containing shapes array and note-to-shapes mapping
  */
+// True CAGED major chord shape templates
+// Each template defines note positions relative to the root note
+// Format: { stringOffset: number, fretOffset: number, interval: 'R' | '3' | '5' }
+const CAGED_TEMPLATES = {
+  // C shape - root on A string (index 1)
+  'C': {
+    rootString: 1, // A string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
+      { stringOffset: 1, fretOffset: 0, interval: '3' },  // 3rd on D string
+      { stringOffset: 2, fretOffset: -1, interval: '5' }, // 5th on G string
+      { stringOffset: 3, fretOffset: -1, interval: 'R' }, // Root on B string
+      { stringOffset: 4, fretOffset: -1, interval: '3' }  // 3rd on high E string
+    ]
+  },
+  // A shape - root on A string (index 1)
+  'A': {
+    rootString: 1, // A string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on A string
+      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on D string
+      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on G string
+      { stringOffset: 3, fretOffset: 2, interval: '3' },  // 3rd on B string
+      { stringOffset: 4, fretOffset: 0, interval: '5' }   // 5th on high E string
+    ]
+  },
+  // G shape - root on low E string (index 0)
+  'G': {
+    rootString: 0, // Low E string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on low E
+      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on A string
+      { stringOffset: 2, fretOffset: 0, interval: 'R' },  // Root on D string
+      { stringOffset: 3, fretOffset: 0, interval: '3' },  // 3rd on G string
+      { stringOffset: 4, fretOffset: 0, interval: '5' },  // 5th on B string
+      { stringOffset: 5, fretOffset: 0, interval: 'R' }   // Root on high E
+    ]
+  },
+  // E shape - root on low E string (index 0)
+  'E': {
+    rootString: 0, // Low E string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on low E
+      { stringOffset: 1, fretOffset: 2, interval: '5' },  // 5th on A string
+      { stringOffset: 2, fretOffset: 2, interval: 'R' },  // Root on D string
+      { stringOffset: 3, fretOffset: 1, interval: '3' },  // 3rd on G string
+      { stringOffset: 4, fretOffset: 0, interval: '5' },  // 5th on B string
+      { stringOffset: 5, fretOffset: 0, interval: 'R' }   // Root on high E
+    ]
+  },
+  // D shape - root on D string (index 2)
+  'D': {
+    rootString: 2, // D string
+    notes: [
+      { stringOffset: 0, fretOffset: 0, interval: 'R' },  // Root on D string
+      { stringOffset: 1, fretOffset: -2, interval: 'R' }, // Root on G string
+      { stringOffset: 2, fretOffset: -1, interval: '3' }, // 3rd on B string
+      { stringOffset: 3, fretOffset: -2, interval: '5' }  // 5th on high E string
+    ]
+  }
+};
+
+// Helper to calculate note at a given interval from root
+function getNoteAtInterval(root, interval, chordNotes) {
+  // For major chords: R = 0, 3 = 4 semitones, 5 = 7 semitones
+  const intervalMap = {
+    'R': 0,
+    '3': 4,
+    '5': 7
+  };
+  
+  const rootIndex = NOTES.indexOf(root);
+  const targetIndex = (rootIndex + intervalMap[interval]) % 12;
+  return NOTES[targetIndex];
+}
+
 export function detectCAGEDChordShapes(chordRoot, chordNotes, fretboard) {
   if (!chordNotes || chordNotes.length === 0 || !chordRoot) {
     return { shapes: [], noteToShapes: new Map(), connections: [] };
   }
 
-  // Find all root note positions on the fretboard
-  const rootPositions = [];
-  fretboard.forEach((stringData, stringIndex) => {
-    stringData.frets.forEach(fretData => {
-      if (fretData.note === chordRoot && fretData.fret > 0 && fretData.fret <= NUM_FRETS) {
-        rootPositions.push({
-          stringIndex,
-          fret: fretData.fret,
-          note: fretData.note
-        });
-      }
-    });
-  });
-
-  // CAGED shape patterns based on root note positions
-  // Each shape is identified by which string the root typically appears on
-  const cagedShapePatterns = {
-    'E': { rootStrings: [0, 5], name: 'E' }, // Root on low E or high E (strings 0, 5)
-    'D': { rootStrings: [3], name: 'D' },    // Root on D string (string 2)
-    'C': { rootStrings: [4], name: 'C' },    // Root on A string (string 1)
-    'A': { rootStrings: [2], name: 'A' },    // Root on G string (string 3)
-    'G': { rootStrings: [1], name: 'G' },    // Root on B string (string 4)
-  };
-
   const shapes = [];
   const noteToShapes = new Map();
   const connections = [];
 
-  // For each root position, identify the CAGED shape and collect chord tones
-  rootPositions.forEach(rootPos => {
-    // Determine which CAGED shape this represents
-    let cagedShape = null;
-    for (const [shapeName, pattern] of Object.entries(cagedShapePatterns)) {
-      if (pattern.rootStrings.includes(rootPos.stringIndex)) {
-        cagedShape = shapeName;
-        break;
-      }
-    }
-
-    if (!cagedShape) return;
-
-    // Collect all chord tones within a playable range around this root
-    const shapeNotes = [];
-    const minFret = Math.max(0, rootPos.fret - 2);
-    const maxFret = Math.min(NUM_FRETS, rootPos.fret + 4);
-
+  // For each CAGED shape template
+  Object.entries(CAGED_TEMPLATES).forEach(([shapeName, template]) => {
+    // Find all valid root positions for this shape type
+    const validRootPositions = [];
+    
     fretboard.forEach((stringData, stringIndex) => {
-      stringData.frets.forEach(fretData => {
-        if (chordNotes.includes(fretData.note) && 
-            fretData.fret >= minFret && 
-            fretData.fret <= maxFret &&
-            fretData.fret > 0) {
-          const noteKey = `${stringIndex}-${fretData.fret}`;
+      // Only look for roots on the correct string for this shape
+      if (stringIndex === template.rootString) {
+        stringData.frets.forEach(fretData => {
+          if (fretData.note === chordRoot && fretData.fret > 0 && fretData.fret <= NUM_FRETS) {
+            validRootPositions.push({
+              stringIndex,
+              fret: fretData.fret,
+              note: fretData.note
+            });
+          }
+        });
+      }
+    });
+
+    // For each valid root position, generate a shape instance
+    validRootPositions.forEach(rootPos => {
+      const shapeNotes = [];
+      let isValidShape = true;
+
+      // Apply template to generate shape notes
+      template.notes.forEach(templateNote => {
+        const targetString = rootPos.stringIndex + templateNote.stringOffset;
+        const targetFret = rootPos.fret + templateNote.fretOffset;
+        
+        // Check if position is valid on fretboard
+        if (targetString < 0 || targetString >= STANDARD_TUNING.length ||
+            targetFret < 1 || targetFret > NUM_FRETS) {
+          isValidShape = false;
+          return;
+        }
+
+        // Get expected note at this interval
+        const expectedNote = getNoteAtInterval(chordRoot, templateNote.interval, chordNotes);
+        
+        // Get actual note at this position on fretboard
+        const stringData = fretboard[targetString];
+        const fretData = stringData.frets[targetFret];
+        
+        // Verify the note matches the template
+        if (fretData && fretData.note === expectedNote && chordNotes.includes(fretData.note)) {
+          const noteKey = `${targetString}-${targetFret}`;
           
           shapeNotes.push({
-            stringIndex,
-            fret: fretData.fret,
+            stringIndex: targetString,
+            fret: targetFret,
             note: fretData.note,
-            isRoot: fretData.note === chordRoot
+            isRoot: fretData.note === chordRoot,
+            interval: templateNote.interval
           });
 
           // Track which shapes this note belongs to
           if (!noteToShapes.has(noteKey)) {
             noteToShapes.set(noteKey, []);
           }
-          noteToShapes.get(noteKey).push(cagedShape);
+          noteToShapes.get(noteKey).push(shapeName);
+        } else {
+          isValidShape = false;
         }
       });
-    });
 
-    // Only add shapes with at least 2 notes
-    if (shapeNotes.length >= 2) {
-      shapes.push({
-        cagedShape,
-        notes: shapeNotes,
-        rootPosition: rootPos,
-        minFret,
-        maxFret
-      });
-
-      // Generate glow connections within this shape - only adjacent notes
-      // Sort notes by position for structured connections
-      const sortedNotes = [...shapeNotes].sort((a, b) => {
-        if (a.stringIndex !== b.stringIndex) return a.stringIndex - b.stringIndex;
-        return a.fret - b.fret;
-      });
-
-      sortedNotes.forEach((note1, i) => {
-        sortedNotes.forEach((note2, j) => {
-          if (i < j) {
-            const stringDist = Math.abs(note1.stringIndex - note2.stringIndex);
-            const fretDist = Math.abs(note1.fret - note2.fret);
-            
-            // Only connect adjacent notes within realistic fingering proximity
-            // Adjacent strings (1 string apart) OR same string within 2 frets
-            const isAdjacentStrings = stringDist === 1 && fretDist <= 3;
-            const isSameStringNearby = stringDist === 0 && fretDist <= 2;
-            const isDiagonalNeighbor = stringDist === 1 && fretDist === 1;
-            
-            if (isAdjacentStrings || isSameStringNearby || isDiagonalNeighbor) {
-              connections.push({
-                from: note1,
-                to: note2,
-                cagedShape,
-                strength: 0.5 / (stringDist + fretDist + 1) // Very subtle
-              });
-            }
-          }
+      // Only add complete, valid shapes
+      if (isValidShape && shapeNotes.length === template.notes.length) {
+        shapes.push({
+          cagedShape: shapeName,
+          notes: shapeNotes,
+          rootPosition: rootPos
         });
-      });
-    }
+      }
+    });
   });
 
   return { shapes, noteToShapes, connections };
