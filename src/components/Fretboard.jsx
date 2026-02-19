@@ -10,14 +10,8 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
 
   // Generate all CAGED major shapes for the selected chord root
-  // Use chordRoot if available, otherwise fall back to scale rootNote
   const cagedRoot = chordRoot || rootNote;
-  console.log("Fretboard received root:", cagedRoot);
-  console.log("Generating CAGED shapes for root:", cagedRoot);
   const cagedNotes = cagedRoot ? generateAllCAGEDShapes(cagedRoot) : [];
-  
-  // Debug: log all CAGED notes
-  console.log("All CAGED Shapes:", cagedNotes);
 
   // Get the selected position data
   const currentPosition = selectedPosition === 'all' 
