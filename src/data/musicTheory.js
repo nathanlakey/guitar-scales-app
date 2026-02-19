@@ -365,10 +365,10 @@ export function detectChordShapes(fretboard, chordNotes) {
 export const CAGED_COLORS = {
   'C': { 
     name: 'C Shape',
-    primary: 'rgba(59, 130, 246, 1)', // Blue
-    glow: 'rgba(59, 130, 246, 0.6)',
-    light: 'rgba(96, 165, 250, 0.8)',
-    shadow: 'rgba(59, 130, 246, 0.3)'
+    primary: 'rgba(239, 68, 68, 1)', // Red
+    glow: 'rgba(239, 68, 68, 0.6)',
+    light: 'rgba(248, 113, 113, 0.8)',
+    shadow: 'rgba(239, 68, 68, 0.3)'
   },
   'A': { 
     name: 'A Shape',
@@ -386,17 +386,17 @@ export const CAGED_COLORS = {
   },
   'E': { 
     name: 'E Shape',
-    primary: 'rgba(236, 72, 153, 1)', // Pink
-    glow: 'rgba(236, 72, 153, 0.6)',
-    light: 'rgba(244, 114, 182, 0.8)',
-    shadow: 'rgba(236, 72, 153, 0.3)'
+    primary: 'rgba(234, 179, 8, 1)', // Yellow
+    glow: 'rgba(234, 179, 8, 0.6)',
+    light: 'rgba(250, 204, 21, 0.8)',
+    shadow: 'rgba(234, 179, 8, 0.3)'
   },
   'D': { 
     name: 'D Shape',
-    primary: 'rgba(251, 146, 60, 1)', // Orange
-    glow: 'rgba(251, 146, 60, 0.6)',
-    light: 'rgba(251, 191, 36, 0.8)',
-    shadow: 'rgba(251, 146, 60, 0.3)'
+    primary: 'rgba(6, 182, 212, 1)', // Cyan
+    glow: 'rgba(6, 182, 212, 0.6)',
+    light: 'rgba(34, 211, 238, 0.8)',
+    shadow: 'rgba(6, 182, 212, 0.3)'
   }
 };
 
