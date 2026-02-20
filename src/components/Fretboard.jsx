@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getNoteAt } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getMajorPentatonic, getMinorPentatonic, getRelativeMinorPentatonic, getNoteAt } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
 
-function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '', cagedPosition = 'ALL', showScaleOverlay = false }) {
-  const fretboard = generateFretboard(rootNote, scaleName);
+function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '', cagedPosition = 'ALL', showScaleOverlay = false, displayMode = 'note', overlayScaleType = 'major' }) {
+  const fretboard = generateFretboard(chordRoot || rootNote, scaleName);
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
 
@@ -25,26 +25,69 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   const scaleNotes = useMemo(() => {
     if (!showScaleOverlay || !cagedRoot) return [];
     
-    const scale = getMajorScale(cagedRoot);
+    // Select scale based on overlay type
+    let scale;
+    switch (overlayScaleType) {
+      case 'major':
+        scale = getMajorScale(cagedRoot);
+        break;
+      case 'majorPentatonic':
+        scale = getMajorPentatonic(cagedRoot);
+        break;
+      case 'minorPentatonic':
+        scale = getMinorPentatonic(cagedRoot);
+        break;
+      case 'relativeMinorPentatonic':
+        scale = getRelativeMinorPentatonic(cagedRoot);
+        break;
+      default:
+        scale = getMajorScale(cagedRoot);
+    }
+    
     const notes = [];
+    
+    // Handle both array of strings (major scale) and array of objects (pentatonic)
+    const isPentatonic = overlayScaleType !== 'major';
+    const intervalMap = {};
+    
+    if (isPentatonic) {
+      // Pentatonic: scale is array of {note, interval}
+      scale.forEach(item => {
+        intervalMap[item.note] = item.interval;
+      });
+    } else {
+      // Major scale: calculate intervals from semitones
+      scale.forEach(note => {
+        const noteIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(note);
+        const rootIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(cagedRoot);
+        const semitones = (noteIndex - rootIndex + 12) % 12;
+        
+        const degreeMap = {
+          0: 1, 2: 2, 4: 3, 5: 4, 7: 5, 9: 6, 11: 7
+        };
+        intervalMap[note] = degreeMap[semitones] || null;
+      });
+    }
     
     for (let stringIndex = 0; stringIndex < 6; stringIndex++) {
       for (let fret = 0; fret <= NUM_FRETS; fret++) {
         const note = getNoteAt(stringIndex, fret);
-        if (scale.includes(note)) {
+        // Strict lookup - no fallback for pentatonic
+        if (note in intervalMap && intervalMap[note] != null) {
           notes.push({
             stringIndex,
             fret,
             note,
             role: 'scale',
-            isScaleTone: true
+            isScaleTone: true,
+            interval: intervalMap[note]
           });
         }
       }
     }
     
     return notes;
-  }, [cagedRoot, showScaleOverlay]);
+  }, [cagedRoot, showScaleOverlay, overlayScaleType]);
 
   // Filter scale notes by position (NEVER affects cagedNotes)
   const visibleScaleNotes = useMemo(() => {
@@ -171,11 +214,27 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
   // Get display label for a fret (note name or interval)
   const getDisplayLabel = (fretData) => {
-    if (showIntervals) {
-      if (fretData.isRoot) return 'R';
-      return fretData.interval || '';
+    // Backward compatibility: showIntervals takes precedence if displayMode not set
+    if (showIntervals && displayMode === undefined) {
+      if (!fretData.inScale || fretData.interval == null) return '';
+      return fretData.interval;
     }
-    return fretData.note;
+
+    // New unified displayMode logic
+    switch (displayMode) {
+      case 'degree':
+        if (!fretData.inScale || fretData.interval == null) return '';
+        return fretData.interval;
+
+      case 'both':
+        if (!fretData.inScale || fretData.interval == null)
+          return fretData.note;
+        return `${fretData.note}\n${fretData.interval}`;
+
+      case 'note':
+      default:
+        return fretData.note;
+    }
   };
 
   // Get tooltip text based on display mode
@@ -231,6 +290,9 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                   const hasChordNote = !!chordNote;
                   const hasScaleNote = !!scaleNote && !hasChordNote; // Don't show scale if chord exists at same position
                   
+                  // Get interval - prefer scale overlay interval if available
+                  const displayInterval = scaleNote?.interval ?? fretData.interval;
+                  
                   return (
                     <div key={fretData.fret} className="fret-cell">
                       <div className={`string-line string-${stringIndex}`}></div>
@@ -239,7 +301,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                       {/* LAYER 1: Scale notes (background) */}
                       {hasScaleNote && (
                         <button
-                          className={`note-marker note-scale ${
+                          className={`note-marker note-scale degree-${scaleNote.interval} ${
                             isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                           } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
                           title={getTooltipText(fretData)}
@@ -256,7 +318,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                         
                         return (
                           <button
-                            className={`note-marker note-${visualType} ${
+                            className={`note-marker note-${visualType} degree-${displayInterval} ${
                               isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                             } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
                             title={getTooltipText(fretData)}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NOTES, CHORDS } from '../data/musicTheory';
 import './ChordSelector.css';
 
-function ChordSelector({ selectedRoot, selectedType, onRootChange, onTypeChange, onClear, selectedPosition, onPositionChange, showScaleOverlay, onScaleOverlayChange }) {
+function ChordSelector({ selectedRoot, selectedType, onRootChange, onTypeChange, onClear, selectedPosition, onPositionChange, showScaleOverlay, onScaleOverlayChange, overlayScaleType, onOverlayScaleTypeChange }) {
   return (
     <div className="chord-selector">
       <div className="chord-selector-header">
@@ -75,6 +75,24 @@ function ChordSelector({ selectedRoot, selectedType, onRootChange, onTypeChange,
             Show Scale Overlay
           </label>
         </div>
+
+        {/* ADD THIS - Scale type selector */}
+        {showScaleOverlay && (
+          <div className="chord-control-group">
+            <label className="chord-control-label">Scale Type</label>
+            <select
+              value={overlayScaleType}
+              onChange={(e) => onOverlayScaleTypeChange(e.target.value)}
+              className="chord-select"
+              disabled={!selectedRoot}
+            >
+              <option value="major">Major Scale</option>
+              <option value="majorPentatonic">Major Pentatonic</option>
+              <option value="minorPentatonic">Minor Pentatonic</option>
+              <option value="relativeMinorPentatonic">Relative Minor Pentatonic</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {selectedRoot && (

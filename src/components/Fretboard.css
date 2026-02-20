@@ -40,6 +40,35 @@
   border: 1px solid rgba(139, 188, 255, 0.4);
 }
 
+/* Scale degree colors */
+.note-marker.degree-1 {
+  background: #ff4d4d !important;
+}
+
+.note-marker.degree-2 {
+  background: #b197fc !important;
+}
+
+.note-marker.degree-3 {
+  background: #69db7c !important;
+}
+
+.note-marker.degree-4 {
+  background: #ffd166 !important;
+}
+
+.note-marker.degree-5 {
+  background: #4dabf7 !important;
+}
+
+.note-marker.degree-6 {
+  background: #ffa94d !important;
+}
+
+.note-marker.degree-7 {
+  background: #f783ac !important;
+}
+
 .fretboard-wrapper {
   min-width: 1000px;
 }

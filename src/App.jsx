@@ -17,6 +17,10 @@ function App() {
   const [chordType, setChordType] = useState('Major')
   const [cagedPosition, setCagedPosition] = useState('ALL')
   const [showScaleOverlay, setShowScaleOverlay] = useState(false)
+  // ADD THIS - Display mode toggle
+  const [displayMode, setDisplayMode] = useState('note')
+  // ADD THIS - Overlay scale type
+  const [overlayScaleType, setOverlayScaleType] = useState('major')
 
   // Generate fretboard data for AudioControls
   const fretboardData = generateFretboard(rootNote, scaleName)
@@ -91,6 +95,31 @@ function App() {
           >
             {showIntervals ? 'Notes' : 'Intervals'}
           </button>
+
+          {/* ADD THIS - Display mode toggle */}
+          <div className="display-mode-toggle">
+            <button
+              className={`mode-btn ${displayMode === 'note' ? 'active' : ''}`}
+              onClick={() => setDisplayMode('note')}
+              title="Show note names"
+            >
+              Notes
+            </button>
+            <button
+              className={`mode-btn ${displayMode === 'degree' ? 'active' : ''}`}
+              onClick={() => setDisplayMode('degree')}
+              title="Show scale degrees"
+            >
+              Degrees
+            </button>
+            <button
+              className={`mode-btn ${displayMode === 'both' ? 'active' : ''}`}
+              onClick={() => setDisplayMode('both')}
+              title="Show both"
+            >
+              Both
+            </button>
+          </div>
         </div>
 
         {/* Chord Shape Selector */}
@@ -104,6 +133,8 @@ function App() {
           onPositionChange={setCagedPosition}
           showScaleOverlay={showScaleOverlay}
           onScaleOverlayChange={setShowScaleOverlay}
+          overlayScaleType={overlayScaleType}
+          onOverlayScaleTypeChange={setOverlayScaleType}
         />
 
         {/* The instrument - primary focus */}
@@ -117,6 +148,8 @@ function App() {
           chordRoot={chordRoot}
           cagedPosition={cagedPosition}
           showScaleOverlay={showScaleOverlay}
+          displayMode={displayMode}
+          overlayScaleType={overlayScaleType}
         />
 
         {/* Audio controls - minimal and secondary */}
