@@ -135,20 +135,14 @@ export function getMajorPentatonic(root) {
   const intervals = [0, 2, 4, 7, 9];
   const rootIndex = NOTES.indexOf(root);
   if (rootIndex === -1) return [];
-  return intervals.map((semitone, index) => ({
-    note: NOTES[(rootIndex + semitone) % 12],
-    interval: index + 1
-  }));
+  return intervals.map(interval => NOTES[(rootIndex + interval) % 12]);
 }
 
 export function getMinorPentatonic(root) {
   const intervals = [0, 3, 5, 7, 10];
   const rootIndex = NOTES.indexOf(root);
   if (rootIndex === -1) return [];
-  return intervals.map((semitone, index) => ({
-    note: NOTES[(rootIndex + semitone) % 12],
-    interval: index + 1
-  }));
+  return intervals.map(interval => NOTES[(rootIndex + interval) % 12]);
 }
 
 export function getRelativeMinorPentatonic(root) {

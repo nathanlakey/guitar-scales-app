@@ -46,28 +46,33 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     
     const notes = [];
     
-    // Handle both array of strings (major scale) and array of objects (pentatonic)
-    const isPentatonic = overlayScaleType !== 'major';
+    // Unified interval calculation for all scale types
     const intervalMap = {};
+    const scaleNoteArray = Array.isArray(scale) ? scale : [];
     
-    if (isPentatonic) {
-      // Pentatonic: scale is array of {note, interval}
-      scale.forEach(item => {
-        intervalMap[item.note] = item.interval;
-      });
-    } else {
-      // Major scale: calculate intervals from semitones
-      scale.forEach(note => {
-        const noteIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(note);
-        const rootIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(cagedRoot);
-        const semitones = (noteIndex - rootIndex + 12) % 12;
-        
-        const degreeMap = {
-          0: 1, 2: 2, 4: 3, 5: 4, 7: 5, 9: 6, 11: 7
-        };
-        intervalMap[note] = degreeMap[semitones] || null;
-      });
-    }
+    scaleNoteArray.forEach(noteOrObj => {
+      // Handle both string (major/pentatonic) and object formats
+      const note = typeof noteOrObj === 'string' ? noteOrObj : noteOrObj.note;
+      
+      // Calculate harmonic interval from semitone distance
+      const noteIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(note);
+      const rootIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(cagedRoot);
+      const semitones = (noteIndex - rootIndex + 12) % 12;
+      
+      // Harmonic degree mapping (same for all scales)
+      const degreeMap = {
+        0: 1,  // Root
+        2: 2,  // Major 2nd
+        3: 3,  // Minor 3rd
+        4: 3,  // Major 3rd
+        5: 4,  // Perfect 4th
+        7: 5,  // Perfect 5th
+        9: 6,  // Major 6th
+        10: 7, // Minor 7th
+        11: 7  // Major 7th
+      };
+      intervalMap[note] = degreeMap[semitones] || null;
+    });
     
     for (let stringIndex = 0; stringIndex < 6; stringIndex++) {
       for (let fret = 0; fret <= NUM_FRETS; fret++) {
@@ -110,6 +115,26 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
       note.fret <= maxFret + 1
     );
   }, [scaleNotes, cagedNotes, showScaleOverlay, cagedPosition]);
+
+  // Get harmonic interval for any note relative to root
+  const getHarmonicInterval = (note, root) => {
+    const noteIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(note);
+    const rootIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(root);
+    const semitones = (noteIndex - rootIndex + 12) % 12;
+    
+    const degreeMap = {
+      0: 1,  // Root
+      2: 2,  // Major 2nd
+      3: 3,  // Minor 3rd
+      4: 3,  // Major 3rd
+      5: 4,  // Perfect 4th
+      7: 5,  // Perfect 5th
+      9: 6,  // Major 6th
+      10: 7, // Minor 7th
+      11: 7  // Major 7th
+    };
+    return degreeMap[semitones] || 1;
+  };
 
   // Get the selected position data
   const currentPosition = selectedPosition === 'all' 
@@ -290,35 +315,36 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                   const hasChordNote = !!chordNote;
                   const hasScaleNote = !!scaleNote && !hasChordNote; // Don't show scale if chord exists at same position
                   
-                  // Get interval - prefer scale overlay interval if available
-                  const displayInterval = scaleNote?.interval ?? fretData.interval;
-                  
                   return (
                     <div key={fretData.fret} className="fret-cell">
                       <div className={`string-line string-${stringIndex}`}></div>
                       <div className="fret-wire"></div>
                       
                       {/* LAYER 1: Scale notes (background) */}
-                      {hasScaleNote && (
-                        <button
-                          className={`note-marker note-scale degree-${scaleNote.interval} ${
-                            isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
-                          } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
-                          title={getTooltipText(fretData)}
-                          onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
-                        >
-                          {getDisplayLabel(fretData)}
-                        </button>
-                      )}
+                      {hasScaleNote && (() => {
+                        const harmonicInterval = getHarmonicInterval(scaleNote.note, cagedRoot);
+                        return (
+                          <button
+                            className={`note-marker note-scale degree-${harmonicInterval} ${
+                              isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
+                            } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
+                            title={getTooltipText(fretData)}
+                            onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
+                          >
+                            {getDisplayLabel(fretData)}
+                          </button>
+                        );
+                      })()}
                       
                       {/* LAYER 2: Chord notes (foreground) */}
                       {hasChordNote && (() => {
                         const isRoot = chordNote.role === 'root';
                         const visualType = isRoot ? 'root' : 'chord';
+                        const harmonicInterval = getHarmonicInterval(fretData.note, cagedRoot);
                         
                         return (
                           <button
-                            className={`note-marker note-${visualType} degree-${displayInterval} ${
+                            className={`note-marker note-${visualType} degree-${harmonicInterval} ${
                               isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                             } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
                             title={getTooltipText(fretData)}
