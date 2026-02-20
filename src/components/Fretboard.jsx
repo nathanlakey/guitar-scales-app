@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getMajorPentatonic, getMinorPentatonic, getRelativeMinorPentatonic, getNoteAt } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getMajorPentatonic, getMinorPentatonic, getRelativeMinorPentatonic, getNoteAt, NOTES } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
@@ -55,8 +55,8 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
       const note = typeof noteOrObj === 'string' ? noteOrObj : noteOrObj.note;
       
       // Calculate harmonic interval from semitone distance
-      const noteIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(note);
-      const rootIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(cagedRoot);
+      const noteIndex = NOTES.indexOf(note);
+      const rootIndex = NOTES.indexOf(cagedRoot);
       const semitones = (noteIndex - rootIndex + 12) % 12;
       
       // Harmonic degree mapping (same for all scales)
@@ -118,8 +118,8 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
   // Get harmonic interval for any note relative to root
   const getHarmonicInterval = (note, root) => {
-    const noteIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(note);
-    const rootIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(root);
+    const noteIndex = NOTES.indexOf(note);
+    const rootIndex = NOTES.indexOf(root);
     const semitones = (noteIndex - rootIndex + 12) % 12;
     
     const degreeMap = {
