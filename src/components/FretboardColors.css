@@ -1,0 +1,15 @@
+:root {
+  /* Chromatic semitone interval colors (0-11) */
+  --interval-0:  #ff1f1f;  /* Root — brightest red */
+  --interval-1:  #b197fc;  /* minor second */
+  --interval-2:  #845ef7;  /* major second */
+  --interval-3:  #00e676;  /* minor third — bright green */
+  --interval-4:  #2f9e44;  /* major third */
+  --interval-5:  #ffd43b;  /* perfect fourth */
+  --interval-6:  #22b8cf;  /* tritone */
+  --interval-7:  #2979ff;  /* perfect fifth — brightest blue */
+  --interval-8:  #20a39e;  /* minor sixth */
+  --interval-9:  #1098ad;  /* major sixth */
+  --interval-10: #f06595;  /* minor seventh */
+  --interval-11: #c2255c;  /* major seventh */
+}

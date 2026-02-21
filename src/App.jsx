@@ -22,6 +22,13 @@ function App() {
   // ADD THIS - Overlay scale type
   const [overlayScaleType, setOverlayScaleType] = useState('major')
 
+  // Handler to update overlayScaleType when scaleName changes
+  const handleScaleNameChange = (newScaleName) => {
+    setScaleName(newScaleName);
+    // Also update overlayScaleType to match the selected scale
+    setOverlayScaleType(newScaleName);
+  };
+
   // Generate fretboard data for AudioControls
   const fretboardData = generateFretboard(rootNote, scaleName)
 
@@ -56,7 +63,7 @@ function App() {
             rootNote={rootNote}
             scaleName={scaleName}
             onRootChange={setRootNote}
-            onScaleChange={setScaleName}
+            onScaleChange={handleScaleNameChange}
           />
           
           <ScaleInfo rootNote={rootNote} scaleName={scaleName} />

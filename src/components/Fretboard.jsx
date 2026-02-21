@@ -1,8 +1,40 @@
 import { useState, useEffect, useMemo } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getMajorPentatonic, getMinorPentatonic, getRelativeMinorPentatonic, getNoteAt, NOTES } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getMajorPentatonic, getMinorPentatonic, getRelativeMinorPentatonic, getNoteAt, NOTES, SCALES } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
 import './Fretboard.css';
+
+// Interval-based color mapping - colors assigned by interval from root
+const INTERVAL_COLOR_MAP = {
+  0:  "#FF3B30",  // Root
+  1:  "#FF9500",  // ♭2
+  2:  "#FFD60A",  // 2
+  3:  "#00ACC1",  // ♭3
+  4:  "#34C759",  // 3
+  5:  "#FFD60A",  // 4
+  6:  "#AF52DE",  // ♭5
+  7:  "#2979FF",  // 5
+  8:  "#FF2D55",  // ♭6
+  9:  "#5856D6",  // 6
+  10: "#FF9F0A",  // ♭7
+  11: "#64D2FF"   // 7
+};
+
+// Semitone to harmonic degree display mapping with accidentals
+const SEMITONE_TO_DISPLAY = {
+  0: "1",   // Root
+  1: "♭2",  // Minor 2nd
+  2: "2",   // Major 2nd
+  3: "♭3",  // Minor 3rd
+  4: "3",   // Major 3rd
+  5: "4",   // Perfect 4th
+  6: "♭5",  // Tritone
+  7: "5",   // Perfect 5th
+  8: "♭6",  // Minor 6th
+  9: "6",   // Major 6th
+  10: "♭7", // Minor 7th
+  11: "7"   // Major 7th
+};
 
 function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '', cagedPosition = 'ALL', showScaleOverlay = false, displayMode = 'note', overlayScaleType = 'major' }) {
   const fretboard = generateFretboard(chordRoot || rootNote, scaleName);
@@ -25,67 +57,87 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   const scaleNotes = useMemo(() => {
     if (!showScaleOverlay || !cagedRoot) return [];
     
-    // Select scale based on overlay type
-    let scale;
+    // Get scale definition for the active scale type
+    let scaleDefinition;
+    let activeRoot = cagedRoot;
+    
+    // Map overlayScaleType to SCALES keys, or use it directly if it matches
     switch (overlayScaleType) {
       case 'major':
-        scale = getMajorScale(cagedRoot);
+        scaleDefinition = SCALES['Major (Ionian)'];
         break;
       case 'majorPentatonic':
-        scale = getMajorPentatonic(cagedRoot);
+        scaleDefinition = SCALES['Major Pentatonic'];
         break;
       case 'minorPentatonic':
-        scale = getMinorPentatonic(cagedRoot);
+        scaleDefinition = SCALES['Minor Pentatonic'];
         break;
       case 'relativeMinorPentatonic':
-        scale = getRelativeMinorPentatonic(cagedRoot);
+        // Relative minor is 3 semitones down, so adjust the root
+        const rootIndex = NOTES.indexOf(cagedRoot);
+        activeRoot = NOTES[(rootIndex - 3 + 12) % 12];
+        scaleDefinition = SCALES['Minor Pentatonic'];
         break;
       default:
-        scale = getMajorScale(cagedRoot);
+        // Try to use overlayScaleType directly as a SCALES key
+        scaleDefinition = SCALES[overlayScaleType];
+        if (!scaleDefinition) {
+          // Fallback to Major if scale not found
+          scaleDefinition = SCALES['Major (Ionian)'];
+        }
     }
     
-    const notes = [];
+    // Safety check - ensure scaleDefinition has required properties
+    if (!scaleDefinition || !scaleDefinition.intervals || !scaleDefinition.degrees) {
+      console.error('Invalid scale definition for overlayScaleType:', overlayScaleType);
+      return [];
+    }
     
-    // Unified interval calculation for all scale types
-    const intervalMap = {};
-    const scaleNoteArray = Array.isArray(scale) ? scale : [];
-    
-    scaleNoteArray.forEach(noteOrObj => {
-      // Handle both string (major/pentatonic) and object formats
-      const note = typeof noteOrObj === 'string' ? noteOrObj : noteOrObj.note;
-      
-      // Calculate harmonic interval from semitone distance
-      const noteIndex = NOTES.indexOf(note);
-      const rootIndex = NOTES.indexOf(cagedRoot);
-      const semitones = (noteIndex - rootIndex + 12) % 12;
-      
-      // Harmonic degree mapping (same for all scales)
-      const degreeMap = {
-        0: 1,  // Root
-        2: 2,  // Major 2nd
-        3: 3,  // Minor 3rd
-        4: 3,  // Major 3rd
-        5: 4,  // Perfect 4th
-        7: 5,  // Perfect 5th
-        9: 6,  // Major 6th
-        10: 7, // Minor 7th
-        11: 7  // Major 7th
-      };
-      intervalMap[note] = degreeMap[semitones] || null;
+    console.log('Scale Overlay Debug:', {
+      overlayScaleType,
+      scaleIntervals: scaleDefinition.intervals,
+      scaleDegrees: scaleDefinition.degrees,
+      activeRoot
     });
+    
+    const notes = [];
+    const rootIdx = NOTES.indexOf(activeRoot);
     
     for (let stringIndex = 0; stringIndex < 6; stringIndex++) {
       for (let fret = 0; fret <= NUM_FRETS; fret++) {
         const note = getNoteAt(stringIndex, fret);
-        // Strict lookup - no fallback for pentatonic
-        if (note in intervalMap && intervalMap[note] != null) {
+        const noteIdx = NOTES.indexOf(note);
+        const semitoneDistance = (noteIdx - rootIdx + 12) % 12;
+        
+        // Find index in scale intervals using intervals.indexOf()
+        const intervalIndex = scaleDefinition.intervals.indexOf(semitoneDistance);
+        
+        // Only include if semitone distance exists in scale
+        if (intervalIndex !== -1) {
+          const degree = scaleDefinition.degrees[intervalIndex];
+          
+          // Debug logging for every overlay note
+          console.log({
+            overlayScaleType,
+            rootNote: activeRoot,
+            note,
+            fret,
+            stringIndex,
+            semitoneDistance,
+            intervalIndex,
+            scaleIntervals: scaleDefinition.intervals,
+            scaleDegrees: scaleDefinition.degrees,
+            degree
+          });
+          
           notes.push({
             stringIndex,
             fret,
             note,
             role: 'scale',
             isScaleTone: true,
-            interval: intervalMap[note]
+            interval: semitoneDistance,
+            degree
           });
         }
       }
@@ -98,42 +150,66 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   const visibleScaleNotes = useMemo(() => {
     if (!showScaleOverlay || scaleNotes.length === 0) return [];
     
+    let filtered;
+    
     // Show all scale notes if "All Positions" selected
     if (cagedPosition === 'ALL') {
-      return scaleNotes;
+      filtered = scaleNotes;
+    } else {
+      // Filter scale notes to match CAGED position's fret range
+      if (cagedNotes.length === 0) {
+        // No chord notes to define range, don't show any scale notes
+        filtered = [];
+      } else {
+        const frets = cagedNotes.map(n => n.fret);
+        const minFret = Math.min(...frets);
+        const maxFret = Math.max(...frets);
+        
+        filtered = scaleNotes.filter(note =>
+          note.fret >= minFret &&
+          note.fret <= maxFret
+        );
+      }
     }
     
-    // Filter scale notes to match CAGED position's fret range
-    if (cagedNotes.length === 0) return scaleNotes;
+    // FINAL adjacency filter: Prevent adjacent frets on same string from both rendering
+    // Sort all notes by string, then by fret
+    const sortedFiltered = filtered.sort((a, b) => {
+      if (a.stringIndex !== b.stringIndex) {
+        return a.stringIndex - b.stringIndex;
+      }
+      return a.fret - b.fret;
+    });
     
-    const frets = cagedNotes.map(n => n.fret);
-    const minFret = Math.min(...frets);
-    const maxFret = Math.max(...frets);
+    const filteredVisibleScaleNotes = [];
+    const lastFretPerString = {};
     
-    return scaleNotes.filter(note =>
-      note.fret >= minFret - 1 &&
-      note.fret <= maxFret + 1
-    );
+    for (const note of sortedFiltered) {
+      const string = note.stringIndex;
+      const fret = note.fret;
+      
+      if (lastFretPerString[string] === undefined) {
+        // First note on this string
+        filteredVisibleScaleNotes.push(note);
+        lastFretPerString[string] = fret;
+      } else if (fret !== lastFretPerString[string] + 1) {
+        // Not adjacent to previous, keep it
+        filteredVisibleScaleNotes.push(note);
+        lastFretPerString[string] = fret;
+      }
+      // If fret === lastFretPerString[string] + 1, skip it (adjacent to previous)
+    }
+    
+    return filteredVisibleScaleNotes;
   }, [scaleNotes, cagedNotes, showScaleOverlay, cagedPosition]);
 
   // Get harmonic interval for any note relative to root
+  // Returns semitone distance (0-11) for chromatic color mapping
   const getHarmonicInterval = (note, root) => {
     const noteIndex = NOTES.indexOf(note);
     const rootIndex = NOTES.indexOf(root);
     const semitones = (noteIndex - rootIndex + 12) % 12;
-    
-    const degreeMap = {
-      0: 1,  // Root
-      2: 2,  // Major 2nd
-      3: 3,  // Minor 3rd
-      4: 3,  // Major 3rd
-      5: 4,  // Perfect 4th
-      7: 5,  // Perfect 5th
-      9: 6,  // Major 6th
-      10: 7, // Minor 7th
-      11: 7  // Major 7th
-    };
-    return degreeMap[semitones] || 1;
+    return semitones;
   };
 
   // Get the selected position data
@@ -164,9 +240,22 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
   // Check if a scale note exists at position
   const getScaleNote = (stringIndex, fret) => {
-    return visibleScaleNotes.find(note => 
+    // Check if current fret has a scale note
+    const currentNote = visibleScaleNotes.find(note => 
       note.stringIndex === stringIndex && note.fret === fret
     );
+    
+    if (!currentNote) return null;
+    
+    // Check if previous fret on same string also has a scale note
+    const previousNote = visibleScaleNotes.find(note =>
+      note.stringIndex === stringIndex && note.fret === fret - 1
+    );
+    
+    // If previous fret has a scale note, suppress current (lower fret wins)
+    if (previousNote) return null;
+    
+    return currentNote;
   };
 
   // Calculate position for SVG coordinate system
@@ -238,23 +327,42 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   };
 
   // Get display label for a fret (note name or interval)
-  const getDisplayLabel = (fretData) => {
+  const getDisplayLabel = (fretData, scaleNoteData = null) => {
     // Backward compatibility: showIntervals takes precedence if displayMode not set
     if (showIntervals && displayMode === undefined) {
-      if (!fretData.inScale || fretData.interval == null) return '';
-      return fretData.interval;
+      // Use scale-specific degree if available, otherwise fall back to chromatic mapping
+      if (scaleNoteData?.degree) {
+        return scaleNoteData.degree;
+      }
+      if (!fretData.inScale) return '';
+      const semitoneInterval = getHarmonicInterval(fretData.note, cagedRoot);
+      return SEMITONE_TO_DISPLAY[semitoneInterval] || "1";
     }
 
     // New unified displayMode logic
     switch (displayMode) {
       case 'degree':
-        if (!fretData.inScale || fretData.interval == null) return '';
-        return fretData.interval;
+        // Use scale-specific degree if available
+        if (scaleNoteData?.degree) {
+          return scaleNoteData.degree;
+        }
+        // Fallback to chromatic mapping if in scale
+        if (!fretData.inScale) return '';
+        const semitoneInterval = getHarmonicInterval(fretData.note, cagedRoot);
+        return SEMITONE_TO_DISPLAY[semitoneInterval] || "1";
 
       case 'both':
-        if (!fretData.inScale || fretData.interval == null)
+        // Use scale-specific degree if available, otherwise fall back to chromatic mapping
+        let degreeLabel;
+        if (scaleNoteData?.degree) {
+          degreeLabel = scaleNoteData.degree;
+        } else if (fretData.inScale) {
+          const semitoneInt = getHarmonicInterval(fretData.note, cagedRoot);
+          degreeLabel = SEMITONE_TO_DISPLAY[semitoneInt] || "1";
+        } else {
           return fretData.note;
-        return `${fretData.note}\n${fretData.interval}`;
+        }
+        return `${fretData.note}\n${degreeLabel}`;
 
       case 'note':
       default:
@@ -322,16 +430,22 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                       
                       {/* LAYER 1: Scale notes (background) */}
                       {hasScaleNote && (() => {
-                        const harmonicInterval = getHarmonicInterval(scaleNote.note, cagedRoot);
+                        const noteName = scaleNote.note;
+                        const rootIndex = NOTES.indexOf(cagedRoot);
+                        const noteIndex = NOTES.indexOf(noteName);
+                        const interval = (noteIndex - rootIndex + 12) % 12;
+                        const noteColor = INTERVAL_COLOR_MAP[interval];
+                        console.log("🎨 FINAL NOTE COLOR (Scale):", noteName, "interval:", interval, "color:", noteColor);
                         return (
                           <button
-                            className={`note-marker note-scale degree-${harmonicInterval} ${
+                            className={`note-marker note-scale ${
                               isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                             } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
+                            style={{ backgroundColor: noteColor }}
                             title={getTooltipText(fretData)}
                             onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                           >
-                            {getDisplayLabel(fretData)}
+                            {getDisplayLabel(fretData, scaleNote)}
                           </button>
                         );
                       })()}
@@ -340,17 +454,25 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                       {hasChordNote && (() => {
                         const isRoot = chordNote.role === 'root';
                         const visualType = isRoot ? 'root' : 'chord';
-                        const harmonicInterval = getHarmonicInterval(fretData.note, cagedRoot);
+                        const noteName = fretData.note;
+                        const rootIndex = NOTES.indexOf(cagedRoot);
+                        const noteIndex = NOTES.indexOf(noteName);
+                        const interval = (noteIndex - rootIndex + 12) % 12;
+                        const noteColor = INTERVAL_COLOR_MAP[interval];
+                        console.log("🎨 FINAL NOTE COLOR (Chord):", noteName, "interval:", interval, "color:", noteColor);
+                        // Get scale note for degree label if available
+                        const correspondingScaleNote = getScaleNote(stringData.stringIndex, fretData.fret);
                         
                         return (
                           <button
-                            className={`note-marker note-${visualType} degree-${harmonicInterval} ${
+                            className={`note-marker note-${visualType} ${
                               isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                             } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
+                            style={{ backgroundColor: noteColor }}
                             title={getTooltipText(fretData)}
                             onClick={() => handleNoteClick(stringData.stringNote, fretData.fret, fretData.note, stringData.stringIndex)}
                           >
-                            {getDisplayLabel(fretData)}
+                            {getDisplayLabel(fretData, correspondingScaleNote)}
                           </button>
                         );
                       })()}

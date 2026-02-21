@@ -1,3 +1,20 @@
+:root {
+  /* Chromatic semitone interval colors (0-11) */
+  --interval-0:  #ff1f1f;  /* Root — brightest red */
+  --interval-1:  #b197fc;  /* minor second */
+  --interval-2:  #845ef7;  /* major second */
+  --interval-3:  #00e676;  /* minor third — bright green */
+  --interval-4:  #2f9e44;  /* major third */
+  --interval-5:  #ffd43b;  /* perfect fourth */
+  --interval-6:  #22b8cf;  /* tritone */
+  --interval-7:  #2979ff;  /* perfect fifth — brightest blue */
+  --interval-8:  #20a39e;  /* minor sixth */
+  --interval-9:  #1098ad;  /* major sixth */
+  --interval-10: #f06595;  /* minor seventh */
+  --interval-11: #c2255c;  /* major seventh */
+}
+
+
 .fretboard-container {
   background: #242424;
   border-radius: 16px;
@@ -12,62 +29,61 @@
 
 /* Visual hierarchy for notes */
 .note-root {
-  background: #ff5757 !important;
+  /* Background color is set via inline style using NOTE_COLOR_MAP */
   color: #ffffff !important;
   transform: scale(1.15);
   box-shadow: 0 0 14px rgba(255, 87, 87, 0.9);
   z-index: 3;
   font-weight: 700;
+  
+  /* Enhanced text visibility */
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.02em;
 }
 
 .note-chord {
-  background: #5aa9ff !important;
   color: #ffffff !important;
   transform: scale(1.0);
   box-shadow: 0 0 10px rgba(90, 169, 255, 0.6);
   z-index: 2;
   font-weight: 600;
+  
+  /* Enhanced text visibility */
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.02em;
 }
 
 .note-scale {
-  background: #8bbcff !important;
-  color: #1a1a1a !important;
-  opacity: 0.45;
-  transform: scale(0.8);
-  box-shadow: none;
+  opacity: 0.65;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  transform: scale(0.9);
   z-index: 1;
   font-weight: 500;
-  border: 1px solid rgba(139, 188, 255, 0.4);
+  
+  /* Enhanced text visibility */
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.02em;
 }
 
-/* Scale degree colors */
-.note-marker.degree-1 {
-  background: #ff4d4d !important;
-}
-
-.note-marker.degree-2 {
-  background: #b197fc !important;
-}
-
-.note-marker.degree-3 {
-  background: #69db7c !important;
-}
-
-.note-marker.degree-4 {
-  background: #ffd166 !important;
-}
-
-.note-marker.degree-5 {
-  background: #4dabf7 !important;
-}
-
-.note-marker.degree-6 {
-  background: #ffa94d !important;
-}
-
-.note-marker.degree-7 {
-  background: #f783ac !important;
-}
+/* 
+ * NOTE: All note colors are now defined in musicTheory.js via NOTE_COLOR_MAP
+ * DO NOT add color rules here - they will override inline styles
+ * Colors are applied via inline backgroundColor styles in Fretboard.jsx
+ */
 
 .fretboard-wrapper {
   min-width: 1000px;
@@ -373,10 +389,24 @@
   height: 34px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #a8c8e1, #8fb4d4);
-  color: #fff;
-  font-size: 0.7rem;
+  /* Background color is set via inline style using NOTE_COLOR_MAP */
+  
+  /* Enhanced text visibility - DO NOT modify background colors */
+  color: #ffffff;
+  font-size: 0.95rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
+  
+  /* Strong text contrast without affecting circle color */
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    0 -1px 3px rgba(0, 0, 0, 0.8);
+  
+  /* Prevent thin-looking text */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -489,10 +519,6 @@
     0 0 15px rgba(232, 140, 125, 0.3),
     inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
-  box-shadow:
-    0 4px 16px rgba(215, 121, 104, 0.5),
-    inset 0 1px 2px rgba(255, 255, 255, 0.25);
-}
 
 /* Interval mode - slightly different typography for clarity */
 .note-marker.interval-mode {
@@ -504,10 +530,6 @@
 .note-marker.interval-mode.root {
   font-family: inherit;
   font-weight: 900;
-}
-  box-shadow:
-    0 4px 16px rgba(215, 121, 104, 0.5),
-    inset 0 1px 2px rgba(255, 255, 255, 0.25);
 }
 
 /* Highlighted root note */

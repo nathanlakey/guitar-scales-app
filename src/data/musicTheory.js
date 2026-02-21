@@ -1,6 +1,23 @@
 // All 12 chromatic notes
 export const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+// Note-based color mapping - SINGLE SOURCE OF TRUTH for all note colors
+// DO NOT add color logic anywhere else in the application
+export const NOTE_COLOR_MAP = {
+  "C":  "#00C853",  // Flat 3 in A minor — GREEN
+  "C#": "#00ACC1",  // Major 3 in A major — TEAL
+  "D":  "#FFD600",  // golden yellow
+  "D#": "#FF8F00",  // orange
+  "E":  "#2979FF",  // blue
+  "F":  "#AA00FF",  // purple
+  "F#": "#FF6F61",  // coral
+  "G":  "#FF9F1C",  // orange-amber
+  "G#": "#8E24AA",  // violet
+  "A":  "#FF3B30",  // red
+  "A#": "#6A4C93",  // indigo
+  "B":  "#A3E635"   // lime
+};
+
 // Enharmonic display names for flats
 export const ENHARMONIC = {
   'C#': 'Db',
@@ -20,28 +37,88 @@ export const NUM_FRETS = 15;
 export const FRET_MARKERS = [3, 5, 7, 9, 12, 15];
 export const DOUBLE_MARKERS = [12];
 
-// Scale definitions using semitone intervals from root
+// Scale definitions using semitone intervals from root with degree labels
 export const SCALES = {
-  'Major (Ionian)': [0, 2, 4, 5, 7, 9, 11],
-  'Natural Minor (Aeolian)': [0, 2, 3, 5, 7, 8, 10],
-  'Dorian': [0, 2, 3, 5, 7, 9, 10],
-  'Phrygian': [0, 1, 3, 5, 7, 8, 10],
-  'Lydian': [0, 2, 4, 6, 7, 9, 11],
-  'Mixolydian': [0, 2, 4, 5, 7, 9, 10],
-  'Locrian': [0, 1, 3, 5, 6, 8, 10],
-  'Harmonic Minor': [0, 2, 3, 5, 7, 8, 11],
-  'Melodic Minor': [0, 2, 3, 5, 7, 9, 11],
-  'Major Pentatonic': [0, 2, 4, 7, 9],
-  'Minor Pentatonic': [0, 3, 5, 7, 10],
-  'Blues': [0, 3, 5, 6, 7, 10],
-  'Major Blues': [0, 2, 3, 4, 7, 9],
-  'Whole Tone': [0, 2, 4, 6, 8, 10],
-  'Diminished (HW)': [0, 1, 3, 4, 6, 7, 9, 10],
-  'Diminished (WH)': [0, 2, 3, 5, 6, 8, 9, 11],
-  'Chromatic': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-  'Hungarian Minor': [0, 2, 3, 6, 7, 8, 11],
-  'Phrygian Dominant': [0, 1, 4, 5, 7, 8, 10],
-  'Double Harmonic': [0, 1, 4, 5, 7, 8, 11],
+  'Major (Ionian)': {
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    degrees: ['1', '2', '3', '4', '5', '6', '7']
+  },
+  'Natural Minor (Aeolian)': {
+    intervals: [0, 2, 3, 5, 7, 8, 10],
+    degrees: ['1', '2', '♭3', '4', '5', '♭6', '♭7']
+  },
+  'Dorian': {
+    intervals: [0, 2, 3, 5, 7, 9, 10],
+    degrees: ['1', '2', '♭3', '4', '5', '6', '♭7']
+  },
+  'Phrygian': {
+    intervals: [0, 1, 3, 5, 7, 8, 10],
+    degrees: ['1', '♭2', '♭3', '4', '5', '♭6', '♭7']
+  },
+  'Lydian': {
+    intervals: [0, 2, 4, 6, 7, 9, 11],
+    degrees: ['1', '2', '3', '♯4', '5', '6', '7']
+  },
+  'Mixolydian': {
+    intervals: [0, 2, 4, 5, 7, 9, 10],
+    degrees: ['1', '2', '3', '4', '5', '6', '♭7']
+  },
+  'Locrian': {
+    intervals: [0, 1, 3, 5, 6, 8, 10],
+    degrees: ['1', '♭2', '♭3', '4', '♭5', '♭6', '♭7']
+  },
+  'Harmonic Minor': {
+    intervals: [0, 2, 3, 5, 7, 8, 11],
+    degrees: ['1', '2', '♭3', '4', '5', '♭6', '7']
+  },
+  'Melodic Minor': {
+    intervals: [0, 2, 3, 5, 7, 9, 11],
+    degrees: ['1', '2', '♭3', '4', '5', '6', '7']
+  },
+  'Major Pentatonic': {
+    intervals: [0, 2, 4, 7, 9],
+    degrees: ['1', '2', '3', '5', '6']
+  },
+  'Minor Pentatonic': {
+    intervals: [0, 3, 5, 7, 10],
+    degrees: ['1', '♭3', '4', '5', '♭7']
+  },
+  'Blues': {
+    intervals: [0, 3, 5, 6, 7, 10],
+    degrees: ['1', '♭3', '4', '♭5', '5', '♭7']
+  },
+  'Major Blues': {
+    intervals: [0, 2, 3, 4, 7, 9],
+    degrees: ['1', '2', '♭3', '3', '5', '6']
+  },
+  'Whole Tone': {
+    intervals: [0, 2, 4, 6, 8, 10],
+    degrees: ['1', '2', '3', '♯4', '♯5', '♯6']
+  },
+  'Diminished (HW)': {
+    intervals: [0, 1, 3, 4, 6, 7, 9, 10],
+    degrees: ['1', '♭2', '♭3', '3', '♯4', '5', '6', '♭7']
+  },
+  'Diminished (WH)': {
+    intervals: [0, 2, 3, 5, 6, 8, 9, 11],
+    degrees: ['1', '2', '♭3', '4', '♭5', '♯5', '6', '7']
+  },
+  'Chromatic': {
+    intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    degrees: ['1', '♭2', '2', '♭3', '3', '4', '♭5', '5', '♭6', '6', '♭7', '7']
+  },
+  'Hungarian Minor': {
+    intervals: [0, 2, 3, 6, 7, 8, 11],
+    degrees: ['1', '2', '♭3', '♯4', '5', '♭6', '7']
+  },
+  'Phrygian Dominant': {
+    intervals: [0, 1, 4, 5, 7, 8, 10],
+    degrees: ['1', '♭2', '3', '4', '5', '♭6', '♭7']
+  },
+  'Double Harmonic': {
+    intervals: [0, 1, 4, 5, 7, 8, 11],
+    degrees: ['1', '♭2', '3', '4', '5', '♭6', '7']
+  },
 };
 
 // Chord definitions using semitone intervals from root
@@ -160,8 +237,9 @@ export function getRelativeMinorPentatonic(root) {
  * @returns {Array<string>} Array of notes in the scale
  */
 export function getScaleNotes(rootNote, scaleName) {
-  const intervals = SCALES[scaleName];
-  if (!intervals) return [];
+  const scaleDefinition = SCALES[scaleName];
+  if (!scaleDefinition) return [];
+  const intervals = scaleDefinition.intervals;
   const rootIndex = NOTES.indexOf(rootNote);
   if (rootIndex === -1) return [];
   return intervals.map(interval => NOTES[(rootIndex + interval) % 12]);
@@ -284,7 +362,8 @@ function getCAGEDPositions(rootNote, scaleName) {
 function get3NPSPositions(rootNote, scaleName) {
   const positions = [];
   const scaleNotes = getScaleNotes(rootNote, scaleName);
-  const intervals = SCALES[scaleName];
+  const scaleDefinition = SCALES[scaleName];
+  const intervals = scaleDefinition?.intervals;
   
   // 3NPS works best with 7-note scales
   if (!intervals || intervals.length < 7) {

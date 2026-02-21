@@ -27,7 +27,7 @@ function ChordSelector({ selectedRoot, selectedType, onRootChange, onTypeChange,
             className="chord-select"
           >
             <option value="">None</option>
-            {NOTES.map(note => (
+            {[...NOTES].sort((a, b) => a.localeCompare(b)).map(note => (
               <option key={note} value={note}>{note}</option>
             ))}
           </select>

@@ -140,7 +140,8 @@ class BackingTrack {
       'Double Harmonic': [0, 1, 4, 5, 7, 8, 11],
     };
 
-    return SCALES[scaleName] || [0, 2, 4, 5, 7, 9, 11]; // Default to major
+    const scaleDefinition = SCALES[scaleName];
+    return scaleDefinition?.intervals || [0, 2, 4, 5, 7, 9, 11]; // Default to major
   }
 
   /**
