@@ -410,22 +410,32 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
           </div>
 
           {/* Empty fretboard */}
-          <div className="fretboard">
+          <div className="fretboard wood-rosewood">
             <div className="nut"></div>
-            {stringLabels.map((label, stringIndex) => (
+            {stringLabels.map((label, stringIndex) => {
+              const stringClasses = [
+                "string-line string-e-high",
+                "string-line string-b",
+                "string-line string-g",
+                "string-line string-d",
+                "string-line string-a",
+                "string-line string-e-low"
+              ];
+              return (
               <div key={stringIndex} className="guitar-string-row">
                 <div className="string-label">{label}</div>
                 <div className="open-note-cell">
-                  <div className={`string-line string-${stringIndex}`}></div>
+                  <div className={stringClasses[stringIndex]}></div>
                 </div>
                 {Array.from({ length: NUM_FRETS }, (_, fret) => (
                   <div key={fret + 1} className="fret-cell">
-                    <div className={`string-line string-${stringIndex}`}></div>
+                    <div className={stringClasses[stringIndex]}></div>
                     <div className="fret-wire"></div>
                   </div>
                 ))}
               </div>
-            ))}
+            )})}
+            
 
           {/* Fret marker dots - always visible */}
           <FretMarkers />
@@ -452,14 +462,22 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
         </div>
 
         {/* The actual fretboard */}
-        <div className="fretboard">
-          {/* Nut */}
+          <div className="fretboard wood-rosewood">
           <div className="nut"></div>
 
           {/* CAGED chord shape coloring - no connections, color-only visualization */}
 
           {/* Strings - displayed from stringIndex 0 (high E) to stringIndex 5 (low E) */}
           {fretboard.map((stringData, stringIndex) => {
+            const stringClasses = [
+              "string-line string-e-high",
+              "string-line string-b",
+              "string-line string-g",
+              "string-line string-d",
+              "string-line string-a",
+              "string-line string-e-low"
+            ];
+            
             return (
               <div key={stringIndex} className="guitar-string-row">
                 {/* String label */}
@@ -467,7 +485,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
 
                 {/* Open note spacer (before the nut) */}
                 <div className="open-note-cell">
-                  <div className={`string-line string-${stringIndex}`}></div>
+                  <div className={stringClasses[stringIndex]}></div>
                 </div>
 
                 {/* Fretted notes */}
@@ -481,7 +499,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
                   
                   return (
                     <div key={fretData.fret} className="fret-cell">
-                      <div className={`string-line string-${stringIndex}`}></div>
+                      <div className={stringClasses[stringIndex]}></div>
                       <div className="fret-wire"></div>
                       
                       {/* LAYER 1: Scale notes (background) */}

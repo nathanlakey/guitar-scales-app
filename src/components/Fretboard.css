@@ -145,24 +145,92 @@
   letter-spacing: 0.5px;
 }
 
-/* The fretboard itself */
+/* The fretboard itself - base structure */
 .fretboard {
   position: relative;
-  background:
-    linear-gradient(180deg,
-      #3d2b1f 0%,
-      #4a3328 15%,
-      #5c3d2e 30%,
-      #4a3328 50%,
-      #5c3d2e 70%,
-      #4a3328 85%,
-      #3d2b1f 100%
-    );
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 8px 0;
+  overflow: hidden;
+
   box-shadow:
-    inset 0 2px 8px rgba(0, 0, 0, 0.4),
-    0 2px 12px rgba(0, 0, 0, 0.3);
+    inset 0 6px 16px rgba(0,0,0,0.65),
+    inset 0 -6px 16px rgba(0,0,0,0.65),
+    inset 0 0 60px rgba(0,0,0,0.45),
+    0 10px 30px rgba(0,0,0,0.35);
+}
+
+/* Rosewood material - default wood type */
+.fretboard.wood-rosewood {
+  background:
+    linear-gradient(
+      180deg,
+      #6e4a33 0%,
+      #5b3b27 20%,
+      #4a2f20 40%,
+      #3f281b 60%,
+      #4a2f20 80%,
+      #5b3b27 100%
+    ),
+
+    repeating-linear-gradient(
+      90deg,
+      rgba(0,0,0,0.10) 0px,
+      rgba(0,0,0,0.10) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 2px,
+      transparent 2px,
+      transparent 12px
+    ),
+
+    repeating-linear-gradient(
+      90deg,
+      rgba(120,70,40,0.08) 0px,
+      rgba(120,70,40,0.08) 40px,
+      rgba(80,45,25,0.10) 40px,
+      rgba(80,45,25,0.10) 80px
+    );
+}
+
+/* Shared lighting effects for all wood types */
+.fretboard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.10) 0%,
+      rgba(255,255,255,0.04) 15%,
+      rgba(255,255,255,0.00) 35%,
+      rgba(0,0,0,0.10) 85%,
+      rgba(0,0,0,0.20) 100%
+    );
+
+  pointer-events: none;
+}
+
+.fretboard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255,255,255,0.06) 0%,
+      rgba(255,255,255,0.03) 25%,
+      rgba(0,0,0,0.05) 70%,
+      rgba(0,0,0,0.18) 100%
+    );
+
+  pointer-events: none;
 }
 
 /* Fret marker dots layer */
@@ -411,7 +479,7 @@
   position: relative;
 }
 
-/* The actual string line */
+/* Steel guitar strings - realistic rendering */
 .string-line {
   position: absolute;
   left: 0;
@@ -419,15 +487,99 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
+  z-index: 2;
+  
+  /* Base metallic steel appearance */
+  background: linear-gradient(
+    to bottom,
+    #f8f8f8 0%,
+    #d0d0d0 20%,
+    #888 50%,
+    #d0d0d0 80%,
+    #f8f8f8 100%
+  );
+  
+  /* Metallic reflections */
+  box-shadow:
+    0 0 1px rgba(255,255,255,0.6),
+    0 0 2px rgba(0,0,0,0.8);
 }
 
-/* String thickness varies (thickest at bottom / low E) */
-.string-0 { height: 1px; background: linear-gradient(90deg, #d4d0c8, #e8e4dc, #d4d0c8); opacity: 0.9; }
-.string-1 { height: 1.3px; background: linear-gradient(90deg, #d4d0c8, #e8e4dc, #d4d0c8); opacity: 0.85; }
-.string-2 { height: 1.6px; background: linear-gradient(90deg, #c8c0b0, #ddd6c8, #c8c0b0); opacity: 0.8; }
-.string-3 { height: 2px; background: linear-gradient(90deg, #b8b0a0, #ccc4b4, #b8b0a0); opacity: 0.8; }
-.string-4 { height: 2.5px; background: linear-gradient(90deg, #a8a090, #bbb4a4, #a8a090); opacity: 0.75; }
-.string-5 { height: 3px; background: linear-gradient(90deg, #989080, #aaa298, #989080); opacity: 0.75; }
+/* Individual string gauges - realistic electric guitar set */
+/* High E (index 0) - thinnest */
+.string-line.string-e-high {
+  height: 2px;
+}
+
+/* B string (index 1) */
+.string-line.string-b {
+  height: 2.5px;
+}
+
+/* G string (index 2) */
+.string-line.string-g {
+  height: 3px;
+}
+
+/* D string (index 3) - wound string begins */
+.string-line.string-d {
+  height: 3.5px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #999 0px,
+      #bbb 1px,
+      #999 2px
+    ),
+    linear-gradient(
+      to bottom,
+      #f8f8f8 0%,
+      #d0d0d0 20%,
+      #888 50%,
+      #d0d0d0 80%,
+      #f8f8f8 100%
+    );
+}
+
+/* A string (index 4) - wound */
+.string-line.string-a {
+  height: 4px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #999 0px,
+      #bbb 1px,
+      #999 2px
+    ),
+    linear-gradient(
+      to bottom,
+      #f8f8f8 0%,
+      #d0d0d0 20%,
+      #888 50%,
+      #d0d0d0 80%,
+      #f8f8f8 100%
+    );
+}
+
+/* Low E (index 5) - thickest wound string */
+.string-line.string-e-low {
+  height: 4.5px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #999 0px,
+      #bbb 1px,
+      #999 2px
+    ),
+    linear-gradient(
+      to bottom,
+      #f8f8f8 0%,
+      #d0d0d0 20%,
+      #888 50%,
+      #d0d0d0 80%,
+      #f8f8f8 100%
+    );
+}
 
 /* Fret wire */
 .fret-wire {
