@@ -48,7 +48,7 @@
   color: #ffffff !important;
   transform: scale(1.15);
   box-shadow: 0 0 14px rgba(255, 87, 87, 0.9);
-  z-index: 3;
+  z-index: 4;
   font-weight: 700;
   
   /* Enhanced text visibility */
@@ -64,7 +64,7 @@
   color: #ffffff !important;
   transform: scale(1.0);
   box-shadow: 0 0 10px rgba(90, 169, 255, 0.6);
-  z-index: 2;
+  z-index: 3;
   font-weight: 600;
   
   /* Enhanced text visibility */
@@ -83,7 +83,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   color: #ffffff;
   transform: scale(1.0);
-  z-index: 1;
+  z-index: 2;
   font-weight: 600;
   
   /* Enhanced text visibility */
@@ -102,7 +102,7 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
   color: #ffffff;
   transform: scale(0.9);
-  z-index: 1;
+  z-index: 2;
   font-weight: 500;
   
   /* Enhanced text visibility */
@@ -173,7 +173,7 @@
   width: calc(100% - 84px);
   height: 100%;
   pointer-events: none;
-  z-index: 2; /* Above fretboard background, below notes */
+  z-index: 1; /* Below notes */
 }
 
 .fret-marker-dot {
