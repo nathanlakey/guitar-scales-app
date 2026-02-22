@@ -8,7 +8,7 @@ function ScaleSelector({ rootNote, scaleName, onRootChange, onScaleChange }) {
       <div className="root-note-row">
         <span className="inline-label">Root:</span>
         <div className="note-grid">
-          {NOTES.map(note => (
+          {[...NOTES].sort((a, b) => a.localeCompare(b)).map(note => (
             <button
               key={note}
               className={`note-btn ${note === rootNote ? 'active' : ''}`}

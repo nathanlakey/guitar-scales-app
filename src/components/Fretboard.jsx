@@ -40,7 +40,7 @@ const SEMITONE_TO_DISPLAY = {
   11: "7"   // Major 7th
 };
 
-function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '', cagedPosition = 'ALL', showScaleOverlay = false, displayMode = 'note', overlayScaleType = 'major' }) {
+function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = [], chordRoot = '', cagedPosition = 'ALL', showScaleOverlay = false, displayMode = 'note', overlayScaleType = 'major' }) {
   // Only generate fretboard if we have valid root and scale
   // This is the PRIMARY DATA SOURCE - contains the selected scale notes
   const fretboard = useMemo(() => {
@@ -214,35 +214,7 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
       }
     }
     
-    // FINAL adjacency filter: Prevent adjacent frets on same string from both rendering
-    // Sort all notes by string, then by fret
-    const sortedFiltered = filtered.sort((a, b) => {
-      if (a.stringIndex !== b.stringIndex) {
-        return a.stringIndex - b.stringIndex;
-      }
-      return a.fret - b.fret;
-    });
-    
-    const filteredVisibleScaleNotes = [];
-    const lastFretPerString = {};
-    
-    for (const note of sortedFiltered) {
-      const string = note.stringIndex;
-      const fret = note.fret;
-      
-      if (lastFretPerString[string] === undefined) {
-        // First note on this string
-        filteredVisibleScaleNotes.push(note);
-        lastFretPerString[string] = fret;
-      } else if (fret !== lastFretPerString[string] + 1) {
-        // Not adjacent to previous, keep it
-        filteredVisibleScaleNotes.push(note);
-        lastFretPerString[string] = fret;
-      }
-      // If fret === lastFretPerString[string] + 1, skip it (adjacent to previous)
-    }
-    
-    return filteredVisibleScaleNotes;
+    return filtered;
   }, [scaleNotes, cagedNotes, showScaleOverlay, cagedPosition]);
 
   // Get harmonic interval for any note relative to root
@@ -252,17 +224,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     const rootIndex = NOTES.indexOf(root);
     const semitones = (noteIndex - rootIndex + 12) % 12;
     return semitones;
-  };
-
-  // Get the selected position data
-  const currentPosition = selectedPosition === 'all' 
-    ? null 
-    : positions.find(p => p.number === parseInt(selectedPosition));
-
-  // Check if a note is in the current position
-  const isInPosition = (fret) => {
-    if (!currentPosition) return true; // Show all if no position selected
-    return fret >= currentPosition.startFret && fret <= currentPosition.endFret;
   };
 
   // Check if a note is a chord tone
@@ -296,17 +257,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     const currentNote = overlayActive
       ? visibleScaleNotes.find(note => note.stringIndex === stringIndex && note.fret === fret)
       : scaleDisplayNotes.find(note => note.stringIndex === stringIndex && note.fret === fret);
-    
-    if (!currentNote) return null;
-    
-    // Check if previous fret on same string also has a scale note
-    const noteSource = overlayActive ? visibleScaleNotes : scaleDisplayNotes;
-    const previousNote = noteSource.find(note =>
-      note.stringIndex === stringIndex && note.fret === fret - 1
-    );
-    
-    // If previous fret has a scale note, suppress current (lower fret wins)
-    if (previousNote) return null;
     
     return currentNote;
   };

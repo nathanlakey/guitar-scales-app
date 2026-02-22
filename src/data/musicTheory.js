@@ -428,6 +428,7 @@ export function getScalePositions(rootNote, scaleName, system = 'CAGED') {
  */
 export function generateFretboard(rootNote, scaleName) {
   const scaleNotes = getScaleNotes(rootNote, scaleName);
+  const scaleDefinition = SCALES[scaleName];
   const fretboard = [];
 
   // Iterate strings from low (6th) to high (1st)
@@ -440,6 +441,18 @@ export function generateFretboard(rootNote, scaleName) {
       const inScale = scaleNotes.includes(note);
       const root = isRoot(note, rootNote);
       const interval = getIntervalNumber(note, rootNote, scaleName);
+      
+      // Calculate degree from scale definition
+      let degree = null;
+      if (inScale && scaleDefinition && scaleDefinition.intervals && scaleDefinition.degrees) {
+        const rootIdx = NOTES.indexOf(rootNote);
+        const noteIdx = NOTES.indexOf(note);
+        const semitoneDistance = (noteIdx - rootIdx + 12) % 12;
+        const intervalIndex = scaleDefinition.intervals.indexOf(semitoneDistance);
+        if (intervalIndex !== -1) {
+          degree = scaleDefinition.degrees[intervalIndex];
+        }
+      }
 
       stringData.push({
         note,
@@ -451,6 +464,7 @@ export function generateFretboard(rootNote, scaleName) {
         inScale,
         isRoot: root,
         interval,
+        degree,
       });
     }
     fretboard.push({
