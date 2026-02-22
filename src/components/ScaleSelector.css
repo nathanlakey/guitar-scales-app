@@ -31,16 +31,20 @@
   text-transform: uppercase;
 }
 
-/* Root note buttons - ultra compact */
-.note-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
+/* Root note buttons - fixed grid layout */
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 44px);
+  gap: 8px;
+  justify-content: start;
 }
 
 .note-btn {
-  min-width: 30px;
-  padding: 4px 7px;
+  width: 44px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.02);
@@ -50,6 +54,7 @@
   cursor: pointer;
   transition: all 0.15s ease;
   line-height: 1;
+  padding: 0;
 }
 
 .note-btn:hover {
@@ -132,9 +137,15 @@
     max-width: none;
   }
 
+  .note-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    width: 100%;
+  }
+
   .note-btn {
-    min-width: 36px;
-    padding: 6px 8px;
+    width: 100%;
+    height: 36px;
     font-size: 0.75rem;
   }
 }

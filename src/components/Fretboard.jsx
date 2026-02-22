@@ -1,8 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import { generateFretboard, STANDARD_TUNING, NUM_FRETS, FRET_MARKERS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getMajorPentatonic, getMinorPentatonic, getRelativeMinorPentatonic, getNoteAt, NOTES, SCALES } from '../data/musicTheory';
+import { generateFretboard, STANDARD_TUNING, NUM_FRETS, generateAllCAGEDShapes, generateCAGEDShape, getMajorScale, getMajorPentatonic, getMinorPentatonic, getRelativeMinorPentatonic, getNoteAt, NOTES, SCALES } from '../data/musicTheory';
 import audioEngine from '../audio/AudioEngine';
 import scalePlayer from '../audio/ScalePlayer';
+import FretMarkers from './FretMarkers';
 import './Fretboard.css';
+
+// Fret marker positions (for fret number display)
+const FRET_MARKERS = [3, 5, 7, 9, 12, 15];
 
 // Interval-based color mapping - colors assigned by interval from root
 const INTERVAL_COLOR_MAP = {
@@ -37,9 +41,47 @@ const SEMITONE_TO_DISPLAY = {
 };
 
 function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPosition = 'all', positions = [], chordNotes = [], chordRoot = '', cagedPosition = 'ALL', showScaleOverlay = false, displayMode = 'note', overlayScaleType = 'major' }) {
-  const fretboard = generateFretboard(chordRoot || rootNote, scaleName);
+  // Only generate fretboard if we have valid root and scale
+  // This is the PRIMARY DATA SOURCE - contains the selected scale notes
+  const fretboard = useMemo(() => {
+    const activeRoot = chordRoot || rootNote;
+    if (!activeRoot || !scaleName) return null;
+    return generateFretboard(activeRoot, scaleName);
+  }, [rootNote, scaleName, chordRoot]);
+
   const [highlightedNote, setHighlightedNote] = useState(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+
+  // Generate display notes from fretboard data
+  // This converts the fretboard structure into a flat array for rendering
+  const scaleDisplayNotes = useMemo(() => {
+    if (!fretboard) return [];
+    
+    const notes = [];
+    const activeRoot = chordRoot || rootNote;
+    const rootIdx = NOTES.indexOf(activeRoot);
+    
+    fretboard.forEach((stringData, stringIndex) => {
+      stringData.frets.forEach(fretData => {
+        if (fretData.inScale) {
+          const noteIdx = NOTES.indexOf(fretData.note);
+          const interval = (noteIdx - rootIdx + 12) % 12;
+          
+          notes.push({
+            stringIndex,
+            fret: fretData.fret,
+            note: fretData.note,
+            role: fretData.isRoot ? 'root' : 'scale',
+            isScaleTone: true,
+            interval,
+            degree: fretData.degree || null
+          });
+        }
+      });
+    });
+    
+    return notes;
+  }, [fretboard, chordRoot, rootNote]);
 
   // Generate all CAGED major shapes for the selected chord root (memoized for performance)
   // PURE - NEVER modified after generation
@@ -233,22 +275,33 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
 
   // Check if a chord note exists at position
   const getChordNote = (stringIndex, fret) => {
+    // Only show CAGED notes if explicitly in chord shape mode (chordRoot is set)
+    if (!chordRoot) return null;
     return cagedNotes.find(note => 
       note.stringIndex === stringIndex && note.fret === fret
     );
   };
 
   // Check if a scale note exists at position
+  // PRIMARY RENDERING LOGIC: Use the selected scale unless CAGED mode overrides
   const getScaleNote = (stringIndex, fret) => {
-    // Check if current fret has a scale note
-    const currentNote = visibleScaleNotes.find(note => 
-      note.stringIndex === stringIndex && note.fret === fret
-    );
+    // If we're in chord shape mode, only show the chord notes (CAGED shapes)
+    // Scale notes are hidden unless overlay is enabled
+    if (chordRoot && !overlayActive) {
+      return null;
+    }
+    
+    // Otherwise, show the primary scale selection
+    // Use overlay notes only if overlay is actually active (requires chordRoot)
+    const currentNote = overlayActive
+      ? visibleScaleNotes.find(note => note.stringIndex === stringIndex && note.fret === fret)
+      : scaleDisplayNotes.find(note => note.stringIndex === stringIndex && note.fret === fret);
     
     if (!currentNote) return null;
     
     // Check if previous fret on same string also has a scale note
-    const previousNote = visibleScaleNotes.find(note =>
+    const noteSource = overlayActive ? visibleScaleNotes : scaleDisplayNotes;
+    const previousNote = noteSource.find(note =>
       note.stringIndex === stringIndex && note.fret === fret - 1
     );
     
@@ -326,6 +379,15 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
     return highlightedNote.stringIndex === stringIndex && highlightedNote.fret === fret;
   };
 
+  // Determine if scale notes are the primary dataset (should render fully opaque)
+  // Primary = user selected a scale and it's the main focus (not an overlay)
+  const isPrimaryDataset = !chordRoot && !showScaleOverlay;
+
+  // Overlay is only active when BOTH conditions are met:
+  // 1. showScaleOverlay is enabled
+  // 2. chordRoot is actively selected (not null, empty, or "None")
+  const overlayActive = showScaleOverlay && !!chordRoot;
+
   // Get display label for a fret (note name or interval)
   const getDisplayLabel = (fretData, scaleNoteData = null) => {
     // Backward compatibility: showIntervals takes precedence if displayMode not set
@@ -382,6 +444,50 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
   // String labels (high to low for display: 1st string at top)
   const stringLabels = ['e', 'B', 'G', 'D', 'A', 'E'];
 
+  // Render empty fretboard if no scale selected
+  if (!fretboard) {
+    return (
+      <div className="fretboard-container">
+        <div className="fretboard-wrapper">
+          {/* Fret numbers */}
+          <div className="fret-numbers">
+            <div className="fret-number nut-label"></div>
+            {Array.from({ length: NUM_FRETS }, (_, i) => (
+              <div key={i + 1} className="fret-number">
+                {FRET_MARKERS.includes(i + 1) ? (i + 1) : ''}
+              </div>
+            ))}
+          </div>
+
+          {/* Empty fretboard */}
+          <div className="fretboard">
+            <div className="nut"></div>
+            {stringLabels.map((label, stringIndex) => (
+              <div key={stringIndex} className="guitar-string-row">
+                <div className="string-label">{label}</div>
+                <div className="open-note-cell">
+                  <div className={`string-line string-${stringIndex}`}></div>
+                </div>
+                {Array.from({ length: NUM_FRETS }, (_, fret) => (
+                  <div key={fret + 1} className="fret-cell">
+                    <div className={`string-line string-${stringIndex}`}></div>
+                    <div className="fret-wire"></div>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+          {/* Fret marker dots - always visible */}
+          <FretMarkers />
+        </div>
+      </div>
+      <div className="empty-state-message">
+        <p>Select a root note and scale to get started</p>
+      </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fretboard-container">
       <div className="fretboard-wrapper">
@@ -435,10 +541,13 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
                         const noteIndex = NOTES.indexOf(noteName);
                         const interval = (noteIndex - rootIndex + 12) % 12;
                         const noteColor = INTERVAL_COLOR_MAP[interval];
-                        console.log("🎨 FINAL NOTE COLOR (Scale):", noteName, "interval:", interval, "color:", noteColor);
+                        const isRoot = scaleNote.role === 'root';
+                        const isPrimary = isPrimaryDataset && !isRoot;
+                        const visualType = isRoot ? 'root' : (isPrimary ? 'scale-primary' : 'scale');
+                        console.log("🎨 FINAL NOTE COLOR (Scale):", noteName, "interval:", interval, "color:", noteColor, "isPrimary:", isPrimary);
                         return (
                           <button
-                            className={`note-marker note-scale ${
+                            className={`note-marker note-${visualType} ${
                               isNoteHighlighted(stringData.stringIndex, fretData.fret) ? 'highlighted' : ''
                             } ${showIntervals ? 'interval-mode' : 'note-mode'}`}
                             style={{ backgroundColor: noteColor }}
@@ -482,6 +591,9 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, selectedPositio
               </div>
             );
           })}
+
+          {/* Fret marker dots - always visible */}
+          <FretMarkers />
         </div>
       </div>
     </div>

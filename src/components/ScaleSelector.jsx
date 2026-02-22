@@ -7,8 +7,8 @@ function ScaleSelector({ rootNote, scaleName, onRootChange, onScaleChange }) {
       {/* Compact inline root note selector */}
       <div className="root-note-row">
         <span className="inline-label">Root:</span>
-        <div className="note-buttons">
-          {[...NOTES].sort().map(note => (
+        <div className="note-grid">
+          {NOTES.map(note => (
             <button
               key={note}
               className={`note-btn ${note === rootNote ? 'active' : ''}`}
@@ -25,9 +25,10 @@ function ScaleSelector({ rootNote, scaleName, onRootChange, onScaleChange }) {
         <span className="inline-label">Scale:</span>
         <select 
           className="scale-dropdown"
-          value={scaleName}
+          value={scaleName || ''}
           onChange={(e) => onScaleChange(e.target.value)}
         >
+          <option value="">Select a scale...</option>
           {Object.entries(SCALE_CATEGORIES).map(([category, scales]) => (
             <optgroup key={category} label={category}>
               {scales.map(scale => (

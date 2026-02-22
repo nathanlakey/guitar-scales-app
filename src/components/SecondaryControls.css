@@ -1,0 +1,57 @@
+.secondary-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  backdrop-filter: blur(6px);
+  flex-wrap: wrap;
+  opacity: 0.85;
+}
+
+.secondary-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-right: 4px;
+}
+
+.overlay-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.overlay-toggle:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.overlay-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #8fb4d4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .secondary-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .secondary-label {
+    margin-right: 0;
+  }
+}

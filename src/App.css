@@ -25,6 +25,52 @@
 .app-main {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+/* Spacing before fretboard */
+.app-main > :nth-last-child(2) {
+  margin-bottom: 12px;
+}
+
+/* Spacing around fretboard */
+.app-main .fretboard-container {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+/* Control Cards */
+.control-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 16px 20px;
+  backdrop-filter: blur(10px);
+}
+
+.control-card .card-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 12px 0;
+}
+
+.control-card .card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Scale Card specific */
+.scale-card .card-content {
+  gap: 20px;
+}
+
+/* Layout Card specific */
+.layout-card .card-content {
   gap: 16px;
 }
 

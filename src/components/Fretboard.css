@@ -25,6 +25,21 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow-x: auto;
   margin: 24px 0;
+  position: relative;
+}
+
+/* Empty state message */
+.empty-state-message {
+  text-align: center;
+  padding: 32px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.empty-state-message p {
+  margin: 0;
 }
 
 /* Visual hierarchy for notes */
@@ -61,7 +76,27 @@
   letter-spacing: 0.02em;
 }
 
+.note-scale-primary {
+  /* Primary scale notes - full opacity when scale is the main focus */
+  opacity: 1.0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  transform: scale(1.0);
+  z-index: 1;
+  font-weight: 600;
+  
+  /* Enhanced text visibility */
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.02em;
+}
+
 .note-scale {
+  /* Secondary scale notes - reduced opacity when overlay or chord mode active */
   opacity: 0.65;
   border: 2px solid rgba(255, 255, 255, 0.9);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
@@ -128,6 +163,31 @@
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.4),
     0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Fret marker dots layer */
+.fret-markers-layer {
+  position: absolute;
+  top: 0;
+  left: 84px; /* offset for string label (40px) + open note cell (44px) */
+  width: calc(100% - 84px);
+  height: 100%;
+  pointer-events: none;
+  z-index: 2; /* Above fretboard background, below notes */
+}
+
+.fret-marker-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #f4f4f4 40%, #dcdcdc 70%, #b8b8b8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 
 /* Nut (the bar at the start of the fretboard) */
