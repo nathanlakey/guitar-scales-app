@@ -7,7 +7,7 @@
 .scale-notes-display {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
   align-items: center;
 }
 
@@ -15,54 +15,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
-  padding: 3px 6px;
-  border-radius: 3px;
-  background: rgba(143, 180, 212, 0.06);
-  border: 1px solid rgba(143, 180, 212, 0.12);
+  gap: 2px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: rgba(143, 180, 212, 0.07);
+  border: 1px solid rgba(143, 180, 212, 0.16);
   min-width: 28px;
 }
 
 .scale-note-chip.root {
-  background: rgba(232, 140, 125, 0.08);
-  border-color: rgba(232, 140, 125, 0.15);
+  background: rgba(232, 140, 125, 0.1);
+  border-color: rgba(232, 140, 125, 0.22);
 }
 
 .chip-interval {
-  font-size: 0.5rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   line-height: 1;
 }
 
+.scale-note-chip.root .chip-interval {
+  color: rgba(232, 140, 125, 0.6);
+}
+
 .chip-note {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(143, 180, 212, 0.9);
+  color: rgba(143, 180, 212, 0.95);
   line-height: 1;
 }
 
 .scale-note-chip.root .chip-note {
-  color: rgba(232, 140, 125, 0.9);
+  color: rgba(232, 140, 125, 0.95);
 }
 
 @media (max-width: 600px) {
   .scale-info {
     width: 100%;
   }
-  
+
   .scale-note-chip {
-    padding: 4px 6px;
+    padding: 4px 7px;
     min-width: 28px;
-  }
-
-  .chip-interval {
-    font-size: 0.5rem;
-  }
-
-  .chip-note {
-    font-size: 0.7rem;
   }
 }

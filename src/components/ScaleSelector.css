@@ -1,99 +1,97 @@
 .scale-selector {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  flex: 1;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* Compact inline root note row */
 .root-note-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* Scale dropdown row */
 .scale-select-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex: 1;
-  max-width: 400px;
+  gap: 12px;
 }
 
 .inline-label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 0.5px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.8px;
   white-space: nowrap;
   min-width: 32px;
   text-transform: uppercase;
 }
 
-/* Root note buttons - fixed grid layout */
+/* Root note buttons - single horizontal row of pills */
 .note-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 44px);
-  gap: 8px;
-  justify-content: start;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
 }
 
 .note-btn {
-  width: 44px;
-  height: 32px;
+  height: 28px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.02);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 100px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 0.68rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
   line-height: 1;
-  padding: 0;
+  white-space: nowrap;
+  font-family: inherit;
 }
 
 .note-btn:hover {
-  background: rgba(143, 180, 212, 0.08);
-  border-color: rgba(143, 180, 212, 0.25);
-  color: #8fb4d4;
+  border-color: rgba(143, 180, 212, 0.3);
+  color: rgba(143, 180, 212, 0.8);
+  background: rgba(143, 180, 212, 0.05);
 }
 
 .note-btn.active {
-  background: rgba(143, 180, 212, 0.12);
-  border-color: rgba(143, 180, 212, 0.4);
-  color: #8fb4d4;
-  font-weight: 600;
+  background: #8fb4d4;
+  border-color: #8fb4d4;
+  color: #1a1a1a;
+  font-weight: 700;
 }
 
 /* Scale dropdown */
 .scale-dropdown {
   flex: 1;
-  padding: 5px 9px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 3px;
-  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 100px;
+  color: rgba(255, 255, 255, 0.65);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   outline: none;
+  font-family: inherit;
 }
 
 .scale-dropdown:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   border-color: rgba(143, 180, 212, 0.25);
 }
 
 .scale-dropdown:focus {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(143, 180, 212, 0.4);
-  box-shadow: 0 0 0 1px rgba(143, 180, 212, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(143, 180, 212, 0.45);
+  box-shadow: 0 0 0 2px rgba(143, 180, 212, 0.08);
 }
 
 .scale-dropdown option {
@@ -111,41 +109,16 @@
 
 /* Responsive */
 @media (max-width: 600px) {
-  .scale-selector {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+  .note-grid {
+    flex-wrap: wrap;
+    gap: 4px;
   }
 
-  .root-note-row,
-  .scale-select-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .scale-select-row {
-    max-width: none;
-  }
-
-  .inline-label {
-    min-width: auto;
+  .note-btn {
+    height: 30px;
   }
 
   .scale-dropdown {
     width: 100%;
-    max-width: none;
-  }
-
-  .note-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
-    width: 100%;
-  }
-
-  .note-btn {
-    width: 100%;
-    height: 36px;
-    font-size: 0.75rem;
   }
 }

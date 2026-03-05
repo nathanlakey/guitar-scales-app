@@ -307,7 +307,7 @@ function getCAGEDPositions(rootNote, scaleName) {
   const scaleNotes = getScaleNotes(rootNote, scaleName);
   
   // Find first root note on low E string
-  const lowEString = STANDARD_TUNING[0]; // 'E'
+  const lowEString = STANDARD_TUNING[5]; // index 5 = low E
   let firstRootFret = 0;
   
   for (let fret = 0; fret <= NUM_FRETS; fret++) {
@@ -372,7 +372,7 @@ function get3NPSPositions(rootNote, scaleName) {
   }
   
   // Find first root on low E string
-  const lowEString = STANDARD_TUNING[0];
+  const lowEString = STANDARD_TUNING[5]; // index 5 = low E
   let firstRootFret = 0;
   
   for (let fret = 0; fret <= NUM_FRETS; fret++) {
