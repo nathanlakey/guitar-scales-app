@@ -135,13 +135,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
       return [];
     }
     
-    console.log('Scale Overlay Debug:', {
-      overlayScaleType,
-      scaleIntervals: scaleDefinition.intervals,
-      scaleDegrees: scaleDefinition.degrees,
-      activeRoot
-    });
-    
     const notes = [];
     const rootIdx = NOTES.indexOf(activeRoot);
     
@@ -157,20 +150,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
         // Only include if semitone distance exists in scale
         if (intervalIndex !== -1) {
           const degree = scaleDefinition.degrees[intervalIndex];
-          
-          // Debug logging for every overlay note
-          console.log({
-            overlayScaleType,
-            rootNote: activeRoot,
-            note,
-            fret,
-            stringIndex,
-            semitoneDistance,
-            intervalIndex,
-            scaleIntervals: scaleDefinition.intervals,
-            scaleDegrees: scaleDefinition.degrees,
-            degree
-          });
           
           notes.push({
             stringIndex,
@@ -512,7 +491,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
                         const isRoot = scaleNote.role === 'root';
                         const isPrimary = isPrimaryDataset && !isRoot;
                         const visualType = isRoot ? 'root' : (isPrimary ? 'scale-primary' : 'scale');
-                        console.log("🎨 FINAL NOTE COLOR (Scale):", noteName, "interval:", interval, "color:", noteColor, "isPrimary:", isPrimary);
                         return (
                           <button
                             className={`note-marker note-${visualType} ${
@@ -536,7 +514,6 @@ function Fretboard({ rootNote, scaleName, showIntervals = false, chordNotes = []
                         const noteIndex = NOTES.indexOf(noteName);
                         const interval = (noteIndex - rootIndex + 12) % 12;
                         const noteColor = INTERVAL_COLOR_MAP[interval];
-                        console.log("🎨 FINAL NOTE COLOR (Chord):", noteName, "interval:", interval, "color:", noteColor);
                         // Get scale note for degree label if available
                         const correspondingScaleNote = getScaleNote(stringData.stringIndex, fretData.fret);
                         

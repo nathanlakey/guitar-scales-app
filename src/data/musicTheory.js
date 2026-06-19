@@ -642,13 +642,12 @@ const CAGED_TEMPLATES = {
     ]
   },
   D: {
-    rootStringIndex: 1,
+    rootStringIndex: 3,
     positions: [
       { stringOffset: 0, fretOffset: 0 },
-      { stringOffset: 1, fretOffset: -1 },
-      { stringOffset: 2, fretOffset: -3 },
-      { stringOffset: 3, fretOffset: -3 },
-      { stringOffset: -1, fretOffset: -1 }
+      { stringOffset: -1, fretOffset: 2 },
+      { stringOffset: -2, fretOffset: 3 },
+      { stringOffset: -3, fretOffset: 2 }
     ]
   }
 };
